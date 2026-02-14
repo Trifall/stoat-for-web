@@ -1,3 +1,7 @@
+// TOP OF FILE - BEFORE ANY IMPORTS
+console.log("RTC STATE MODULE LOADING NOW");
+alert("RTC STATE MODULE LOADING");
+
 import {
   Accessor,
   JSX,
@@ -27,6 +31,9 @@ declare global {
 
 import { Room } from "livekit-client";
 import { Channel } from "stoat.js";
+
+// DEBUG: Verify this file is being loaded
+console.log("[PTT-WEB] state.tsx module loaded!"); alert("[PTT-WEB] VOICE MODULE LOADED - CHECK CONSOLE");
 
 import { useState } from "@revolt/state";
 import { Voice as VoiceSettings } from "@revolt/state/stores/Voice";
@@ -153,6 +160,16 @@ class Voice {
       autoSubscribe: false,
     });
     console.log("[PTT-WEB] Room connected successfully, mic state:", room.localParticipant.isMicrophoneEnabled);
+    
+    // Explicitly mute the microphone in LiveKit after connecting
+    // PTT mode requires mic to start muted
+    if (room.localParticipant.isMicrophoneEnabled) {
+      console.log("[PTT-WEB] Mic was auto-enabled by LiveKit, explicitly muting...");
+      await room.localParticipant.setMicrophoneEnabled(false);
+      console.log("[PTT-WEB] Mic explicitly muted, state:", room.localParticipant.isMicrophoneEnabled);
+    } else {
+      console.log("[PTT-WEB] Mic already muted as expected");
+    }
   }
 
   disconnect() {
@@ -278,6 +295,22 @@ export function VoiceContext(props: { children: JSX.Element }) {
           console.log("[PTT-WEB] ⚠ No active room, cannot mute/unmute");
         }
       };
+      
+      // Also apply current state immediately when joining a call
+      // This ensures PTT OFF is applied when first connecting
+      const applyCurrentPttState = () => {
+        const room = voice.room();
+        if (room) {
+          const currentState = window.pushToTalk?.getCurrentState();
+          if (currentState) {
+            console.log("[PTT-WEB] Applying current PTT state on room connection:", currentState.active ? "ON" : "OFF");
+            voice.setMute(currentState.active);
+          }
+        }
+      };
+      
+      // Apply state now and also listen for room connection
+      applyCurrentPttState();
 
       // Apply current state immediately
       handleStateChange(currentState);
