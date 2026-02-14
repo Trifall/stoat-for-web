@@ -17,8 +17,6 @@ declare global {
     pushToTalk?: {
       onStateChange: (callback: (state: { active: boolean }) => void) => void;
       offStateChange: (callback: (state: { active: boolean }) => void) => void;
-      onLocalKeybind: (callback: (data: { accelerator: string }) => void) => void;
-      offLocalKeybind: (callback: (data: { accelerator: string }) => void) => void;
       setManualState: (active: boolean) => void;
       getCurrentState: () => { active: boolean };
     };
@@ -283,19 +281,6 @@ export function VoiceContext(props: { children: JSX.Element }) {
         }
       };
       
-      // Also apply current state immediately when joining a call
-      const applyCurrentPttState = () => {
-        const room = voice.room();
-        if (room) {
-          const currentState = window.pushToTalk?.getCurrentState();
-          if (currentState) {
-            console.log("[PTT-WEB] Applying current PTT state on room connection:", currentState.active ? "ON" : "OFF");
-            voice.setMute(currentState.active);
-          }
-        }
-      };
-      
-      applyCurrentPttState();
       handleStateChange(currentState);
 
       console.log("[PTT-WEB] Registering onStateChange listener...");
