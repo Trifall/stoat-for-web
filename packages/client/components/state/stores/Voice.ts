@@ -340,4 +340,32 @@ export class Voice extends AbstractStore<"voice", TypeVoice> {
       this.set("pushToTalkReleaseDelay", config.releaseDelay);
     }
   }
+
+  /**
+   * Get notification sounds enabled
+   */
+  get notificationSoundsEnabled(): boolean {
+    return this.get().notificationSoundsEnabled;
+  }
+
+  /**
+   * Set notification sounds enabled
+   */
+  set notificationSoundsEnabled(value: boolean) {
+    this.set("notificationSoundsEnabled", value);
+  }
+
+  /**
+   * Get notification volume
+   */
+  get notificationVolume(): number {
+    return this.get().notificationVolume;
+  }
+
+  /**
+   * Set notification volume
+   */
+  set notificationVolume(value: number) {
+    this.set("notificationVolume", value);
+  }
 }

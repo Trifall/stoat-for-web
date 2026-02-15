@@ -22,6 +22,24 @@ declare global {
       offStateChange: (callback: (state: { active: boolean }) => void) => void;
       setManualState: (active: boolean) => void;
       getCurrentState: () => { active: boolean };
+      getConfig: () => {
+        enabled: boolean;
+        keybind: string;
+        mode: "hold" | "toggle";
+        releaseDelay: number;
+      };
+      onConfigChange: (callback: (config: {
+        enabled: boolean;
+        keybind: string;
+        mode: "hold" | "toggle";
+        releaseDelay: number;
+      }) => void) => void;
+      offConfigChange: (callback: (config: {
+        enabled: boolean;
+        keybind: string;
+        mode: "hold" | "toggle";
+        releaseDelay: number;
+      }) => void) => void;
     };
   }
 }
@@ -375,8 +393,8 @@ export function VoiceContext(props: { children: JSX.Element }) {
 
   // Sync notification settings reactively
   createEffect(() => {
-    const enabled = state.voice.get().notificationSoundsEnabled;
-    const volume = state.voice.get().notificationVolume;
+    const enabled = state.voice.notificationSoundsEnabled;
+    const volume = state.voice.notificationVolume;
     console.log("[VoiceNotifications] Settings updated - enabled:", enabled, "volume:", volume);
     voiceNotifications.setEnabled(enabled);
     voiceNotifications.setVolume(volume);
