@@ -8,6 +8,7 @@ import { css } from "styled-system/css";
 
 import { AutoCompleteSearchSpace } from "../../utils/autoComplete";
 
+import { useState } from "@revolt/state";
 import { codeMirrorAutoComplete } from "./codeMirrorAutoComplete";
 import { isInFencedCodeBlock } from "./codeMirrorCommon";
 import { smartLineWrapping } from "./codeMirrorLineWrap";
@@ -70,11 +71,12 @@ const placeholderCompartment = new Compartment();
  * Text editor powered by CodeMirror
  */
 export function TextEditor2(props: Props) {
+  const { isMobile } = useState();
   const codeMirror = document.createElement("div");
   codeMirror.className = editor;
 
   //Custom CSS
-  codeMirror.style.minWidth = '0';
+  codeMirror.style.minWidth = "0";
 
   /**
    * Handle 'Enter' key presses
@@ -82,7 +84,8 @@ export function TextEditor2(props: Props) {
    */
   const enterKeymap = keymap.of([
     {
-      key: "Enter",
+      key: isMobile ? "Ctrl-Enter" : "Enter",
+      //TODO: This is not working right, mobile seems to not trigger the function
       run: (view) => {
         if (!props.onComplete) return false;
 
