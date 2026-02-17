@@ -1839,13 +1839,13 @@ msgstr ""
 msgid "Multi-factor authentication is already enabled for this account."
 msgstr ""
 
+#: components/app/menus/UserContextMenu.tsx
+msgid "Mute"
+msgstr ""
+
 #. js-lingui-explicit-id
 #: components/app/interface/settings/user/voice/NotificationSoundsSettings.tsx
 msgid "notifications.sounds.mute"
-msgstr ""
-
-#: components/app/menus/UserContextMenu.tsx
-msgid "Mute"
 msgstr ""
 
 #: components/app/menus/shared/NotificationContextMenu.tsx

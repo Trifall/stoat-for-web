@@ -1839,13 +1839,13 @@ msgstr "Move members between voice channels"
 msgid "Multi-factor authentication is already enabled for this account."
 msgstr "Multi-factor authentication is already enabled for this account."
 
+#: components/app/menus/UserContextMenu.tsx
+msgid "Mute"
+msgstr "Mute"
+
 #. js-lingui-explicit-id
 #: components/app/interface/settings/user/voice/NotificationSoundsSettings.tsx
 msgid "notifications.sounds.mute"
-msgstr "Mute"
-
-#: components/app/menus/UserContextMenu.tsx
-msgid "Mute"
 msgstr "Mute"
 
 #: components/app/menus/shared/NotificationContextMenu.tsx
