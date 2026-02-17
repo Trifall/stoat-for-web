@@ -145,17 +145,18 @@ class Voice {
       this.#setChannel(channel);
       this.#setState("CONNECTING");
 
-      console.log("[PTT-WEB] Setting initial mic state to OFF (muted)");
-      this.#setMicrophone(false);
+      // only auto-mute when PTT is enabled
+      const pttEnabled = this.#settings.pushToTalkEnabled;
+      if (pttEnabled) {
+        console.log("[PTT-WEB] PTT enabled - Setting initial mic state to OFF (muted)");
+        this.#setMicrophone(false);
+      } else {
+        console.log("[PTT-WEB] PTT disabled - Keeping mic state as-is");
+        this.#setMicrophone(true);
+      }
       this.#setDeafen(false);
       this.#setVideo(false);
       this.#setScreenshare(false);
-
-      // Only enable mic if user has speaking permission AND PTT is not active
-      // Note: PTT starts with mic OFF, user must press key to speak
-      if (this.speakingPermission) {
-        console.log("[PTT-WEB] User has speaking permission, but keeping mic OFF initially (PTT mode)");
-      }
     });
 
     room.addListener("connected", () => {
@@ -180,14 +181,11 @@ class Voice {
     });
     console.log("[PTT-WEB] Room connected successfully, mic state:", room.localParticipant.isMicrophoneEnabled);
     
-    // Explicitly mute the microphone in LiveKit after connecting
-    // PTT mode requires mic to start muted
-    if (room.localParticipant.isMicrophoneEnabled) {
-      console.log("[PTT-WEB] Mic was auto-enabled by LiveKit, explicitly muting...");
+    // only auto-mute when PTT is enabled
+    if (this.#settings.pushToTalkEnabled && room.localParticipant.isMicrophoneEnabled) {
+      console.log("[PTT-WEB] PTT enabled and mic was auto-enabled by LiveKit, explicitly muting...");
       await room.localParticipant.setMicrophoneEnabled(false);
       console.log("[PTT-WEB] Mic explicitly muted, state:", room.localParticipant.isMicrophoneEnabled);
-    } else {
-      console.log("[PTT-WEB] Mic already muted as expected");
     }
   }
 
