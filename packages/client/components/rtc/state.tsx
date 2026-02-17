@@ -40,6 +40,13 @@ declare global {
         mode: "hold" | "toggle";
         releaseDelay: number;
       }) => void) => void;
+      updateSettings: (settings: {
+        enabled?: boolean;
+        keybind?: string;
+        mode?: "hold" | "toggle";
+        releaseDelay?: number;
+        notificationSounds?: boolean;
+      }) => void;
     };
   }
 }
@@ -188,6 +195,8 @@ class Voice {
     const room = this.room();
     if (!room) return;
 
+    voiceNotifications.playSelfLeave();
+
     room.removeAllListeners();
     room.disconnect();
 
@@ -210,6 +219,17 @@ class Voice {
     );
 
     this.#setMicrophone(room.localParticipant.isMicrophoneEnabled);
+
+    // only play sounds if PTT is disabled, or if PTT is enabled with notification sounds on
+    const shouldPlaySound = !this.#settings.pushToTalkEnabled || this.#settings.pushToTalkNotificationSounds;
+    
+    if (shouldPlaySound) {
+      if (room.localParticipant.isMicrophoneEnabled) {
+        voiceNotifications.playUnmute();
+      } else {
+        voiceNotifications.playMute();
+      }
+    }
   }
 
   /**
@@ -232,6 +252,17 @@ class Voice {
       await room.localParticipant.setMicrophoneEnabled(enabled);
       this.#setMicrophone(enabled);
       console.log("[PTT-WEB] setMute() - mic state updated to:", enabled);
+      
+      // only play sounds if PTT is disabled, or if PTT is enabled with notification sounds on
+      const shouldPlaySound = !this.#settings.pushToTalkEnabled || this.#settings.pushToTalkNotificationSounds;
+      
+      if (shouldPlaySound) {
+        if (enabled) {
+          voiceNotifications.playUnmute();
+        } else {
+          voiceNotifications.playMute();
+        }
+      }
     } else {
       console.log("[PTT-WEB] setMute() - no change needed, already:", enabled);
     }
@@ -391,13 +422,35 @@ export function VoiceContext(props: { children: JSX.Element }) {
     }
   });
 
-  // Sync notification settings reactively
+  // sync notification settings reactively
   createEffect(() => {
+    // track master settings
     const enabled = state.voice.notificationSoundsEnabled;
     const volume = state.voice.notificationVolume;
+    
+    // track individual sound toggles (force reactivity)
+    const soundJoinCall = state.voice.soundJoinCall;
+    const soundLeaveCall = state.voice.soundLeaveCall;
+    const soundSomeoneJoined = state.voice.soundSomeoneJoined;
+    const soundSomeoneLeft = state.voice.soundSomeoneLeft;
+    const soundMute = state.voice.soundMute;
+    const soundUnmute = state.voice.soundUnmute;
+    const soundReceiveMessage = state.voice.soundReceiveMessage;
+    
     console.log("[VoiceNotifications] Settings updated - enabled:", enabled, "volume:", volume);
+    
+    // apply settings to notification manager
     voiceNotifications.setEnabled(enabled);
     voiceNotifications.setVolume(volume);
+    
+    // sync individual sound toggles
+    voiceNotifications.setSoundEnabled("join_call", soundJoinCall);
+    voiceNotifications.setSoundEnabled("leave_call", soundLeaveCall);
+    voiceNotifications.setSoundEnabled("someone_joined", soundSomeoneJoined);
+    voiceNotifications.setSoundEnabled("someone_left", soundSomeoneLeft);
+    voiceNotifications.setSoundEnabled("mute", soundMute);
+    voiceNotifications.setSoundEnabled("unmute", soundUnmute);
+    voiceNotifications.setSoundEnabled("receive_message", soundReceiveMessage);
   });
 
   return (

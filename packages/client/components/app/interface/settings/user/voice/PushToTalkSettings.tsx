@@ -24,6 +24,7 @@ function syncToDesktop(settings: {
   keybind?: string;
   mode?: "hold" | "toggle";
   releaseDelay?: number;
+  notificationSounds?: boolean;
 }) {
   if (typeof window !== "undefined" && window.pushToTalk?.updateSettings) {
     window.pushToTalk.updateSettings(settings);
@@ -81,6 +82,34 @@ export function PushToTalkSettings() {
 
         <Column>
           <Text class="label">
+            <Trans id="ptt.settings.notifications">Notification Sounds</Trans>
+          </Text>
+          <CategoryButton.Group>
+            <CategoryButton
+              icon="blank"
+              action={
+                <div style={{ "pointer-events": "none" }}>
+                  <Checkbox
+                    checked={state.voice.pushToTalkNotificationSounds}
+                  />
+                </div>
+              }
+              onClick={() => {
+                const newValue = !state.voice.pushToTalkNotificationSounds;
+                state.voice.pushToTalkNotificationSounds = newValue;
+                syncToDesktop({ notificationSounds: newValue });
+              }}
+            >
+              <Trans id="ptt.settings.playMuteSounds">Play Mute/Unmute Sounds</Trans>
+            </CategoryButton>
+          </CategoryButton.Group>
+          <Text class="label" size="small">
+            <Trans id="ptt.settings.muteSoundsDescription">Play sounds when muting/unmuting with Push to Talk</Trans>
+          </Text>
+        </Column>
+
+        <Column>
+          <Text class="label">
             <Trans id="ptt.settings.mode">Mode</Trans>
           </Text>
           <CategoryButton.Group>
@@ -111,7 +140,7 @@ export function PushToTalkSettings() {
           <Text class="label">
             <Trans id="ptt.settings.releaseDelay">Release Delay</Trans>
           </Text>
-          <Row gap="md" align="center">
+          <Row gap="md">
             <SliderContainer>
               <Slider
                 min={0}

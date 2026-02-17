@@ -19,9 +19,19 @@ export interface TypeVoice {
   pushToTalkKeybind: string;
   pushToTalkMode: "hold" | "toggle";
   pushToTalkReleaseDelay: number;
+  pushToTalkNotificationSounds: boolean;
 
   notificationSoundsEnabled: boolean;
   notificationVolume: number;
+  
+  // Individual sound toggles
+  soundJoinCall: boolean;
+  soundLeaveCall: boolean;
+  soundSomeoneJoined: boolean;
+  soundSomeoneLeft: boolean;
+  soundMute: boolean;
+  soundUnmute: boolean;
+  soundReceiveMessage: boolean;
 }
 
 /**
@@ -58,8 +68,16 @@ export class Voice extends AbstractStore<"voice", TypeVoice> {
       pushToTalkKeybind: "V",
       pushToTalkMode: "hold",
       pushToTalkReleaseDelay: 250,
+      pushToTalkNotificationSounds: false,
       notificationSoundsEnabled: true,
       notificationVolume: 0.75,
+      soundJoinCall: true,
+      soundLeaveCall: true,
+      soundSomeoneJoined: true,
+      soundSomeoneLeft: true,
+      soundMute: true,
+      soundUnmute: true,
+      soundReceiveMessage: true,
     };
   }
 
@@ -110,6 +128,7 @@ export class Voice extends AbstractStore<"voice", TypeVoice> {
         .forEach(([k, v]) => (data.userMutes[k] = v));
     }
 
+    // push to talk settings
     if (typeof input.pushToTalkEnabled === "boolean") {
       data.pushToTalkEnabled = input.pushToTalkEnabled;
     }
@@ -130,12 +149,41 @@ export class Voice extends AbstractStore<"voice", TypeVoice> {
       data.pushToTalkReleaseDelay = input.pushToTalkReleaseDelay;
     }
 
+    if (typeof input.pushToTalkNotificationSounds === "boolean") {
+      data.pushToTalkNotificationSounds = input.pushToTalkNotificationSounds;
+    }
+
+
+    // notification settings
     if (typeof input.notificationSoundsEnabled === "boolean") {
       data.notificationSoundsEnabled = input.notificationSoundsEnabled;
     }
 
     if (typeof input.notificationVolume === "number") {
       data.notificationVolume = Math.max(0, Math.min(1, input.notificationVolume));
+    }
+
+    // individual sound toggles
+    if (typeof input.soundJoinCall === "boolean") {
+      data.soundJoinCall = input.soundJoinCall;
+    }
+    if (typeof input.soundLeaveCall === "boolean") {
+      data.soundLeaveCall = input.soundLeaveCall;
+    }
+    if (typeof input.soundSomeoneJoined === "boolean") {
+      data.soundSomeoneJoined = input.soundSomeoneJoined;
+    }
+    if (typeof input.soundSomeoneLeft === "boolean") {
+      data.soundSomeoneLeft = input.soundSomeoneLeft;
+    }
+    if (typeof input.soundMute === "boolean") {
+      data.soundMute = input.soundMute;
+    }
+    if (typeof input.soundUnmute === "boolean") {
+      data.soundUnmute = input.soundUnmute;
+    }
+    if (typeof input.soundReceiveMessage === "boolean") {
+      data.soundReceiveMessage = input.soundReceiveMessage;
     }
 
     return data;
@@ -318,6 +366,20 @@ export class Voice extends AbstractStore<"voice", TypeVoice> {
   }
 
   /**
+   * Get push to talk notification sounds
+   */
+  get pushToTalkNotificationSounds(): boolean {
+    return this.get().pushToTalkNotificationSounds;
+  }
+
+  /**
+   * Set push to talk notification sounds
+   */
+  set pushToTalkNotificationSounds(value: boolean) {
+    this.set("pushToTalkNotificationSounds", value);
+  }
+
+  /**
    * Set all push to talk config at once (from external source like desktop app)
    */
   setPushToTalkConfig(config: {
@@ -325,6 +387,7 @@ export class Voice extends AbstractStore<"voice", TypeVoice> {
     keybind?: string;
     mode?: "hold" | "toggle";
     releaseDelay?: number;
+    notificationSounds?: boolean;
   }) {
     console.log("[Voice] Setting PTT config from external source:", config);
     if (typeof config.enabled === "boolean") {
@@ -338,6 +401,9 @@ export class Voice extends AbstractStore<"voice", TypeVoice> {
     }
     if (typeof config.releaseDelay === "number") {
       this.set("pushToTalkReleaseDelay", config.releaseDelay);
+    }
+    if (typeof config.notificationSounds === "boolean") {
+      this.set("pushToTalkNotificationSounds", config.notificationSounds);
     }
   }
 
@@ -367,5 +433,103 @@ export class Voice extends AbstractStore<"voice", TypeVoice> {
    */
   set notificationVolume(value: number) {
     this.set("notificationVolume", value);
+  }
+
+  /**
+   * Get sound: join call
+   */
+  get soundJoinCall(): boolean {
+    return this.get().soundJoinCall;
+  }
+
+  /**
+   * Set sound: join call
+   */
+  set soundJoinCall(value: boolean) {
+    this.set("soundJoinCall", value);
+  }
+
+  /**
+   * Get sound: leave call
+   */
+  get soundLeaveCall(): boolean {
+    return this.get().soundLeaveCall;
+  }
+
+  /**
+   * Set sound: leave call
+   */
+  set soundLeaveCall(value: boolean) {
+    this.set("soundLeaveCall", value);
+  }
+
+  /**
+   * Get sound: someone joined
+   */
+  get soundSomeoneJoined(): boolean {
+    return this.get().soundSomeoneJoined;
+  }
+
+  /**
+   * Set sound: someone joined
+   */
+  set soundSomeoneJoined(value: boolean) {
+    this.set("soundSomeoneJoined", value);
+  }
+
+  /**
+   * Get sound: someone left
+   */
+  get soundSomeoneLeft(): boolean {
+    return this.get().soundSomeoneLeft;
+  }
+
+  /**
+   * Set sound: someone left
+   */
+  set soundSomeoneLeft(value: boolean) {
+    this.set("soundSomeoneLeft", value);
+  }
+
+  /**
+   * Get sound: mute
+   */
+  get soundMute(): boolean {
+    return this.get().soundMute;
+  }
+
+  /**
+   * Set sound: mute
+   */
+  set soundMute(value: boolean) {
+    this.set("soundMute", value);
+  }
+
+  /**
+   * Get sound: unmute
+   */
+  get soundUnmute(): boolean {
+    return this.get().soundUnmute;
+  }
+
+  /**
+   * Set sound: unmute
+   */
+  set soundUnmute(value: boolean) {
+    this.set("soundUnmute", value);
+  }
+
+  /**
+   * Get sound: receive message
+   */
+  get soundReceiveMessage(): boolean {
+    return this.get().soundReceiveMessage;
+  }
+
+  /**
+   * Set sound: receive message
+   */
+  set soundReceiveMessage(value: boolean) {
+    this.set("soundReceiveMessage", value);
   }
 }
