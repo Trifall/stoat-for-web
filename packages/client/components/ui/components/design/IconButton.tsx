@@ -41,17 +41,10 @@ export function IconButton(props: Props) {
 
   const { buttonProps } = createButton(rest, () => ref);
 
-  function stopProp(e: TouchEvent) {
-    e.preventDefault();
-    e.stopPropagation();
-  }
-
   return (
     <button
       {...passthrough}
       {...buttonProps}
-      onTouchStart={stopProp}
-      onTouchEnd={stopProp}
       ref={ref}
       class={iconButton2({
         ...style,
