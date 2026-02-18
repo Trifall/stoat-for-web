@@ -12,6 +12,7 @@ import equal from "fast-deep-equal";
 import localforage from "localforage";
 
 import { isMobileBrowser } from "@livekit/components-core";
+import { SlideDrawer } from "@revolt/ui/components/navigation/SlideDrawer";
 import { AbstractStore, Store } from "./stores";
 import { Auth } from "./stores/Auth";
 import { Draft } from "./stores/Draft";
@@ -47,7 +48,10 @@ export class State {
   private store: Store;
   private setStore: SetStoreFunction<Store>;
   private writeQueue: Record<string, number>;
+
   isMobile: boolean;
+  appDrawer;
+  setAppDrawer;
 
   // define all stores
   auth = new Auth(this);
@@ -102,6 +106,10 @@ export class State {
     this.setStore = setStore;
     this.writeQueue = {};
     this.isMobile = isMobileBrowser();
+
+    const [ad, setAd] = createSignal<SlideDrawer | null>();
+    this.appDrawer = ad;
+    this.setAppDrawer = setAd;
   }
 
   /**
