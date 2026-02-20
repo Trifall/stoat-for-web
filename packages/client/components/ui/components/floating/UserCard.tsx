@@ -61,9 +61,9 @@ export function UserCard(
           onClick={openFull}
         />
 
+        <Profile.Status user={props.user} />
         <BadgeAndActionsRow>
           <Profile.Badges user={props.user} />
-          <div />
           <Profile.Actions user={props.user} member={props.member} />
         </BadgeAndActionsRow>
         <Profile.Roles member={props.member} />
@@ -89,5 +89,6 @@ const BadgeAndActionsRow = styled("div", {
     gap: "var(--gap-sm)",
     justifyContent: "space-between",
     alignItems: "center",
+    padding: "var(--gap-xs) 0",
   },
 });

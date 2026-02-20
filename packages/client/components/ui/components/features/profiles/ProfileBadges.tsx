@@ -20,133 +20,131 @@ export function ProfileBadges(props: { user: User }) {
   const { t } = useLingui();
 
   return (
-    <Show when={props.user.badges}>
-      <BadgeRow>
-        <Show when={props.user.badges & UserBadges.Founder}>
-          <img
-            use:floating={{
-              tooltip: {
-                placement: "top",
-                content: t`Stoat Founder`,
-              },
-            }}
-            src={badgeFounder}
-          />
-        </Show>
-        <Show when={props.user.badges & UserBadges.Developer}>
-          <img
-            use:floating={{
-              tooltip: {
-                placement: "top",
-                content: t`Stoat Developer`,
-              },
-            }}
-            src={badgeDeveloper}
-          />
-        </Show>
-        <Show when={props.user.badges & UserBadges.Supporter}>
-          <img
-            use:floating={{
-              tooltip: {
-                placement: "top",
-                content: t`Donated to Stoat`,
-              },
-            }}
-            src={badgeSupporter}
-          />
-        </Show>
-        <Show when={props.user.badges & UserBadges.Translator}>
-          <img
-            use:floating={{
-              tooltip: {
-                placement: "top",
-                content: t`Helped translate Stoat`,
-              },
-            }}
-            src={badgeTranslator}
-          />
-        </Show>
-        <Show when={props.user.badges & UserBadges.EarlyAdopter}>
-          <img
-            use:floating={{
-              tooltip: {
-                placement: "top",
-                content: t`One of the first 1000 users!`,
-              },
-            }}
-            src={badgeEarlyAdopter}
-          />
-        </Show>
-        <Show when={props.user.badges & UserBadges.PlatformModeration}>
-          <span
-            use:floating={{
-              tooltip: {
-                placement: "top",
-                content: t`Platform Moderator`,
-              },
-            }}
-          >
-            <img src={badgeModeration} />
-          </span>
-        </Show>
-        <Show when={props.user.badges & UserBadges.ResponsibleDisclosure}>
-          <span
-            use:floating={{
-              tooltip: {
-                placement: "top",
-                content: t`Responsibly disclosed security issues`,
-              },
-            }}
-          >
-            <BiSolidShield />
-          </span>
-        </Show>
-        <Show when={props.user.badges & UserBadges.ReservedRelevantJokeBadge1}>
-          <img
-            use:floating={{
-              tooltip: {
-                placement: "top",
-                content: t`irrelevant joke badge 1`,
-              },
-            }}
-            src={badgeJoke1}
-          />
-        </Show>
-        <Show when={props.user.badges & UserBadges.ReservedRelevantJokeBadge1}>
-          <img
-            use:floating={{
-              tooltip: {
-                placement: "top",
-                content: t`irrelevant joke badge 2`,
-              },
-            }}
-            src={badgeJoke2}
-          />
-        </Show>
-        <Show when={props.user.badges & UserBadges.Paw}>
-          <img
-            use:floating={{
-              tooltip: {
-                placement: "top",
-                content: "🦊",
-              },
-            }}
-            src={badgePaw}
-          />
-        </Show>
-        <Show when={props.user.id === "01EX2NCWQ0CHS3QJF0FEQS1GR4"}>
-          <img
-            use:floating={{
-              tooltip: {
-                placement: "top",
-                content: "🦝",
-              },
-            }}
-            src={badgeRaccoon}
-          />
-        </Show>
-      </BadgeRow>
-    </Show>
+    <BadgeRow>
+      <Show when={props.user.badges & UserBadges.Founder}>
+        <img
+          use:floating={{
+            tooltip: {
+              placement: "top",
+              content: t`Stoat Founder`,
+            },
+          }}
+          src={badgeFounder}
+        />
+      </Show>
+      <Show when={props.user.badges & UserBadges.Developer}>
+        <img
+          use:floating={{
+            tooltip: {
+              placement: "top",
+              content: t`Stoat Developer`,
+            },
+          }}
+          src={badgeDeveloper}
+        />
+      </Show>
+      <Show when={props.user.badges & UserBadges.Supporter}>
+        <img
+          use:floating={{
+            tooltip: {
+              placement: "top",
+              content: t`Donated to Stoat`,
+            },
+          }}
+          src={badgeSupporter}
+        />
+      </Show>
+      <Show when={props.user.badges & UserBadges.Translator}>
+        <img
+          use:floating={{
+            tooltip: {
+              placement: "top",
+              content: t`Helped translate Stoat`,
+            },
+          }}
+          src={badgeTranslator}
+        />
+      </Show>
+      <Show when={props.user.badges & UserBadges.EarlyAdopter}>
+        <img
+          use:floating={{
+            tooltip: {
+              placement: "top",
+              content: t`One of the first 1000 users!`,
+            },
+          }}
+          src={badgeEarlyAdopter}
+        />
+      </Show>
+      <Show when={props.user.badges & UserBadges.PlatformModeration}>
+        <span
+          use:floating={{
+            tooltip: {
+              placement: "top",
+              content: t`Platform Moderator`,
+            },
+          }}
+        >
+          <img src={badgeModeration} />
+        </span>
+      </Show>
+      <Show when={props.user.badges & UserBadges.ResponsibleDisclosure}>
+        <span
+          use:floating={{
+            tooltip: {
+              placement: "top",
+              content: t`Responsibly disclosed security issues`,
+            },
+          }}
+        >
+          <BiSolidShield />
+        </span>
+      </Show>
+      <Show when={props.user.badges & UserBadges.ReservedRelevantJokeBadge1}>
+        <img
+          use:floating={{
+            tooltip: {
+              placement: "top",
+              content: t`irrelevant joke badge 1`,
+            },
+          }}
+          src={badgeJoke1}
+        />
+      </Show>
+      <Show when={props.user.badges & UserBadges.ReservedRelevantJokeBadge1}>
+        <img
+          use:floating={{
+            tooltip: {
+              placement: "top",
+              content: t`irrelevant joke badge 2`,
+            },
+          }}
+          src={badgeJoke2}
+        />
+      </Show>
+      <Show when={props.user.badges & UserBadges.Paw}>
+        <img
+          use:floating={{
+            tooltip: {
+              placement: "top",
+              content: "🦊",
+            },
+          }}
+          src={badgePaw}
+        />
+      </Show>
+      <Show when={props.user.id === "01EX2NCWQ0CHS3QJF0FEQS1GR4"}>
+        <img
+          use:floating={{
+            tooltip: {
+              placement: "top",
+              content: "🦝",
+            },
+          }}
+          src={badgeRaccoon}
+        />
+      </Show>
+    </BadgeRow>
   );
 }
 
@@ -157,8 +155,9 @@ const BadgeRow = styled("div", {
     overflowX: "scroll",
     scrollbar: "hidden",
     padding: "var(--gap-md)",
+    flexShrink: 5,
 
-    "& img, & svg": {
+    "& img, & svg, & span": {
       width: "24px",
       height: "24px",
       aspectRatio: "1/1",

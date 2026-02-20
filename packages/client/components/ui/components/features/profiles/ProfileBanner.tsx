@@ -4,7 +4,6 @@ import { ServerMember, User } from "stoat.js";
 import { css } from "styled-system/css";
 import { styled } from "styled-system/jsx";
 
-import { t } from "@lingui/core/macro";
 import { Avatar, Ripple, UserStatus, typography } from "../../design";
 import { Column, Row } from "../../layout";
 
@@ -58,19 +57,6 @@ export function ProfileBanner(props: {
             </span>
           </UserShort>
         </Row>
-        <Status>
-          {props.user.statusMessage((s) =>
-            s === "Online"
-              ? t`Online`
-              : s === "Busy"
-                ? t`Busy`
-                : s === "Focus"
-                  ? t`Focus`
-                  : s === "Idle"
-                    ? t`Idle`
-                    : t`Offline`,
-          )}
-        </Status>
       </Column>
     </Banner>
   );
@@ -122,12 +108,5 @@ const UserShort = styled("div", {
     lineHeight: "1em",
     gap: "var(--gap-xs)",
     flexDirection: "column",
-  },
-});
-
-const Status = styled("span", {
-  base: {
-    ...typography.raw(),
-    userSelect: "text",
   },
 });

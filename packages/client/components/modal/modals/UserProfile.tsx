@@ -3,14 +3,11 @@ import { styled } from "styled-system/jsx";
 
 import { Dialog, DialogProps, Profile } from "@revolt/ui";
 
-import { useModals } from "..";
 import { Modals } from "../types";
 
 export function UserProfileModal(
   props: DialogProps & Modals & { type: "user_profile" },
 ) {
-  const { openModal } = useModals();
-
   const query = useQuery(() => ({
     queryKey: ["profile", props.user.id],
     queryFn: () => props.user.fetchProfile(),
@@ -23,42 +20,39 @@ export function UserProfileModal(
       minWidth={560}
       padding={8}
     >
-      <Grid>
+      <ProfileContents>
         <Profile.Banner
-          width={3}
+          width={2}
           user={props.user}
           bannerUrl={query.data?.animatedBannerURL}
-          onClick={
-            query.data?.banner
-              ? () =>
-                  openModal({ type: "image_viewer", file: query.data!.banner! })
-              : undefined
-          }
-          onClickAvatar={(e) => {
-            e.stopPropagation();
-
-            if (props.user.avatar) {
-              openModal({ type: "image_viewer", file: props.user.avatar });
-            }
-          }}
         />
 
-        <Profile.Actions user={props.user} width={3} />
         <Profile.Status user={props.user} />
-        <Profile.Badges user={props.user} />
+        <BadgeAndActionsRow>
+          <Profile.Badges user={props.user} />
+          <Profile.Actions user={props.user} />
+        </BadgeAndActionsRow>
+        <Profile.Bio content={query.data?.content} />
         <Profile.Joined user={props.user} />
-        <Profile.Mutuals user={props.user} />
-        <Profile.Bio content={query.data?.content} full />
-      </Grid>
+      </ProfileContents>
     </Dialog>
   );
 }
 
-const Grid = styled("div", {
+const ProfileContents = styled("div", {
   base: {
-    display: "grid",
+    display: "flex",
+    flexDirection: "column",
     gap: "var(--gap-md)",
     padding: "var(--gap-md)",
-    gridTemplateColumns: "repeat(3, 1fr)",
+  },
+});
+
+const BadgeAndActionsRow = styled("div", {
+  base: {
+    display: "flex",
+    gap: "var(--gap-sm)",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
 });

@@ -98,6 +98,7 @@ export function ProfileActions(props: { user: User; member?: ServerMember }) {
 const Actions = styled("div", {
   base: {
     display: "flex",
+    minWidth: "fit-content",
     gap: "var(--gap-md)",
     justifyContent: "flex-end",
   },

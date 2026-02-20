@@ -10,6 +10,7 @@ import { BiSolidPlusCircle } from "solid-icons/bi";
 import { typography } from "../../design";
 import { dismissFloatingElements } from "../../floating";
 import { Row } from "../../layout";
+import { ColouredText } from "../../utils";
 
 export function ProfileRoles(props: { member?: ServerMember }) {
   const { openModal } = useModals();
@@ -28,22 +29,6 @@ export function ProfileRoles(props: { member?: ServerMember }) {
       }
     >
       <RoleList>
-        <For each={props.member!.orderedRoles.toReversed()}>
-          {(role) => (
-            <Row align>
-              <Role
-                style={{
-                  color: role.colour ?? "var(--md-sys-color-outline-variant)",
-                  border:
-                    "1px solid " +
-                    (role.colour ?? "var(--md-sys-color-outline-variant)"),
-                }}
-              >
-                {role.name}
-              </Role>
-            </Row>
-          )}
-        </For>
         <Show when={props.member?.server!.havePermission("AssignRoles")}>
           <Row align>
             <Role onClick={openRoles} cursor="pointer">
@@ -52,6 +37,19 @@ export function ProfileRoles(props: { member?: ServerMember }) {
             </Role>
           </Row>
         </Show>
+        <For each={props.member!.orderedRoles.toReversed()}>
+          {(role) => (
+            <Row align>
+              <Role>
+                <ColouredText
+                  colour={role.colour ?? "var(--md-sys-color-outline-variant)"}
+                >
+                  {role.name}
+                </ColouredText>
+              </Role>
+            </Row>
+          )}
+        </For>
       </RoleList>
     </Show>
   );
@@ -59,15 +57,14 @@ export function ProfileRoles(props: { member?: ServerMember }) {
 
 const Role = styled("span", {
   base: {
-    flexGrow: 1,
     display: "flex",
+    background: "var(--md-sys-color-surface-container-low)",
     gap: "var(--gap-sm)",
     alignItems: "center",
     overflow: "hidden",
     whiteSpace: "nowrap",
     textOverflow: "ellipsis",
     padding: "var(--gap-sm) var(--gap-md)",
-    border: "1px solid",
     borderRadius: "full",
     height: "full",
     ...typography.raw({ class: "label" }),
@@ -78,8 +75,7 @@ const RoleList = styled("div", {
   base: {
     display: "flex",
     alignItems: "stretch",
-    gap: "var(--gap-md)",
-    padding: "var(--gap-sm) var(--gap-md)",
+    gap: "var(--gap-sm)",
     overflowX: "scroll",
     scrollbar: "hidden",
   },
