@@ -5,7 +5,8 @@ import { styled } from "styled-system/jsx";
 
 import { useModals } from "@revolt/modal";
 
-import { Trans } from "@lingui-solid/solid/macro";
+import { Trans, useLingui } from "@lingui-solid/solid/macro";
+import { useState } from "@revolt/state";
 import { BiSolidPlusCircle } from "solid-icons/bi";
 import { typography } from "../../design";
 import { dismissFloatingElements } from "../../floating";
@@ -14,6 +15,8 @@ import { ColouredText } from "../../utils";
 
 export function ProfileRoles(props: { member?: ServerMember }) {
   const { openModal } = useModals();
+  const { t } = useLingui();
+  const state = useState();
 
   function openRoles() {
     openModal({ type: "user_profile_roles", member: props.member! });
@@ -40,13 +43,42 @@ export function ProfileRoles(props: { member?: ServerMember }) {
         <For each={props.member!.orderedRoles.toReversed()}>
           {(role) => (
             <Row align>
-              <Role>
-                <ColouredText
-                  colour={role.colour ?? "var(--md-sys-color-outline-variant)"}
+              {/* There is probably a better to do this if ... else ... */}
+              <Show when={state.settings.getValue("advanced:copy_id")}>
+                <Role
+                  onClick={() => navigator.clipboard.writeText(role.id)}
+                  cursor="pointer"
                 >
-                  {role.name}
-                </ColouredText>
-              </Role>
+                  <span
+                    use:floating={{
+                      tooltip: {
+                        placement: "top",
+                        content: t`Copy Role ID`,
+                      },
+                    }}
+                  >
+                    <ColouredText
+                      colour={
+                        role.colour ?? "var(--md-sys-color-outline-variant)"
+                      }
+                    >
+                      {role.name}
+                    </ColouredText>
+                  </span>
+                </Role>
+              </Show>
+
+              <Show when={!state.settings.getValue("advanced:copy_id")}>
+                <Role>
+                  <ColouredText
+                    colour={
+                      role.colour ?? "var(--md-sys-color-outline-variant)"
+                    }
+                  >
+                    {role.name}
+                  </ColouredText>
+                </Role>
+              </Show>
             </Row>
           )}
         </For>
@@ -64,6 +96,7 @@ const Role = styled("span", {
     overflow: "hidden",
     whiteSpace: "nowrap",
     textOverflow: "ellipsis",
+    userSelect: "none",
     padding: "var(--gap-sm) var(--gap-md)",
     borderRadius: "full",
     height: "full",
