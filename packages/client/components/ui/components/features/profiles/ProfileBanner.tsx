@@ -4,7 +4,8 @@ import { ServerMember, User } from "stoat.js";
 import { css } from "styled-system/css";
 import { styled } from "styled-system/jsx";
 
-import { Avatar, Ripple, UserStatus, typography } from "../../design";
+import { Profile } from ".";
+import { Avatar, Ripple, typography } from "../../design";
 import { Column, Row } from "../../layout";
 
 export function ProfileBanner(props: {
@@ -28,15 +29,14 @@ export function ProfileBanner(props: {
         <Ripple />
       </Show>
 
-      <Column gap="sm">
+      <Column gap="md">
         <Row align gap="lg">
           <Avatar
             src={props.user.animatedAvatarURL}
             size={48}
-            holepunch="bottom-right"
+            holepunch="none"
             onClick={props.onClickAvatar}
             interactive={props.user.avatar && !!props.onClickAvatar}
-            overlay={<UserStatus.Graphic status={props.user.presence} />}
           />
           <UserShort>
             <Show
@@ -57,6 +57,7 @@ export function ProfileBanner(props: {
             </span>
           </UserShort>
         </Row>
+        <Profile.Status user={props.user} />
       </Column>
     </Banner>
   );

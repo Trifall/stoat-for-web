@@ -27,11 +27,8 @@ export function UserProfileModal(
           bannerUrl={query.data?.animatedBannerURL}
         />
 
-        <Profile.Status user={props.user} />
-        <BadgeAndActionsRow>
-          <Profile.Badges user={props.user} />
-          <Profile.Actions user={props.user} />
-        </BadgeAndActionsRow>
+        <Profile.Badges user={props.user} />
+        <Profile.Actions user={props.user} />
         <Profile.Bio content={query.data?.content} />
         <Profile.Joined user={props.user} />
       </ProfileContents>
@@ -45,14 +42,5 @@ const ProfileContents = styled("div", {
     flexDirection: "column",
     gap: "var(--gap-md)",
     padding: "var(--gap-md)",
-  },
-});
-
-const BadgeAndActionsRow = styled("div", {
-  base: {
-    display: "flex",
-    gap: "var(--gap-sm)",
-    justifyContent: "space-between",
-    alignItems: "center",
   },
 });

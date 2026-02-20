@@ -44,26 +44,32 @@ export function ProfileActions(props: { user: User; member?: ServerMember }) {
 
   return (
     <Actions>
-      <Show when={props.user.relationship === "None" && !props.user.bot}>
-        <Button onPress={() => props.user.addFriend()}>Add Friend</Button>
-      </Show>
-      <Show when={props.user.relationship === "Incoming"}>
-        <Button onPress={() => props.user.addFriend()}>
-          Accept friend request
-        </Button>
-        <IconButton onPress={() => props.user.removeFriend()}>
-          <MdCancel />
-        </IconButton>
-      </Show>
-      <Show when={props.user.relationship === "Outgoing"}>
-        <Button onPress={() => props.user.removeFriend()}>
-          Cancel friend request
-        </Button>
-      </Show>
-      <Show when={props.user.relationship === "Friend"}>
-        <Button onPress={openDm}>Message</Button>
-      </Show>
-
+      <div style={{ "margin-right": "auto" }}>
+        {" "}
+        <Show when={props.user.relationship === "None" && !props.user.bot}>
+          <Button size="sm" onPress={() => props.user.addFriend()}>
+            Add Friend
+          </Button>
+        </Show>
+        <Show when={props.user.relationship === "Incoming"}>
+          <Button size="sm" onPress={() => props.user.addFriend()}>
+            Accept friend request
+          </Button>
+          <IconButton size="sm" onPress={() => props.user.removeFriend()}>
+            <MdCancel />
+          </IconButton>
+        </Show>
+        <Show when={props.user.relationship === "Outgoing"}>
+          <Button size="sm" onPress={() => props.user.removeFriend()}>
+            Cancel friend request
+          </Button>
+        </Show>
+        <Show when={props.user.relationship === "Friend"}>
+          <Button size="sm" onPress={openDm}>
+            Message
+          </Button>
+        </Show>
+      </div>
       <Show
         when={
           props.member
@@ -76,12 +82,13 @@ export function ProfileActions(props: { user: User; member?: ServerMember }) {
             : props.user.self
         }
       >
-        <IconButton onPress={openEdit}>
+        <IconButton size="sm" onPress={openEdit}>
           <MdEdit {...iconSize(16)} />
         </IconButton>
       </Show>
 
       <IconButton
+        size="sm"
         use:floating={{
           contextMenu: () => (
             <UserContextMenu user={props.user} member={props.member} />
@@ -99,7 +106,8 @@ const Actions = styled("div", {
   base: {
     display: "flex",
     minWidth: "fit-content",
-    gap: "var(--gap-md)",
+    gap: "var(--gap-sm)",
     justifyContent: "flex-end",
+    alignItems: "center",
   },
 });

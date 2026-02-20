@@ -4,7 +4,7 @@ import { useLingui } from "@lingui-solid/solid/macro";
 import { User } from "stoat.js";
 import { styled } from "styled-system/jsx";
 
-import { typography } from "../../design";
+import { typography, UserStatus } from "../../design";
 
 export function ProfileStatus(props: { user: User }) {
   const { t } = useLingui();
@@ -12,6 +12,7 @@ export function ProfileStatus(props: { user: User }) {
   return (
     <Show when={props.user.status?.text}>
       <Status>
+        <UserStatus status={props.user.presence} size="16px" />
         {props.user.statusMessage((s) =>
           s === "Online"
             ? t`Online`
@@ -31,7 +32,9 @@ export function ProfileStatus(props: { user: User }) {
 const Status = styled("span", {
   base: {
     ...typography.raw(),
+    display: "flex",
+    alignItems: "center",
+    gap: "var(--gap-md)",
     userSelect: "text",
-    padding: "0 var(--gap-md)",
   },
 });

@@ -61,11 +61,8 @@ export function UserCard(
           onClick={openFull}
         />
 
-        <Profile.Status user={props.user} />
-        <BadgeAndActionsRow>
-          <Profile.Badges user={props.user} />
-          <Profile.Actions user={props.user} member={props.member} />
-        </BadgeAndActionsRow>
+        <Profile.Badges user={props.user} />
+        <Profile.Actions user={props.user} member={props.member} />
         <Profile.Roles member={props.member} />
         <Profile.Bio content={query.data?.content} onClick={openFull} />
         <Profile.Joined user={props.user} member={props.member} />
