@@ -52,7 +52,7 @@ export function UserCard(
         e.stopImmediatePropagation();
       }}
     >
-      <Grid>
+      <ProfileContents>
         <Profile.Banner
           width={2}
           user={props.user}
@@ -61,22 +61,33 @@ export function UserCard(
           onClick={openFull}
         />
 
-        <Profile.Actions user={props.user} member={props.member} width={2} />
+        <BadgeAndActionsRow>
+          <Profile.Badges user={props.user} />
+          <div />
+          <Profile.Actions user={props.user} member={props.member} />
+        </BadgeAndActionsRow>
         <Profile.Roles member={props.member} />
-        <Profile.Badges user={props.user} />
-        <Profile.Status user={props.user} />
-        <Profile.Joined user={props.user} member={props.member} />
         <Profile.Bio content={query.data?.content} onClick={openFull} />
-      </Grid>
+        <Profile.Joined user={props.user} member={props.member} />
+      </ProfileContents>
     </div>
   );
 }
 
-const Grid = styled("div", {
+const ProfileContents = styled("div", {
   base: {
-    display: "grid",
+    display: "flex",
+    flexDirection: "column",
     gap: "var(--gap-md)",
     padding: "var(--gap-md)",
-    gridTemplateColumns: "repeat(2, 1fr)",
+  },
+});
+
+const BadgeAndActionsRow = styled("div", {
+  base: {
+    display: "flex",
+    gap: "var(--gap-sm)",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
 });

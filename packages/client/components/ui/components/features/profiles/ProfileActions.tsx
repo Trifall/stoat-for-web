@@ -18,12 +18,7 @@ import { iconSize } from "../../utils";
 /**
  * Actions shown on profile cards
  */
-export function ProfileActions(props: {
-  width: 2 | 3;
-
-  user: User;
-  member?: ServerMember;
-}) {
+export function ProfileActions(props: { user: User; member?: ServerMember }) {
   const navigate = useNavigate();
   const { openModal } = useModals();
 
@@ -48,7 +43,7 @@ export function ProfileActions(props: {
   }
 
   return (
-    <Actions width={props.width}>
+    <Actions>
       <Show when={props.user.relationship === "None" && !props.user.bot}>
         <Button onPress={() => props.user.addFriend()}>Add Friend</Button>
       </Show>
@@ -105,15 +100,5 @@ const Actions = styled("div", {
     display: "flex",
     gap: "var(--gap-md)",
     justifyContent: "flex-end",
-  },
-  variants: {
-    width: {
-      3: {
-        gridColumn: "1 / 4",
-      },
-      2: {
-        gridColumn: "1 / 3",
-      },
-    },
   },
 });

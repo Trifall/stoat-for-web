@@ -4,8 +4,9 @@ import { ServerMember, User } from "stoat.js";
 import { css } from "styled-system/css";
 import { styled } from "styled-system/jsx";
 
+import { t } from "@lingui/core/macro";
 import { Avatar, Ripple, UserStatus, typography } from "../../design";
-import { Row } from "../../layout";
+import { Column, Row } from "../../layout";
 
 export function ProfileBanner(props: {
   user: User;
@@ -28,34 +29,49 @@ export function ProfileBanner(props: {
         <Ripple />
       </Show>
 
-      <Row align gap="lg">
-        <Avatar
-          src={props.user.animatedAvatarURL}
-          size={48}
-          holepunch="bottom-right"
-          onClick={props.onClickAvatar}
-          interactive={props.user.avatar && !!props.onClickAvatar}
-          overlay={<UserStatus.Graphic status={props.user.presence} />}
-        />
-        <UserShort>
-          <Show
-            when={
-              (props.member?.displayName ?? props.user.displayName) !==
-              props.user.username
-            }
-          >
-            <span class={css({ fontWeight: 600 })}>
-              {props.member?.displayName ?? props.user.displayName}
+      <Column gap="sm">
+        <Row align gap="lg">
+          <Avatar
+            src={props.user.animatedAvatarURL}
+            size={48}
+            holepunch="bottom-right"
+            onClick={props.onClickAvatar}
+            interactive={props.user.avatar && !!props.onClickAvatar}
+            overlay={<UserStatus.Graphic status={props.user.presence} />}
+          />
+          <UserShort>
+            <Show
+              when={
+                (props.member?.displayName ?? props.user.displayName) !==
+                props.user.username
+              }
+            >
+              <span class={css({ fontWeight: 600 })}>
+                {props.member?.displayName ?? props.user.displayName}
+              </span>
+            </Show>
+            <span>
+              {props.user.username}
+              <span class={css({ fontWeight: 200 })}>
+                #{props.user.discriminator}
+              </span>
             </span>
-          </Show>
-          <span>
-            {props.user.username}
-            <span class={css({ fontWeight: 200 })}>
-              #{props.user.discriminator}
-            </span>
-          </span>
-        </UserShort>
-      </Row>
+          </UserShort>
+        </Row>
+        <Status>
+          {props.user.statusMessage((s) =>
+            s === "Online"
+              ? t`Online`
+              : s === "Busy"
+                ? t`Busy`
+                : s === "Focus"
+                  ? t`Focus`
+                  : s === "Idle"
+                    ? t`Idle`
+                    : t`Offline`,
+          )}
+        </Status>
+      </Column>
     </Banner>
   );
 }
@@ -67,8 +83,8 @@ const Banner = styled("div", {
 
     userSelect: "none",
 
-    height: "120px",
-    padding: "var(--gap-lg)",
+    height: "128px",
+    padding: "var(--gap-md) var(--gap-lg)",
 
     display: "flex",
     flexDirection: "column",
@@ -106,5 +122,12 @@ const UserShort = styled("div", {
     lineHeight: "1em",
     gap: "var(--gap-xs)",
     flexDirection: "column",
+  },
+});
+
+const Status = styled("span", {
+  base: {
+    ...typography.raw(),
+    userSelect: "text",
   },
 });
