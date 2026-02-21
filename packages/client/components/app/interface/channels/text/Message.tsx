@@ -77,16 +77,18 @@ export function Message(props: Props) {
   const [isHovering, setIsHovering] = createSignal(false);
 
   /**
-   * Determine whether this message only contains a GIF
+   * Determine if this message only contains an image
    */
-  const isOnlyGIF = () =>
+  const isOnlyImg = () =>
     props.message.embeds &&
     props.message.embeds.length === 1 &&
-    props.message.embeds[0].type === "Website" &&
-    ((props.message.embeds[0] as WebsiteEmbed).specialContent?.type === "GIF" ||
-      (props.message.embeds[0] as WebsiteEmbed).originalUrl?.startsWith(
-        "https://tenor.com",
-      )) &&
+    (props.message.embeds[0].type === "Image" ||
+      (props.message.embeds[0].type === "Website" &&
+        ((props.message.embeds[0] as WebsiteEmbed).specialContent?.type ===
+          "GIF" ||
+          (props.message.embeds[0] as WebsiteEmbed).originalUrl?.startsWith(
+            "https://tenor.com",
+          )))) &&
     props.message.content &&
     !props.message.content.replace(RE_URL, "").length;
 
@@ -135,7 +137,11 @@ export function Message(props: Props) {
           />
         </div>
       }
-      contextMenu={() => <MessageContextMenu message={props.message} />}
+      contextMenu={() =>
+        props.editing ? undefined : (
+          <MessageContextMenu message={props.message} />
+        )
+      }
       timestamp={props.message.createdAt}
       edited={props.message.editedAt}
       mentioned={props.message.mentioned}
@@ -144,31 +150,29 @@ export function Message(props: Props) {
       isLink={props.isLink}
       tail={props.tail || state.settings.getValue("appearance:compact_mode")}
       header={
-        <Show when={props.message.replyIds}>
-          <For each={props.message.replyIds}>
-            {(reply_id) => {
-              /**
-               * Signal the actual message
-               */
-              const message = () => client().messages.get(reply_id);
+        <For each={props.message.replyIds}>
+          {(reply_id) => {
+            /**
+             * Signal the actual message
+             */
+            const message = () => client().messages.get(reply_id);
 
-              onMount(() => {
-                if (!message()) {
-                  props.message.channel!.fetchMessage(reply_id);
-                }
-              });
+            onMount(() => {
+              if (!message()) {
+                props.message.channel!.fetchMessage(reply_id);
+              }
+            });
 
-              return (
-                <MessageReply
-                  mention={props.message.mentionIds?.includes(
-                    message()!.authorId!,
-                  )}
-                  message={message()}
-                />
-              );
-            }}
-          </For>
-        </Show>
+            return (
+              <MessageReply
+                mention={props.message.mentionIds?.includes(
+                  message()!.authorId!,
+                )}
+                message={message()}
+              />
+            );
+          }}
+        </For>
       }
       info={
         <Switch fallback={<div />}>
@@ -276,24 +280,20 @@ export function Message(props: Props) {
         <Match when={props.editing}>
           <EditMessage message={props.message} />
         </Match>
-        <Match when={props.message.content && !isOnlyGIF()}>
+        <Match when={props.message.content && !isOnlyImg()}>
           <BreakText>
             <Markdown content={props.message.content!} />
           </BreakText>
         </Match>
       </Switch>
-      <Show when={props.message.attachments}>
-        <For each={props.message.attachments}>
-          {(attachment) => (
-            <Attachment message={props.message} file={attachment} />
-          )}
-        </For>
-      </Show>
-      <Show when={props.message.embeds}>
-        <For each={props.message.embeds}>
-          {(embed) => <Embed embed={embed} />}
-        </For>
-      </Show>
+      <For each={props.message.attachments}>
+        {(attachment) => (
+          <Attachment message={props.message} file={attachment} />
+        )}
+      </For>
+      <For each={props.message.embeds}>
+        {(embed) => <Embed embed={embed} />}
+      </For>
       <Reactions
         reactions={props.message.reactions as never as Map<string, Set<string>>}
         interactions={props.message.interactions}
