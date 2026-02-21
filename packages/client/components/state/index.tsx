@@ -50,6 +50,7 @@ export class State {
   private writeQueue: Record<string, number>;
 
   isMobile: boolean;
+  pwaPrompt: Event | undefined;
   appDrawer;
   setAppDrawer;
 

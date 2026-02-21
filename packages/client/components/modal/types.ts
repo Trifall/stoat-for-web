@@ -314,4 +314,7 @@ export type Modals =
       type: "edit_category";
       server: Server;
       category: CategoryData;
+    }
+  | {
+      type: "try_pwa";
     };
