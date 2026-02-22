@@ -149,15 +149,6 @@ export type Modals =
       emoji: Emoji;
     }
   | {
-      /**
-       * @deprecated build proper error handling!
-       */
-      type: "error";
-
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      error: any;
-    }
-  | {
       type: "error2";
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any

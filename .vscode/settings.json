@@ -20,5 +20,8 @@
   "editor.insertSpaces": true,
   "editor.tabSize": 2,
   // Nix environment settings
-  "nixEnvSelector.nixFile": "${workspaceFolder}/default.nix"
+  "nixEnvSelector.nixFile": "${workspaceFolder}/default.nix",
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  }
 }
