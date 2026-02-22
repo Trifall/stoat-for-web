@@ -53,6 +53,8 @@ export class State {
   pwaPrompt: Event | undefined;
   appDrawer;
   setAppDrawer;
+  diagDrawer;
+  setDiagDrawer;
 
   // define all stores
   auth = new Auth(this);
@@ -111,6 +113,10 @@ export class State {
     const [ad, setAd] = createSignal<SlideDrawer | null>();
     this.appDrawer = ad;
     this.setAppDrawer = setAd;
+
+    const [dd, setDd] = createSignal<SlideDrawer | null>();
+    this.diagDrawer = dd;
+    this.setDiagDrawer = setDd;
   }
 
   /**
