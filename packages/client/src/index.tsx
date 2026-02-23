@@ -6,6 +6,7 @@ import "./sentry";
 import { JSX, onMount } from "solid-js";
 import { render } from "solid-js/web";
 
+import { attachDevtoolsOverlay } from "@solid-devtools/overlay";
 import { Navigate, Route, Router, useParams } from "@solidjs/router";
 import { QueryClient, QueryClientProvider } from "@tanstack/solid-query";
 import "material-symbols";
@@ -43,7 +44,7 @@ import { ServerHome } from "./interface/ServerHome";
 import { ChannelPage } from "./interface/channels/ChannelPage";
 import "./serviceWorkerInterface";
 
-//TODO TEMP
+attachDevtoolsOverlay();
 
 /**
  * Redirect PWA start to the last active path

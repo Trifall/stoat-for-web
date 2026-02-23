@@ -47,9 +47,6 @@ try {
 } catch (error) {
   if (error.code === "ENOENT") {
     createSymlink();
-  } else if (error.code === "ENOTEMPTY") {
-    //TODO TEMP for testing
-    console.info(`Left assets in-place.`);
   } else {
     console.error(error);
     process.exit(-1);
