@@ -10,7 +10,8 @@ type SoundName =
   | "someone_left"
   | "mute"
   | "unmute"
-  | "receive_message";
+  | "receive_message"
+  | "disconnect";
 
 const SOUND_FILES: Record<SoundName, string> = {
   join_call: "/assets/audio/join_call.wav",
@@ -20,15 +21,16 @@ const SOUND_FILES: Record<SoundName, string> = {
   mute: "/assets/audio/mute.wav",
   unmute: "/assets/audio/unmute.wav",
   receive_message: "/assets/audio/receive_message.wav",
+  disconnect: "/assets/audio/leave_call.wav",
 };
 
 class VoiceNotificationManager {
   private enabled = true;
-  private volume = 0.25; 
+  private volume = 0.25;
   private audioBuffers = new Map<SoundName, AudioBuffer>();
   private audioContext: AudioContext | null = null;
   private hasUserInteracted = false;
-  private currentlyPlaying = new Set<SoundName>(); 
+  private currentlyPlaying = new Set<SoundName>();
 
   constructor() {
     this.handleUserInteraction = this.handleUserInteraction.bind(this);
@@ -93,6 +95,7 @@ class VoiceNotificationManager {
     mute: true,
     unmute: true,
     receive_message: true,
+    disconnect: true,
   };
 
   /**
@@ -111,7 +114,7 @@ class VoiceNotificationManager {
 
   private async playSound(name: SoundName): Promise<void> {
     if (!this.isSoundEnabled(name)) return;
-    
+
     // prevent overlapping sounds
     if (this.currentlyPlaying.has(name)) return;
 
@@ -187,6 +190,11 @@ class VoiceNotificationManager {
   /** Received a message notification */
   playMessageReceived(): void {
     this.playSound("receive_message");
+  }
+
+  /** Disconnected from voice channel */
+  playDisconnect(): void {
+    this.playSound("disconnect");
   }
 
   setEnabled(enabled: boolean): void {

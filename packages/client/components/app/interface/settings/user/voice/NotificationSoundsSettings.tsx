@@ -18,7 +18,7 @@ import {
  */
 export function NotificationSoundsSettings() {
   const state = useState();
-  
+
   const individualSoundsDisabled = () => !state.voice.notificationSoundsEnabled;
 
   return (
@@ -33,16 +33,17 @@ export function NotificationSoundsSettings() {
             icon="blank"
             action={
               <div style={{ "pointer-events": "none" }}>
-                <Checkbox
-                  checked={state.voice.notificationSoundsEnabled}
-                />
+                <Checkbox checked={state.voice.notificationSoundsEnabled} />
               </div>
             }
             onClick={() => {
-              state.voice.notificationSoundsEnabled = !state.voice.notificationSoundsEnabled;
+              state.voice.notificationSoundsEnabled =
+                !state.voice.notificationSoundsEnabled;
             }}
           >
-            <Trans id="notifications.sounds.enable">Enable Notification Sounds</Trans>
+            <Trans id="notifications.sounds.enable">
+              Enable Notification Sounds
+            </Trans>
           </CategoryButton>
         </CategoryButton.Group>
       </Column>
@@ -72,7 +73,9 @@ export function NotificationSoundsSettings() {
             <TextField
               type="text"
               disabled={individualSoundsDisabled()}
-              value={Math.round(state.voice.notificationVolume * 100).toString()}
+              value={Math.round(
+                state.voice.notificationVolume * 100,
+              ).toString()}
               onChange={(event) => {
                 if (!individualSoundsDisabled()) {
                   const value = parseInt(event.currentTarget.value, 10);
@@ -151,11 +154,14 @@ export function NotificationSoundsSettings() {
             }
             onClick={() => {
               if (!individualSoundsDisabled()) {
-                state.voice.soundSomeoneJoined = !state.voice.soundSomeoneJoined;
+                state.voice.soundSomeoneJoined =
+                  !state.voice.soundSomeoneJoined;
               }
             }}
           >
-            <Trans id="notifications.sounds.someoneJoined">Someone Joined</Trans>
+            <Trans id="notifications.sounds.someoneJoined">
+              Someone Joined
+            </Trans>
           </CategoryButton>
 
           <CategoryButton
@@ -231,11 +237,57 @@ export function NotificationSoundsSettings() {
             }
             onClick={() => {
               if (!individualSoundsDisabled()) {
-                state.voice.soundReceiveMessage = !state.voice.soundReceiveMessage;
+                state.voice.soundReceiveMessage =
+                  !state.voice.soundReceiveMessage;
               }
             }}
           >
-            <Trans id="notifications.sounds.receiveMessage">Receive Message</Trans>
+            <Trans id="notifications.sounds.receiveMessage">
+              Receive Message
+            </Trans>
+          </CategoryButton>
+
+          <CategoryButton
+            icon="blank"
+            disabled={individualSoundsDisabled()}
+            action={
+              <div style={{ "pointer-events": "none" }}>
+                <Checkbox
+                  checked={state.voice.soundDisconnect}
+                  disabled={individualSoundsDisabled()}
+                />
+              </div>
+            }
+            onClick={() => {
+              if (!individualSoundsDisabled()) {
+                state.voice.soundDisconnect = !state.voice.soundDisconnect;
+              }
+            }}
+          >
+            <Trans id="notifications.sounds.disconnect">Disconnected</Trans>
+          </CategoryButton>
+        </CategoryButton.Group>
+      </Column>
+
+      <Column>
+        <Text class="label">
+          <Trans id="notifications.sounds.connection">Connection</Trans>
+        </Text>
+        <CategoryButton.Group>
+          <CategoryButton
+            icon="blank"
+            action={
+              <div style={{ "pointer-events": "none" }}>
+                <Checkbox checked={state.voice.autoReconnect} />
+              </div>
+            }
+            onClick={() => {
+              state.voice.autoReconnect = !state.voice.autoReconnect;
+            }}
+          >
+            <Trans id="notifications.sounds.autoReconnect">
+              Auto-reconnect
+            </Trans>
           </CategoryButton>
         </CategoryButton.Group>
       </Column>

@@ -23,7 +23,7 @@ export interface TypeVoice {
 
   notificationSoundsEnabled: boolean;
   notificationVolume: number;
-  
+
   // Individual sound toggles
   soundJoinCall: boolean;
   soundLeaveCall: boolean;
@@ -32,6 +32,9 @@ export interface TypeVoice {
   soundMute: boolean;
   soundUnmute: boolean;
   soundReceiveMessage: boolean;
+  soundDisconnect: boolean;
+
+  autoReconnect: boolean;
 }
 
 /**
@@ -78,6 +81,8 @@ export class Voice extends AbstractStore<"voice", TypeVoice> {
       soundMute: true,
       soundUnmute: true,
       soundReceiveMessage: true,
+      soundDisconnect: true,
+      autoReconnect: true,
     };
   }
 
@@ -153,14 +158,16 @@ export class Voice extends AbstractStore<"voice", TypeVoice> {
       data.pushToTalkNotificationSounds = input.pushToTalkNotificationSounds;
     }
 
-
     // notification settings
     if (typeof input.notificationSoundsEnabled === "boolean") {
       data.notificationSoundsEnabled = input.notificationSoundsEnabled;
     }
 
     if (typeof input.notificationVolume === "number") {
-      data.notificationVolume = Math.max(0, Math.min(1, input.notificationVolume));
+      data.notificationVolume = Math.max(
+        0,
+        Math.min(1, input.notificationVolume),
+      );
     }
 
     // individual sound toggles
@@ -184,6 +191,12 @@ export class Voice extends AbstractStore<"voice", TypeVoice> {
     }
     if (typeof input.soundReceiveMessage === "boolean") {
       data.soundReceiveMessage = input.soundReceiveMessage;
+    }
+    if (typeof input.soundDisconnect === "boolean") {
+      data.soundDisconnect = input.soundDisconnect;
+    }
+    if (typeof input.autoReconnect === "boolean") {
+      data.autoReconnect = input.autoReconnect;
     }
 
     return data;
@@ -533,5 +546,33 @@ export class Voice extends AbstractStore<"voice", TypeVoice> {
    */
   set soundReceiveMessage(value: boolean) {
     this.set("soundReceiveMessage", value);
+  }
+
+  /**
+   * Get sound: disconnect
+   */
+  get soundDisconnect(): boolean {
+    return this.get().soundDisconnect;
+  }
+
+  /**
+   * Set sound: disconnect
+   */
+  set soundDisconnect(value: boolean) {
+    this.set("soundDisconnect", value);
+  }
+
+  /**
+   * Get auto reconnect
+   */
+  get autoReconnect(): boolean {
+    return this.get().autoReconnect;
+  }
+
+  /**
+   * Set auto reconnect
+   */
+  set autoReconnect(value: boolean) {
+    this.set("autoReconnect", value);
   }
 }

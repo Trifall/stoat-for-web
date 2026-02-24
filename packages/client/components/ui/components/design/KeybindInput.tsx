@@ -1,4 +1,4 @@
-import { Show, type JSX, createEffect, createSignal, onCleanup, onMount } from "solid-js";
+import { createEffect, createSignal, onMount, Show } from "solid-js";
 
 import { styled } from "styled-system/jsx";
 
@@ -177,4 +177,3 @@ export function KeybindInput(props: Props) {
     </Container>
   );
 }
-

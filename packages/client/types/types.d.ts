@@ -25,18 +25,22 @@ declare global {
         mode: "hold" | "toggle";
         releaseDelay: number;
       };
-      onConfigChange: (callback: (config: {
-        enabled: boolean;
-        keybind: string;
-        mode: "hold" | "toggle";
-        releaseDelay: number;
-      }) => void) => void;
-      offConfigChange: (callback: (config: {
-        enabled: boolean;
-        keybind: string;
-        mode: "hold" | "toggle";
-        releaseDelay: number;
-      }) => void) => void;
+      onConfigChange: (
+        callback: (config: {
+          enabled: boolean;
+          keybind: string;
+          mode: "hold" | "toggle";
+          releaseDelay: number;
+        }) => void,
+      ) => void;
+      offConfigChange: (
+        callback: (config: {
+          enabled: boolean;
+          keybind: string;
+          mode: "hold" | "toggle";
+          releaseDelay: number;
+        }) => void,
+      ) => void;
     };
   }
 }

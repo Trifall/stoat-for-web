@@ -6,9 +6,9 @@ import {
   createContext,
   createEffect,
   createSignal,
-  useContext,
-  onMount,
   onCleanup,
+  onMount,
+  useContext,
 } from "solid-js";
 import { RoomContext } from "solid-livekit-components";
 
@@ -34,18 +34,22 @@ declare global {
         mode: "hold" | "toggle";
         releaseDelay: number;
       };
-      onConfigChange: (callback: (config: {
-        enabled: boolean;
-        keybind: string;
-        mode: "hold" | "toggle";
-        releaseDelay: number;
-      }) => void) => void;
-      offConfigChange: (callback: (config: {
-        enabled: boolean;
-        keybind: string;
-        mode: "hold" | "toggle";
-        releaseDelay: number;
-      }) => void) => void;
+      onConfigChange: (
+        callback: (config: {
+          enabled: boolean;
+          keybind: string;
+          mode: "hold" | "toggle";
+          releaseDelay: number;
+        }) => void,
+      ) => void;
+      offConfigChange: (
+        callback: (config: {
+          enabled: boolean;
+          keybind: string;
+          mode: "hold" | "toggle";
+          releaseDelay: number;
+        }) => void,
+      ) => void;
       updateSettings: (settings: {
         enabled?: boolean;
         keybind?: string;
@@ -60,9 +64,9 @@ declare global {
 import { Room } from "livekit-client";
 import { Channel } from "stoat.js";
 
+import { useClient } from "@revolt/client";
 import { useState } from "@revolt/state";
 import { Voice as VoiceSettings } from "@revolt/state/stores/Voice";
-import { useClient } from "@revolt/client";
 import { VoiceCallCardContext } from "@revolt/ui/components/features/voice/callCard/VoiceCallCard";
 
 import { InRoom } from "./components/InRoom";
@@ -99,6 +103,10 @@ class Voice {
   screenshare: Accessor<boolean>;
   #setScreenshare: Setter<boolean>;
 
+  #isManualDisconnect = false;
+  #reconnectAttempts = 0;
+  #maxReconnectAttempts = 5;
+
   constructor(voiceSettings: VoiceSettings) {
     this.#settings = voiceSettings;
 
@@ -133,6 +141,11 @@ class Voice {
 
   async connect(channel: Channel, auth?: { url: string; token: string }) {
     debugLog("PTT-WEB", "Voice.connect() called for channel:", channel.id);
+
+    // Reset reconnect state on new connection attempt
+    this.#isManualDisconnect = false;
+    this.#reconnectAttempts = 0;
+
     this.disconnect();
 
     const room = new Room({
@@ -154,7 +167,10 @@ class Voice {
       // only auto-mute when PTT is enabled
       const pttEnabled = this.#settings.pushToTalkEnabled;
       if (pttEnabled) {
-        debugLog("PTT-WEB", "PTT enabled - Setting initial mic state to OFF (muted)");
+        debugLog(
+          "PTT-WEB",
+          "PTT enabled - Setting initial mic state to OFF (muted)",
+        );
         this.#setMicrophone(false);
       } else {
         debugLog("PTT-WEB", "PTT disabled - Keeping mic state as-is");
@@ -168,13 +184,45 @@ class Voice {
     room.addListener("connected", () => {
       debugLog("PTT-WEB", "Room connected");
       this.#setState("CONNECTED");
+      this.#reconnectAttempts = 0; // Reset on successful connection
       console.log("[VoiceNotifications] Playing self join sound");
       voiceNotifications.playSelfJoin();
     });
 
-    room.addListener("disconnected", () => {
-      debugLog("PTT-WEB", "Room disconnected");
-      this.#setState("DISCONNECTED");
+    room.addListener("disconnected", (reason?) => {
+      debugLog(
+        "PTT-WEB",
+        "Room disconnected, reason:",
+        reason,
+        "isManual:",
+        this.#isManualDisconnect,
+      );
+
+      // If this was a manual disconnect (user clicked leave), don't try to reconnect
+      if (this.#isManualDisconnect) {
+        debugLog("PTT-WEB", "Manual disconnect - resetting state");
+        voiceNotifications.playSelfLeave();
+        this.#setState("READY");
+        this.#setRoom(undefined);
+        this.#setChannel(undefined);
+        return;
+      }
+
+      // Check if auto-reconnect is enabled
+      if (!this.#settings.autoReconnect) {
+        debugLog(
+          "PTT-WEB",
+          "Auto-reconnect disabled - setting to DISCONNECTED",
+        );
+        this.#setState("DISCONNECTED");
+        if (this.#settings.soundDisconnect) {
+          voiceNotifications.playDisconnect();
+        }
+        return;
+      }
+
+      // Try to reconnect
+      this.#handleReconnect();
     });
 
     if (!auth) {
@@ -185,22 +233,101 @@ class Voice {
     await room.connect(auth.url, auth.token, {
       autoSubscribe: false,
     });
-    debugLog("PTT-WEB", "Room connected successfully, mic state:", room.localParticipant.isMicrophoneEnabled);
-    
+    debugLog(
+      "PTT-WEB",
+      "Room connected successfully, mic state:",
+      room.localParticipant.isMicrophoneEnabled,
+    );
+
     // Handle mic state based on PTT setting
     if (this.#settings.pushToTalkEnabled) {
       // PTT enabled - mute mic so user must press key to speak
       if (room.localParticipant.isMicrophoneEnabled) {
-        debugLog("PTT-WEB", "PTT enabled and mic was auto-enabled by LiveKit, explicitly muting...");
+        debugLog(
+          "PTT-WEB",
+          "PTT enabled and mic was auto-enabled by LiveKit, explicitly muting...",
+        );
         await room.localParticipant.setMicrophoneEnabled(false);
-        debugLog("PTT-WEB", "Mic explicitly muted, state:", room.localParticipant.isMicrophoneEnabled);
+        debugLog(
+          "PTT-WEB",
+          "Mic explicitly muted, state:",
+          room.localParticipant.isMicrophoneEnabled,
+        );
       }
     } else {
       // PTT disabled - unmute mic so user can speak immediately
       if (!room.localParticipant.isMicrophoneEnabled) {
-        debugLog("PTT-WEB", "PTT disabled and mic is muted, explicitly unmuting...");
+        debugLog(
+          "PTT-WEB",
+          "PTT disabled and mic is muted, explicitly unmuting...",
+        );
         await room.localParticipant.setMicrophoneEnabled(true);
-        debugLog("PTT-WEB", "Mic explicitly unmuted, state:", room.localParticipant.isMicrophoneEnabled);
+        debugLog(
+          "PTT-WEB",
+          "Mic explicitly unmuted, state:",
+          room.localParticipant.isMicrophoneEnabled,
+        );
+      }
+    }
+  }
+
+  async #handleReconnect() {
+    const channel = this.channel();
+    if (!channel) {
+      debugLog("PTT-WEB", "No channel to reconnect to");
+      this.#setState("DISCONNECTED");
+      if (this.#settings.soundDisconnect) {
+        voiceNotifications.playDisconnect();
+      }
+      return;
+    }
+
+    this.#reconnectAttempts++;
+    debugLog(
+      "PTT-WEB",
+      `Reconnect attempt ${this.#reconnectAttempts}/${this.#maxReconnectAttempts}`,
+    );
+
+    this.#setState("RECONNECTING");
+
+    try {
+      // Fetch a fresh token for reconnection
+      const auth = await channel.joinCall("worldwide");
+      const room = this.room();
+
+      if (!room) {
+        throw new Error("Room no longer exists");
+      }
+
+      debugLog("PTT-WEB", "Attempting to reconnect with new token...");
+      await room.connect(auth.url, auth.token, {
+        autoSubscribe: false,
+      });
+
+      debugLog("PTT-WEB", "Reconnection successful!");
+      this.#reconnectAttempts = 0;
+      this.#setState("CONNECTED");
+    } catch (error) {
+      debugLog("PTT-WEB", "Reconnection failed:", error);
+
+      if (this.#reconnectAttempts < this.#maxReconnectAttempts) {
+        // Try again with exponential backoff
+        const delay = Math.min(
+          1000 * Math.pow(2, this.#reconnectAttempts),
+          10000,
+        );
+        debugLog("PTT-WEB", `Retrying in ${delay}ms...`);
+
+        setTimeout(() => {
+          this.#handleReconnect();
+        }, delay);
+      } else {
+        // Max attempts reached, give up
+        debugLog("PTT-WEB", "Max reconnection attempts reached");
+        this.#setState("DISCONNECTED");
+        if (this.#settings.soundDisconnect) {
+          voiceNotifications.playDisconnect();
+        }
       }
     }
   }
@@ -208,6 +335,10 @@ class Voice {
   disconnect() {
     const room = this.room();
     if (!room) return;
+
+    // Mark as manual disconnect to prevent auto-reconnect
+    this.#isManualDisconnect = true;
+    this.#reconnectAttempts = 0;
 
     voiceNotifications.playSelfLeave();
 
@@ -235,8 +366,10 @@ class Voice {
     this.#setMicrophone(room.localParticipant.isMicrophoneEnabled);
 
     // only play sounds if PTT is disabled, or if PTT is enabled with notification sounds on
-    const shouldPlaySound = !this.#settings.pushToTalkEnabled || this.#settings.pushToTalkNotificationSounds;
-    
+    const shouldPlaySound =
+      !this.#settings.pushToTalkEnabled ||
+      this.#settings.pushToTalkNotificationSounds;
+
     if (shouldPlaySound) {
       if (room.localParticipant.isMicrophoneEnabled) {
         voiceNotifications.playUnmute();
@@ -257,19 +390,32 @@ class Voice {
       debugLog("PTT-WEB", "setMute() - no room, returning");
       return;
     }
-    
+
     const currentState = room.localParticipant.isMicrophoneEnabled;
-    debugLog("PTT-WEB", "setMute() - current mic state:", currentState, "target:", enabled);
-    
+    debugLog(
+      "PTT-WEB",
+      "setMute() - current mic state:",
+      currentState,
+      "target:",
+      enabled,
+    );
+
     if (currentState !== enabled) {
-      debugLog("PTT-WEB", "setMute() - calling setMicrophoneEnabled(", enabled, ")");
+      debugLog(
+        "PTT-WEB",
+        "setMute() - calling setMicrophoneEnabled(",
+        enabled,
+        ")",
+      );
       await room.localParticipant.setMicrophoneEnabled(enabled);
       this.#setMicrophone(enabled);
       debugLog("PTT-WEB", "setMute() - mic state updated to:", enabled);
-      
+
       // only play sounds if PTT is disabled, or if PTT is enabled with notification sounds on
-      const shouldPlaySound = !this.#settings.pushToTalkEnabled || this.#settings.pushToTalkNotificationSounds;
-      
+      const shouldPlaySound =
+        !this.#settings.pushToTalkEnabled ||
+        this.#settings.pushToTalkNotificationSounds;
+
       if (shouldPlaySound) {
         if (enabled) {
           voiceNotifications.playUnmute();
@@ -326,31 +472,56 @@ export function VoiceContext(props: { children: JSX.Element }) {
   const client = useClient();
 
   onMount(() => {
-    debugLog("PTT-WEB", "VoiceContext mounted, checking for desktop PTT API...");
-    debugLog("PTT-WEB", "window.pushToTalk exists:", typeof window !== "undefined" && !!window.pushToTalk);
-    
+    debugLog(
+      "PTT-WEB",
+      "VoiceContext mounted, checking for desktop PTT API...",
+    );
+    debugLog(
+      "PTT-WEB",
+      "window.pushToTalk exists:",
+      typeof window !== "undefined" && !!window.pushToTalk,
+    );
+
     if (typeof window !== "undefined" && window.pushToTalk) {
       debugLog("PTT-WEB", "✓ Desktop PTT API found, initializing integration");
 
       // Check current state immediately (in case we missed the initial signal)
       const currentState = window.pushToTalk.getCurrentState();
-      debugLog("PTT-WEB", "Current PTT state from desktop:", currentState.active ? "ON" : "OFF");
+      debugLog(
+        "PTT-WEB",
+        "Current PTT state from desktop:",
+        currentState.active ? "ON" : "OFF",
+      );
 
       const handleStateChange = (e: { active: boolean }) => {
-        debugLog("PTT-WEB", "Received state change from desktop:", e.active ? "ON" : "OFF");
-        debugLog("PTT-WEB", "Current room:", voice.room() ? "connected" : "not connected");
-        
+        debugLog(
+          "PTT-WEB",
+          "Received state change from desktop:",
+          e.active ? "ON" : "OFF",
+        );
+        debugLog(
+          "PTT-WEB",
+          "Current room:",
+          voice.room() ? "connected" : "not connected",
+        );
+
         // e.active = true means PTT key is pressed (mic should be ON/unmuted)
         // e.active = false means PTT key is released (mic should be OFF/muted)
         if (voice.room()) {
           const shouldEnableMic = e.active;
-          debugLog("PTT-WEB", "PTT active:", e.active, "-> Mic enabled:", shouldEnableMic);
+          debugLog(
+            "PTT-WEB",
+            "PTT active:",
+            e.active,
+            "-> Mic enabled:",
+            shouldEnableMic,
+          );
           voice.setMute(shouldEnableMic);
         } else {
           debugLog("PTT-WEB", "⚠ No active room, cannot mute/unmute");
         }
       };
-      
+
       handleStateChange(currentState);
 
       debugLog("PTT-WEB", "Registering onStateChange listener...");
@@ -384,18 +555,26 @@ export function VoiceContext(props: { children: JSX.Element }) {
         window.pushToTalk?.offConfigChange(handleConfigChange);
       });
     } else {
-      debugLog("PTT-WEB", "✗ Desktop PTT API not available (running in browser?)");
+      debugLog(
+        "PTT-WEB",
+        "✗ Desktop PTT API not available (running in browser?)",
+      );
     }
 
     // setup voice notification sounds
     const currentClient = client();
-    console.log("[VoiceNotifications] Setting up notifications, client available:", !!currentClient);
-    
+    console.log(
+      "[VoiceNotifications] Setting up notifications, client available:",
+      !!currentClient,
+    );
+
     if (!currentClient) {
-      console.log("[VoiceNotifications] Client not available yet, skipping setup");
+      console.log(
+        "[VoiceNotifications] Client not available yet, skipping setup",
+      );
     } else {
       // console.log("[VoiceNotifications] Registering event listeners");
-      
+
       const onJoin = (channel: Channel, participant: { userId: string }) => {
         // console.log("[VoiceNotifications] VoiceChannelJoin event received:", {
         //   channelId: channel.id,
@@ -404,7 +583,10 @@ export function VoiceContext(props: { children: JSX.Element }) {
         //   currentUserId: currentClient.user?.id,
         //   shouldPlay: voice.channel()?.id === channel.id && participant.userId !== currentClient.user?.id
         // });
-        if (voice.channel()?.id === channel.id && participant.userId !== currentClient.user?.id) {
+        if (
+          voice.channel()?.id === channel.id &&
+          participant.userId !== currentClient.user?.id
+        ) {
           console.log("[VoiceNotifications] Playing join sound");
           voiceNotifications.playJoin();
         }
@@ -418,7 +600,10 @@ export function VoiceContext(props: { children: JSX.Element }) {
         //   currentUserId: currentClient.user?.id,
         //   shouldPlay: voice.channel()?.id === channel.id && userId !== currentClient.user?.id
         // });
-        if (voice.channel()?.id === channel.id && userId !== currentClient.user?.id) {
+        if (
+          voice.channel()?.id === channel.id &&
+          userId !== currentClient.user?.id
+        ) {
           console.log("[VoiceNotifications] Playing leave sound");
           voiceNotifications.playLeave();
         }
@@ -441,7 +626,7 @@ export function VoiceContext(props: { children: JSX.Element }) {
     // track master settings
     const enabled = state.voice.notificationSoundsEnabled;
     const volume = state.voice.notificationVolume;
-    
+
     // track individual sound toggles (force reactivity)
     const soundJoinCall = state.voice.soundJoinCall;
     const soundLeaveCall = state.voice.soundLeaveCall;
@@ -450,13 +635,19 @@ export function VoiceContext(props: { children: JSX.Element }) {
     const soundMute = state.voice.soundMute;
     const soundUnmute = state.voice.soundUnmute;
     const soundReceiveMessage = state.voice.soundReceiveMessage;
-    
-    console.log("[VoiceNotifications] Settings updated - enabled:", enabled, "volume:", volume);
-    
+    const soundDisconnect = state.voice.soundDisconnect;
+
+    console.log(
+      "[VoiceNotifications] Settings updated - enabled:",
+      enabled,
+      "volume:",
+      volume,
+    );
+
     // apply settings to notification manager
     voiceNotifications.setEnabled(enabled);
     voiceNotifications.setVolume(volume);
-    
+
     // sync individual sound toggles
     voiceNotifications.setSoundEnabled("join_call", soundJoinCall);
     voiceNotifications.setSoundEnabled("leave_call", soundLeaveCall);
@@ -465,6 +656,7 @@ export function VoiceContext(props: { children: JSX.Element }) {
     voiceNotifications.setSoundEnabled("mute", soundMute);
     voiceNotifications.setSoundEnabled("unmute", soundUnmute);
     voiceNotifications.setSoundEnabled("receive_message", soundReceiveMessage);
+    voiceNotifications.setSoundEnabled("disconnect", soundDisconnect);
   });
 
   return (
