@@ -225,7 +225,9 @@ const Config: SettingsConfiguration<{ server: Server }> = {
             {
               id: "notification_sounds",
               icon: <MdNotifications {...iconSize(20)} />,
-              title: <Trans id="notifications.tab.title">Notification Sounds</Trans>,
+              title: (
+                <Trans id="notifications.tab.title">Notification Sounds</Trans>
+              ),
             },
             {
               id: "appearance",

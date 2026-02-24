@@ -2215,6 +2215,21 @@ msgstr "Reason"
 msgid "notifications.sounds.receiveMessage"
 msgstr "Receive Message"
 
+#. js-lingui-explicit-id
+#: components/app/interface/settings/user/voice/NotificationSoundsSettings.tsx
+msgid "notifications.sounds.disconnect"
+msgstr "Disconnected"
+
+#. js-lingui-explicit-id
+#: components/app/interface/settings/user/voice/NotificationSoundsSettings.tsx
+msgid "notifications.sounds.connection"
+msgstr "Connection"
+
+#. js-lingui-explicit-id
+#: components/app/interface/settings/user/voice/NotificationSoundsSettings.tsx
+msgid "notifications.sounds.autoReconnect"
+msgstr "Auto-reconnect"
+
 #: components/app/interface/settings/user/Notifications.tsx
 msgid "Receive notifications while the app is open and in the background."
 msgstr "Receive notifications while the app is open and in the background."

@@ -49,9 +49,7 @@ export function PushToTalkSettings() {
             icon="blank"
             action={
               <div style={{ "pointer-events": "none" }}>
-                <Checkbox
-                  checked={state.voice.pushToTalkEnabled}
-                />
+                <Checkbox checked={state.voice.pushToTalkEnabled} />
               </div>
             }
             onClick={() => {
@@ -100,11 +98,15 @@ export function PushToTalkSettings() {
                 syncToDesktop({ notificationSounds: newValue });
               }}
             >
-              <Trans id="ptt.settings.playMuteSounds">Play Mute/Unmute Sounds</Trans>
+              <Trans id="ptt.settings.playMuteSounds">
+                Play Mute/Unmute Sounds
+              </Trans>
             </CategoryButton>
           </CategoryButton.Group>
           <Text class="label" size="small">
-            <Trans id="ptt.settings.muteSoundsDescription">Play sounds when muting/unmuting with Push to Talk</Trans>
+            <Trans id="ptt.settings.muteSoundsDescription">
+              Play sounds when muting/unmuting with Push to Talk
+            </Trans>
           </Text>
         </Column>
 
@@ -117,13 +119,12 @@ export function PushToTalkSettings() {
               icon="blank"
               action={
                 <div style={{ "pointer-events": "none" }}>
-                  <Checkbox
-                    checked={state.voice.pushToTalkMode === "toggle"}
-                  />
+                  <Checkbox checked={state.voice.pushToTalkMode === "toggle"} />
                 </div>
               }
               onClick={() => {
-                const newMode = state.voice.pushToTalkMode === "hold" ? "toggle" : "hold";
+                const newMode =
+                  state.voice.pushToTalkMode === "hold" ? "toggle" : "hold";
                 state.voice.pushToTalkMode = newMode;
                 syncToDesktop({ mode: newMode });
               }}
