@@ -390,6 +390,11 @@ msgstr "Assign Roles"
 msgid "Authenticator App"
 msgstr "Authenticator App"
 
+#. js-lingui-explicit-id
+#: components/app/interface/settings/user/voice/NotificationSoundsSettings.tsx
+msgid "notifications.sounds.autoReconnect"
+msgstr "Auto-reconnect"
+
 #: components/app/interface/settings/user/profile/UserProfileEditor.tsx
 msgid "Avatar"
 msgstr "Avatar"
@@ -712,6 +717,11 @@ msgstr "Connected"
 #: components/ui/components/features/voice/callCard/VoiceCallCardStatus.tsx
 msgid "Connecting"
 msgstr "Connecting"
+
+#. js-lingui-explicit-id
+#: components/app/interface/settings/user/voice/NotificationSoundsSettings.tsx
+msgid "notifications.sounds.connection"
+msgstr "Connection"
 
 #: components/modal/modals/ReportContent.tsx
 msgid "Content breaks one or more laws"
@@ -1052,6 +1062,11 @@ msgstr "Disabled"
 
 #: components/ui/components/features/voice/callCard/VoiceCallCardStatus.tsx
 msgid "Disconnected"
+msgstr "Disconnected"
+
+#. js-lingui-explicit-id
+#: components/app/interface/settings/user/voice/NotificationSoundsSettings.tsx
+msgid "notifications.sounds.disconnect"
 msgstr "Disconnected"
 
 #: components/app/interface/settings/user/Native.tsx
@@ -2214,21 +2229,6 @@ msgstr "Reason"
 #: components/app/interface/settings/user/voice/NotificationSoundsSettings.tsx
 msgid "notifications.sounds.receiveMessage"
 msgstr "Receive Message"
-
-#. js-lingui-explicit-id
-#: components/app/interface/settings/user/voice/NotificationSoundsSettings.tsx
-msgid "notifications.sounds.disconnect"
-msgstr "Disconnected"
-
-#. js-lingui-explicit-id
-#: components/app/interface/settings/user/voice/NotificationSoundsSettings.tsx
-msgid "notifications.sounds.connection"
-msgstr "Connection"
-
-#. js-lingui-explicit-id
-#: components/app/interface/settings/user/voice/NotificationSoundsSettings.tsx
-msgid "notifications.sounds.autoReconnect"
-msgstr "Auto-reconnect"
 
 #: components/app/interface/settings/user/Notifications.tsx
 msgid "Receive notifications while the app is open and in the background."
