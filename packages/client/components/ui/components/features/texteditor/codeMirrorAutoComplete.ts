@@ -1,6 +1,6 @@
 import {
+  acceptCompletion,
   autocompletion,
-  closeCompletion,
   currentCompletions,
 } from "@codemirror/autocomplete";
 import { EditorView, keymap } from "@codemirror/view";
@@ -141,8 +141,9 @@ export function codeMirrorAutoComplete(
     {
       key: ":",
       run: (view) => {
-        closeCompletion(view as never);
-        return false;
+        const completions = currentCompletions(view.state);
+        acceptCompletion(view as never);
+        return completions.length > 0;
       },
     },
   ]);
