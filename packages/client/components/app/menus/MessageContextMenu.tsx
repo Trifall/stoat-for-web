@@ -1,4 +1,4 @@
-import { For, Match, Show, Switch } from "solid-js";
+import { Accessor, For, Match, Show, Switch } from "solid-js";
 
 import { Trans } from "@lingui-solid/solid/macro";
 import { File, Message } from "stoat.js";
@@ -14,6 +14,7 @@ import MdDelete from "@material-design-icons/svg/outlined/delete.svg?component-s
 import MdDeleteSweep from "@material-design-icons/svg/outlined/delete_sweep.svg?component-solid";
 import MdDownload from "@material-design-icons/svg/outlined/download.svg?component-solid";
 import MdEdit from "@material-design-icons/svg/outlined/edit.svg?component-solid";
+import MdEmojiEmotions from "@material-design-icons/svg/outlined/emoji_emotions.svg?component-solid";
 import MdLink from "@material-design-icons/svg/outlined/link.svg?component-solid";
 import MdMarkChatUnread from "@material-design-icons/svg/outlined/mark_chat_unread.svg?component-solid";
 import MdOpenInNew from "@material-design-icons/svg/outlined/open_in_new.svg?component-solid";
@@ -25,6 +26,7 @@ import MdShield from "@material-design-icons/svg/outlined/shield.svg?component-s
 
 import MdSentimentContent from "@material-symbols/svg-400/outlined/sentiment_content.svg?component-solid";
 
+import { MediaPickerProps } from "@revolt/ui/components/features/messaging/composition/picker/CompositionMediaPicker";
 import {
   ContextMenu,
   ContextMenuButton,
@@ -35,7 +37,11 @@ import {
 /**
  * Context menu for messages
  */
-export function MessageContextMenu(props: { message?: Message; file?: File }) {
+export function MessageContextMenu(props: {
+  message?: Message;
+  file?: File;
+  reactPicker: Accessor<MediaPickerProps | undefined>;
+}) {
   const user = useUser();
   const state = useState();
   const client = useClient();
@@ -162,7 +168,18 @@ export function MessageContextMenu(props: { message?: Message; file?: File }) {
         <ContextMenuButton icon={MdContentCopy} onClick={copyText}>
           <Trans>Copy text</Trans>
         </ContextMenuButton>
+
         <ContextMenuDivider />
+
+        <Show when={props.message?.channel?.havePermission("React")}>
+          <ContextMenuButton
+            icon={MdEmojiEmotions}
+            onClick={(e) => props.reactPicker()?.onClickEmoji(e)}
+          >
+            <Trans>React</Trans>
+          </ContextMenuButton>
+        </Show>
+
         <Show
           when={
             props.message!.author?.self &&
