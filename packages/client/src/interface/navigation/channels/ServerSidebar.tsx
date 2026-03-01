@@ -449,6 +449,7 @@ function Entry(
 ) {
   const state = useState();
   const voice = useVoice();
+  const navigate = useNavigate();
   const { openModal } = useModals();
 
   const canEditChannel = createMemo(() =>
@@ -483,7 +484,14 @@ function Entry(
   );
 
   return (
-    <a href={`/server/${props.channel.serverId}/channel/${props.channel.id}`}>
+    <a
+      href={`/server/${props.channel.serverId}/channel/${props.channel.id}`}
+      onClick={() => {
+        if (props.channel.isVoice && !inCall()) {
+          voice.connect(props.channel);
+        }
+      }}
+    >
       <Column gap="sm">
         <MenuButton
           use:floating={props.menuGenerator(props.channel)}
@@ -511,6 +519,24 @@ function Entry(
           }
           actions={
             <>
+              <Show when={props.channel.isVoice}>
+                <a
+                  use:floating={{
+                    tooltip: { placement: "top", content: "Open Chat" },
+                  }}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    navigate(
+                      `/server/${props.channel.serverId}/channel/${props.channel.id}`,
+                    );
+                  }}
+                >
+                  <Symbol size={16} fill>
+                    chat
+                  </Symbol>
+                </a>
+              </Show>
               <Show when={canInvite()}>
                 <a
                   use:floating={{
