@@ -1060,13 +1060,13 @@ msgstr ""
 msgid "Disabled"
 msgstr ""
 
+#: components/ui/components/features/voice/callCard/VoiceCallCardStatus.tsx
+msgid "Disconnected"
+msgstr ""
+
 #. js-lingui-explicit-id
 #: components/app/interface/settings/user/voice/NotificationSoundsSettings.tsx
 msgid "notifications.sounds.disconnect"
-msgstr ""
-
-#: components/ui/components/features/voice/callCard/VoiceCallCardStatus.tsx
-msgid "Disconnected"
 msgstr ""
 
 #: components/app/interface/settings/user/Native.tsx
