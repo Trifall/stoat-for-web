@@ -38,6 +38,10 @@ msgstr "[Last] dddd [at] LT"
 msgid "dddd [at] LT"
 msgstr "dddd [at] LT"
 
+#: components/ui/components/features/profiles/ProfileRoles.tsx
+msgid " Add Role "
+msgstr " Add Role "
+
 #: components/app/interface/settings/server/roles/ServerRoleOverview.tsx
 msgid "(changes are being saved…)"
 msgstr "(changes are being saved…)"
@@ -409,8 +413,8 @@ msgid "Back"
 msgstr "Back"
 
 #: components/ui/components/features/profiles/ProfileBadges.tsx
-msgid "Badges"
-msgstr "Badges"
+#~ msgid "Badges"
+#~ msgstr "Badges"
 
 #: components/modal/modals/BanNonMember.tsx
 #: components/modal/modals/BanMember.tsx
@@ -777,6 +781,10 @@ msgstr "Copy message ID"
 #: components/app/interface/settings/server/roles/ServerRoleEditor.tsx
 msgid "Copy role ID"
 msgstr "Copy role ID"
+
+#: components/ui/components/features/profiles/ProfileRoles.tsx
+msgid "Copy Role ID"
+msgstr "Copy Role ID"
 
 #: components/app/menus/ServerContextMenu.tsx
 msgid "Copy server ID"
@@ -2402,7 +2410,6 @@ msgstr "Review policy changes"
 msgid "Role Name"
 msgstr "Role Name"
 
-#: components/ui/components/features/profiles/ProfileRoles.tsx
 #: components/app/interface/settings/ServerSettings.tsx
 msgid "Roles"
 msgstr "Roles"
@@ -2662,8 +2669,8 @@ msgid "Start with Computer"
 msgstr "Start with Computer"
 
 #: components/ui/components/features/profiles/ProfileStatus.tsx
-msgid "Status"
-msgstr "Status"
+#~ msgid "Status"
+#~ msgstr "Status"
 
 #: components/app/interface/settings/user/Native.tsx
 #~ msgid "Stoat Desktop"
