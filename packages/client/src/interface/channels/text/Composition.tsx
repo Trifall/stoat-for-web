@@ -345,17 +345,18 @@ export function MessageComposition(props: Props) {
           >
             {(triggerProps) => (
               <>
-                <MessageBox.InlineIcon size="normal">
-                  <IconButton onPress={triggerProps.onClickGif}>
-                    <Symbol>gif</Symbol>
-                  </IconButton>
-                </MessageBox.InlineIcon>
+                <Show when={!canSend()}>
+                  <MessageBox.InlineIcon size="normal">
+                    <IconButton onPress={triggerProps.onClickGif}>
+                      <Symbol>gif</Symbol>
+                    </IconButton>
+                  </MessageBox.InlineIcon>
+                </Show>
                 <MessageBox.InlineIcon size="normal">
                   <IconButton onPress={triggerProps.onClickEmoji}>
                     <Symbol>emoticon</Symbol>
                   </IconButton>
                 </MessageBox.InlineIcon>
-
                 <div ref={triggerProps.ref} />
               </>
             )}

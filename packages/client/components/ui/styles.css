@@ -6,14 +6,13 @@
 @import "@fontsource/inter/800";
 @import "@fontsource/jetbrains-mono";
 
-* {
-  box-sizing: border-box;
-}
+* { box-sizing: border-box }
 
 body {
   margin: 0;
   background: #191919;
   font-family: var(--fonts-primary);
+  --phone-max-width: 600px;
 }
 
 #root {
@@ -22,6 +21,65 @@ body {
   left: env(safe-area-inset-left);
   right: env(safe-area-inset-right);
   bottom: env(safe-area-inset-bottom);
+}
+
+/* App: Desktop view */
+.appRoot {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.appSidebar {
+  display: flex;
+  flex-shrink: 0;
+}
+
+/* Main: Phone view */
+@media (max-width: 600px) {
+  main {
+    margin: 0;
+    border-radius: 0;
+  }
+  .dialogScrim { padding: 30px }
+  .appSbBase { flex-grow: 1 }
+  .appSidebar {
+    --layout-width-channel-sidebar: auto;
+    position: absolute;
+    width: 100vw;
+    height: 100%;
+  }
+}
+
+/* Settings: Desktop view */
+.setMain {
+  display: flex;
+  height: 100%;
+  pointer-events: all;
+  color: var(--md-sys-color-on-surface);
+  background: var(--md-sys-color-surface-container-highest);
+}
+
+/* Settings: Tablet view */
+.setMobileBack { display: none }
+@media (max-width: 900px) {
+  .setCont { padding: 12px }
+  .setSidebar { padding: 8px 0 }
+  .setClose { display: none }
+  .setMobileBack { display: flex }
+}
+
+/* Settings: Phone view */
+@media (max-width: 600px) {
+  .setSbBase {
+    position: absolute;
+    width: 100vw;
+    height: 100%;
+    padding-left: 12px;
+  }
+  .setSbBase > * { width: 100% }
+  .setSidebar { max-width: unset }
+  .setBase { border-radius: 0 }
+  .setCont { height: 100vh }
 }
 
 /* HighlightJs */

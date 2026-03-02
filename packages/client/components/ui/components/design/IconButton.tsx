@@ -40,6 +40,7 @@ export function IconButton(props: Props) {
   let ref: HTMLButtonElement | undefined;
 
   const { buttonProps } = createButton(rest, () => ref);
+
   return (
     <button
       {...passthrough}

@@ -1,4 +1,12 @@
-import { JSX, Match, Switch, createEffect } from "solid-js";
+import {
+  createEffect,
+  createSignal,
+  JSX,
+  Match,
+  on,
+  onCleanup,
+  Switch,
+} from "solid-js";
 
 import { Server } from "stoat.js";
 import { styled } from "styled-system/jsx";
@@ -15,6 +23,7 @@ import { useState } from "@revolt/state";
 import { LAYOUT_SECTIONS } from "@revolt/state/stores/Layout";
 import { CircularProgress } from "@revolt/ui";
 
+import { SlideDrawer } from "../components/ui/components/navigation/SlideDrawer";
 import { Sidebar } from "./interface/Sidebar";
 
 /**
@@ -31,10 +40,7 @@ const Interface = (props: { children: JSX.Element }) => {
     if (!e.defaultPrevented) {
       if (e.to === "/settings") {
         e.preventDefault();
-        openModal({
-          type: "settings",
-          config: "user",
-        });
+        openModal({ type: "settings", config: "user" });
       } else if (typeof e.to === "string") {
         state.layout.setLastActivePath(e.to);
       }
@@ -57,15 +63,32 @@ const Interface = (props: { children: JSX.Element }) => {
     ].includes(lifecycle.state());
   }
 
+  //Drawer slider for mobile
+  let rootRef, sDrawer: SlideDrawer | null;
+  const [contRef, setContRef] = createSignal<HTMLDivElement>();
+  function rstLayout() {
+    state.layout.setSectionState(LAYOUT_SECTIONS.PRIMARY_SIDEBAR, false, false);
+    state.layout.setSectionState(LAYOUT_SECTIONS.MEMBER_SIDEBAR, false, true);
+  }
+  createEffect(
+    on(contRef, (cont) => {
+      if (!cont || sDrawer) return;
+      sDrawer = new SlideDrawer(cont, rootRef!, (en) => {
+        setTimeout(() => {
+          state.setAppDrawer(en ? sDrawer : null);
+          if (en) rstLayout();
+        }, 1);
+      });
+    }),
+  );
+  onCleanup(() => {
+    sDrawer?.delete();
+    state.setAppDrawer((sDrawer = null));
+  });
+
   return (
     <MessageCache client={client()}>
-      <div
-        style={{
-          display: "flex",
-          "flex-direction": "column",
-          height: "100%",
-        }}
-      >
+      <div ref={rootRef} class="appRoot">
         <Titlebar />
         <Switch fallback={<CircularProgress />}>
           <Match when={!isLoggedIn()}>
@@ -96,6 +119,8 @@ const Interface = (props: { children: JSX.Element }) => {
                 })}
               />
               <Content
+                ref={setContRef}
+                class="appCont"
                 sidebar={state.layout.getSectionState(
                   LAYOUT_SECTIONS.PRIMARY_SIDEBAR,
                   true,
@@ -142,7 +167,6 @@ const Layout = styled("div", {
 const Content = styled("div", {
   base: {
     background: "var(--md-sys-color-surface-container-low)",
-
     display: "flex",
     width: "100%",
     minWidth: 0,

@@ -108,8 +108,12 @@ function BotRedirect() {
   return <PWARedirect />;
 }
 
+let pwaPrompt: Event;
+addEventListener("beforeinstallprompt", (e) => (pwaPrompt = e));
+
 function MountContext(props: { children?: JSX.Element }) {
   const state = useState();
+  state.pwaPrompt = pwaPrompt;
 
   /**
    * Tanstack Query client

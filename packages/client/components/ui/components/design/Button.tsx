@@ -119,6 +119,7 @@ export function Button(props: Props) {
   );
 
   const { buttonProps } = createButton(rest, () => ref);
+
   return (
     <button
       {...passthrough}

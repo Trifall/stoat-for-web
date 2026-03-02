@@ -8,6 +8,7 @@ import { styled } from "styled-system/jsx";
 import { useClient } from "@revolt/client";
 import { TextWithEmoji } from "@revolt/markdown";
 import { useModals } from "@revolt/modal";
+import { useVoice } from "@revolt/rtc";
 import { useState } from "@revolt/state";
 import { LAYOUT_SECTIONS } from "@revolt/state/stores/Layout";
 import {
@@ -16,8 +17,8 @@ import {
   NonBreakingText,
   OverflowingText,
   Spacer,
-  UserStatus,
   typography,
+  UserStatus,
 } from "@revolt/ui";
 import { Symbol } from "@revolt/ui/components/utils/Symbol";
 
@@ -28,7 +29,7 @@ import MdSettings from "@material-design-icons/svg/outlined/settings.svg?compone
 import MdKeep from "../../svg/keep.svg?component-solid";
 import { HeaderIcon } from "../common/CommonHeader";
 
-import { SidebarState } from "./text/TextChannel";
+import { canIHasSidebar, SidebarState } from "./text/TextChannel";
 
 interface Props {
   /**
@@ -55,16 +56,14 @@ export function ChannelHeader(props: Props) {
   const client = useClient();
   const { t } = useLingui();
   const state = useState();
+  const voice = useVoice();
 
   const searchValue = () => {
     if (!props.sidebarState) return null;
 
     const state = props.sidebarState();
-    if (state.state === "search") {
-      return state.query;
-    } else {
-      return "";
-    }
+    if (state.state === "search") return state.query;
+    return "";
   };
 
   return (
@@ -133,6 +132,20 @@ export function ChannelHeader(props: Props) {
       </Switch>
 
       <Spacer />
+
+      <Show when={props.channel.isVoice}>
+        <IconButton
+          onPress={() => voice.connect(props.channel)}
+          use:floating={{
+            tooltip: {
+              placement: "bottom",
+              content: t`Join the voice channel`,
+            },
+          }}
+        >
+          <Symbol>voice_chat</Symbol>
+        </IconButton>
+      </Show>
 
       <Show
         when={
@@ -203,7 +216,7 @@ export function ChannelHeader(props: Props) {
         </IconButton>
       </Show>
 
-      <Show when={props.sidebarState && props.channel.type !== "SavedMessages"}>
+      <Show when={props.sidebarState && canIHasSidebar(props.channel)}>
         <IconButton
           onPress={() => {
             if (props.sidebarState!().state === "default") {

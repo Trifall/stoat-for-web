@@ -26,30 +26,43 @@ const clientContext = createContext(null! as ClientController);
  * Mount the modal controller
  */
 export function ClientContext(props: { state: State; children: JSXElement }) {
-  const { openModal } = useModals();
+  const { openModal, isOpen } = useModals();
 
   // eslint-disable-next-line solid/reactivity
   const controller = new ClientController(props.state);
   onCleanup(() => controller.dispose());
 
   createEffect(() => {
-    const lastIndex = props.state.settings.getValue("changelog:last_index");
-    if (controller.lifecycle.state() === LifecycleState.Ready) return;
+    const cycleState = controller.lifecycle.state();
 
-    if (
-      lastIndex !== CHANGELOG_MODAL_CONST.index &&
-      new Date() < CHANGELOG_MODAL_CONST.until
-    ) {
-      openModal({
-        type: "changelog",
-        initial: CHANGELOG_MODAL_CONST.index,
-      });
+    //Show Changelog modal
+    if (cycleState !== LifecycleState.Ready) {
+      const lastIndex = props.state.settings.getValue("changelog:last_index");
 
-      props.state.settings.setValue(
-        "changelog:last_index",
-        CHANGELOG_MODAL_CONST.index,
-      );
+      if (
+        lastIndex !== CHANGELOG_MODAL_CONST.index &&
+        new Date() < CHANGELOG_MODAL_CONST.until
+      ) {
+        openModal({
+          type: "changelog",
+          initial: CHANGELOG_MODAL_CONST.index,
+        });
+
+        props.state.settings.setValue(
+          "changelog:last_index",
+          CHANGELOG_MODAL_CONST.index,
+        );
+      }
     }
+
+    //Show TryPWA modal
+    if (
+      props.state.isMobile &&
+      cycleState === LifecycleState.Connected &&
+      !props.state.settings.getValue("pwa:shown") &&
+      !isOpen("try_pwa")
+    )
+      openModal({ type: "try_pwa" });
   });
 
   createEffect(

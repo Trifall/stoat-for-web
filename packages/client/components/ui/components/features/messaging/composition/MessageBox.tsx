@@ -95,6 +95,7 @@ interface Props {
 const Base = styled("div", {
   base: {
     flexGrow: 1,
+    minWidth: 0,
 
     paddingInlineEnd: "var(--gap-md)",
     paddingBlock: "var(--gap-sm)",
