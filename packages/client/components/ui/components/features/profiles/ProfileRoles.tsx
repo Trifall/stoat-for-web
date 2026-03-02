@@ -1,68 +1,115 @@
 import { For, Show } from "solid-js";
 
-import { Trans } from "@lingui-solid/solid/macro";
 import { ServerMember } from "stoat.js";
 import { styled } from "styled-system/jsx";
 
 import { useModals } from "@revolt/modal";
 
-import { Ripple, Text, typography } from "../../design";
+import { Trans, useLingui } from "@lingui-solid/solid/macro";
+import { useState } from "@revolt/state";
+import { BiSolidPlusCircle } from "solid-icons/bi";
+import { typography } from "../../design";
 import { dismissFloatingElements } from "../../floating";
 import { Row } from "../../layout";
-
-import { ProfileCard } from "./ProfileCard";
+import { ColouredText } from "../../utils";
 
 export function ProfileRoles(props: { member?: ServerMember }) {
   const { openModal } = useModals();
+  const { t } = useLingui();
+  const state = useState();
 
   function openRoles() {
     openModal({ type: "user_profile_roles", member: props.member! });
     dismissFloatingElements();
   }
 
+  //TODO: Make this not a button
   return (
-    <Show when={props.member?.roles.length}>
-      <ProfileCard isLink onClick={openRoles}>
-        <Ripple />
+    <Show
+      when={
+        props.member?.roles.length ||
+        props.member?.server!.havePermission("AssignRoles")
+      }
+    >
+      <RoleList>
+        <Show when={props.member?.server!.havePermission("AssignRoles")}>
+          <Row align>
+            <Role onClick={openRoles} cursor="pointer">
+              <BiSolidPlusCircle />
+              <Trans> Add Role </Trans>
+            </Role>
+          </Row>
+        </Show>
+        <For each={props.member!.orderedRoles.toReversed()}>
+          {(role) => (
+            <Row align>
+              {/* There is probably a better to do this if ... else ... */}
+              <Show when={state.settings.getValue("advanced:copy_id")}>
+                <Role
+                  onClick={() => navigator.clipboard.writeText(role.id)}
+                  cursor="pointer"
+                >
+                  <span
+                    use:floating={{
+                      tooltip: {
+                        placement: "top",
+                        content: t`Copy Role ID`,
+                      },
+                    }}
+                  >
+                    <ColouredText
+                      colour={
+                        role.colour ?? "var(--md-sys-color-outline-variant)"
+                      }
+                    >
+                      {role.name}
+                    </ColouredText>
+                  </span>
+                </Role>
+              </Show>
 
-        <Text class="title" size="large">
-          <Trans>Roles</Trans>
-        </Text>
-        <div use:invisibleScrollable>
-          <For each={props.member!.orderedRoles.toReversed()}>
-            {(role) => (
-              <Row align>
-                <Role>{role.name}</Role>
-                <RoleIcon
-                  style={{
-                    background:
-                      role.colour ?? "var(--md-sys-color-outline-variant)",
-                  }}
-                />
-              </Row>
-            )}
-          </For>
-        </div>
-      </ProfileCard>
+              <Show when={!state.settings.getValue("advanced:copy_id")}>
+                <Role>
+                  <ColouredText
+                    colour={
+                      role.colour ?? "var(--md-sys-color-outline-variant)"
+                    }
+                  >
+                    {role.name}
+                  </ColouredText>
+                </Role>
+              </Show>
+            </Row>
+          )}
+        </For>
+      </RoleList>
     </Show>
   );
 }
 
 const Role = styled("span", {
   base: {
-    flexGrow: 1,
+    display: "flex",
+    background: "var(--md-sys-color-surface-container-low)",
+    gap: "var(--gap-sm)",
+    alignItems: "center",
     overflow: "hidden",
     whiteSpace: "nowrap",
     textOverflow: "ellipsis",
+    userSelect: "none",
+    padding: "var(--gap-sm) var(--gap-md)",
+    borderRadius: "full",
+    height: "full",
     ...typography.raw({ class: "label" }),
   },
 });
 
-const RoleIcon = styled("div", {
+const RoleList = styled("div", {
   base: {
-    width: "8px",
-    height: "8px",
-    aspectRatio: "1/1",
-    borderRadius: "100%",
+    display: "flex",
+    alignItems: "stretch",
+    gap: "var(--gap-sm)",
+    overflowX: "scroll",
+    scrollbar: "hidden",
   },
 });

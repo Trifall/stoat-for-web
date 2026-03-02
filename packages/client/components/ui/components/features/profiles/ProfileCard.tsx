@@ -6,7 +6,7 @@ export const ProfileCard = styled("div", {
     position: "relative",
 
     minWidth: 0,
-    height: "100%",
+    height: "fit-content",
     width: "100%",
     userSelect: "none",
 
@@ -21,31 +21,10 @@ export const ProfileCard = styled("div", {
     flexDirection: "column",
   },
   variants: {
-    width: {
-      1: {
-        overflow: "hidden",
-        aspectRatio: "1/1",
-      },
-      2: {
-        gridColumn: "1 / 3",
-      },
-      3: {
-        gridColumn: "1 / 4",
-      },
-    },
-    constraint: {
-      half: {
-        overflow: "hidden",
-        aspectRatio: "2/1",
-      },
-    },
     isLink: {
       true: {
         cursor: "pointer",
       },
     },
-  },
-  defaultVariants: {
-    width: 1,
   },
 });

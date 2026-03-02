@@ -9,7 +9,6 @@ import { Ripple, Text, typography } from "../../design";
 import { ProfileCard } from "./ProfileCard";
 
 interface Props {
-  full?: boolean;
   content?: string;
   onClick?: () => void;
 }
@@ -23,8 +22,6 @@ export function ProfileBio(props: Props) {
       <ProfileCard
         onClick={props.onClick}
         isLink={typeof props.onClick !== "undefined"}
-        width={props.full ? 3 : 2}
-        constraint={props.full ? undefined : "half"}
       >
         <Show when={props.onClick}>
           <Ripple />

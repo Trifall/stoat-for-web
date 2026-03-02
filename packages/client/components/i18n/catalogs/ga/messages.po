@@ -38,6 +38,10 @@ msgstr ""
 msgid "dddd [at] LT"
 msgstr ""
 
+#: components/ui/components/features/profiles/ProfileRoles.tsx
+msgid " Add Role "
+msgstr ""
+
 #: components/app/interface/settings/server/roles/ServerRoleOverview.tsx
 msgid "(changes are being saved…)"
 msgstr ""
@@ -409,8 +413,8 @@ msgid "Back"
 msgstr ""
 
 #: components/ui/components/features/profiles/ProfileBadges.tsx
-msgid "Badges"
-msgstr "Suaitheantais"
+#~ msgid "Badges"
+#~ msgstr "Suaitheantais"
 
 #: components/modal/modals/BanNonMember.tsx
 #: components/modal/modals/BanMember.tsx
@@ -776,6 +780,10 @@ msgstr "Cóipeáil ID teachtaireacht"
 
 #: components/app/interface/settings/server/roles/ServerRoleEditor.tsx
 msgid "Copy role ID"
+msgstr ""
+
+#: components/ui/components/features/profiles/ProfileRoles.tsx
+msgid "Copy Role ID"
 msgstr ""
 
 #: components/app/menus/ServerContextMenu.tsx
@@ -2402,7 +2410,6 @@ msgstr ""
 msgid "Role Name"
 msgstr "Ainm Róil"
 
-#: components/ui/components/features/profiles/ProfileRoles.tsx
 #: components/app/interface/settings/ServerSettings.tsx
 msgid "Roles"
 msgstr "Róil"
@@ -2662,8 +2669,8 @@ msgid "Start with Computer"
 msgstr ""
 
 #: components/ui/components/features/profiles/ProfileStatus.tsx
-msgid "Status"
-msgstr ""
+#~ msgid "Status"
+#~ msgstr ""
 
 #: components/app/interface/settings/user/Native.tsx
 #~ msgid "Stoat Desktop"
