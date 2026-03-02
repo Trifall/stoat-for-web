@@ -72,6 +72,13 @@ export function floating(element: HTMLElement, accessor: Accessor<Props>) {
     const config = accessor();
 
     if (target === "userCard" && config.userCard) {
+      // Dismiss any other open user cards first
+      for (const el of floatingElements()) {
+        if (el.element !== element && el.show()?.userCard) {
+          el.hide();
+        }
+      }
+
       if (current?.userCard) {
         setShow(undefined);
       } else if (!current) {
