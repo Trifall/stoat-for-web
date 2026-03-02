@@ -106,6 +106,7 @@ class Voice {
   #isManualDisconnect = false;
   #reconnectAttempts = 0;
   #maxReconnectAttempts = 5;
+  #micWasOnBeforeDeafen = false;
 
   constructor(voiceSettings: VoiceSettings) {
     this.#settings = voiceSettings;
@@ -353,7 +354,30 @@ class Voice {
   }
 
   async toggleDeafen() {
-    this.#setDeafen((s) => !s);
+    const willDeafen = !this.deafen();
+
+    if (willDeafen) {
+      // Save current mic state so we can restore it on undeafen
+      this.#micWasOnBeforeDeafen = this.microphone();
+
+      // Mute the mic when deafening
+      const room = this.room();
+      if (room && room.localParticipant.isMicrophoneEnabled) {
+        await room.localParticipant.setMicrophoneEnabled(false);
+        this.#setMicrophone(false);
+      }
+    } else {
+      // Restore mic to its previous state when undeafening
+      if (this.#micWasOnBeforeDeafen) {
+        const room = this.room();
+        if (room) {
+          await room.localParticipant.setMicrophoneEnabled(true);
+          this.#setMicrophone(true);
+        }
+      }
+    }
+
+    this.#setDeafen(willDeafen);
   }
 
   async toggleMute() {
