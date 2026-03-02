@@ -405,6 +405,7 @@ msgstr "Avatar"
 #: components/auth/src/flows/FlowLogin.tsx
 #: components/auth/src/flows/FlowCreate.tsx
 #: components/auth/src/flows/FlowCheck.tsx
+#: components/app/interface/settings/user/_AccountCard.tsx
 msgid "Back"
 msgstr "Back"
 
@@ -647,6 +648,7 @@ msgstr "Client Settings"
 #: components/modal/modals/UserProfileRoles.tsx
 #: components/modal/modals/UserProfileMutualGroups.tsx
 #: components/modal/modals/UserProfileMutualFriends.tsx
+#: components/modal/modals/TryPWA.tsx
 #: components/modal/modals/ServerInfo.tsx
 #: components/modal/modals/PolicyChange.tsx
 #: components/modal/modals/LinkWarning.tsx
@@ -1044,6 +1046,10 @@ msgstr "Desktop"
 #: components/app/interface/settings/user/bots/MyBots.tsx
 msgid "Developer Documentation"
 msgstr "Developer Documentation"
+
+#: components/modal/modals/TryPWA.tsx
+msgid "Did you know?"
+msgstr "Did you know?"
 
 #: components/app/interface/settings/user/Account.tsx
 msgid "Disable Account"
@@ -1473,6 +1479,10 @@ msgstr "Impersonation"
 msgid "notifications.sounds.individual"
 msgstr "Individual Sounds"
 
+#: components/modal/modals/TryPWA.tsx
+msgid "Install"
+msgstr "Install"
+
 #: components/app/interface/settings/user/Native.tsx
 msgid "Instead of closing, Stoat will hide in your tray."
 msgstr "Instead of closing, Stoat will hide in your tray."
@@ -1545,7 +1555,7 @@ msgstr "Join Call"
 msgid "Join the Stoat Lounge"
 msgstr "Join the Stoat Lounge"
 
-#: components/ui/components/features/voice/callCard/VoiceCallCardPreview.tsx
+#: src/interface/channels/ChannelHeader.tsx
 msgid "Join the voice channel"
 msgstr "Join the voice channel"
 
@@ -2195,6 +2205,7 @@ msgstr "Push to Talk Keybind"
 msgid "Raid or spam attack"
 msgstr "Raid or spam attack"
 
+#: components/app/menus/MessageContextMenu.tsx
 #: components/app/interface/settings/channel/permissions/ChannelPermissionsEditor.tsx
 msgid "React"
 msgstr "React"
@@ -2654,8 +2665,8 @@ msgid "Spellchecker"
 msgstr "Spellchecker"
 
 #: components/ui/components/features/voice/callCard/VoiceCallCardPreview.tsx
-msgid "Start the call"
-msgstr "Start the call"
+#~ msgid "Start the call"
+#~ msgstr "Start the call"
 
 #: components/app/interface/settings/user/Native.tsx
 msgid "Start with Computer"
@@ -2710,8 +2721,8 @@ msgid "Support the project by donating - thank you!"
 msgstr "Support the project by donating - thank you!"
 
 #: components/ui/components/features/voice/callCard/VoiceCallCardPreview.tsx
-msgid "Switch to this voice channel"
-msgstr "Switch to this voice channel"
+#~ msgid "Switch to this voice channel"
+#~ msgstr "Switch to this voice channel"
 
 #: components/app/interface/settings/user/Sync.tsx
 msgid "Sync appearance options, such as chosen emoji pack and message density."
@@ -3125,10 +3136,9 @@ msgstr "Welcome!"
 msgid "Whether other users can edit these settings"
 msgstr "Whether other users can edit these settings"
 
-#. placeholder {0}: names.join(", ")
 #: components/ui/components/features/voice/callCard/VoiceCallCardPreview.tsx
-msgid "With {0}"
-msgstr "With {0}"
+#~ msgid "With {0}"
+#~ msgstr "With {0}"
 
 #: components/modal/modals/CreateGroupOrServer.tsx
 msgid "Would you like to create a new group or server?"
@@ -3157,6 +3167,10 @@ msgstr "You are about to kick {0}"
 #: components/i18n/errors.ts
 msgid "You are banned from this server."
 msgstr "You are banned from this server."
+
+#: components/modal/modals/TryPWA.tsx
+msgid "You can <0>install</0> this Web App on your devive for conveient access from the Home Screen, just like a real app. It even hides the huge menu bar!<1/><2/>To install, tap the button below or open your browser's menu and choose<3> Add to Home Screen</3>."
+msgstr "You can <0>install</0> this Web App on your devive for conveient access from the Home Screen, just like a real app. It even hides the huge menu bar!<1/><2/>To install, tap the button below or open your browser's menu and choose<3> Add to Home Screen</3>."
 
 #: src/interface/Home.tsx
 msgid "You can also click the gear icon in the bottom left."
