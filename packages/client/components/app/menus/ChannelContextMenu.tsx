@@ -4,9 +4,11 @@ import { Trans } from "@lingui-solid/solid/macro";
 import { Channel } from "stoat.js";
 
 import { useModals } from "@revolt/modal";
+import { useNavigate } from "@revolt/routing";
 import { useState } from "@revolt/state";
 
 import MdBadge from "@material-design-icons/svg/outlined/badge.svg?component-solid";
+import MdChat from "@material-design-icons/svg/outlined/chat.svg?component-solid";
 import MdDelete from "@material-design-icons/svg/outlined/delete.svg?component-solid";
 import MdGroupAdd from "@material-design-icons/svg/outlined/group_add.svg?component-solid";
 import MdLibraryAdd from "@material-design-icons/svg/outlined/library_add.svg?component-solid";
@@ -28,6 +30,7 @@ import { NotificationContextMenu } from "./shared/NotificationContextMenu";
  */
 export function ChannelContextMenu(props: { channel: Channel }) {
   const state = useState();
+  const navigate = useNavigate();
   const { openModal } = useModals();
 
   /**
@@ -108,6 +111,19 @@ export function ChannelContextMenu(props: { channel: Channel }) {
 
   return (
     <ContextMenu>
+      <Show when={props.channel.isVoice}>
+        <ContextMenuButton
+          icon={MdChat}
+          onClick={() =>
+            navigate(
+              `/server/${props.channel.serverId}/channel/${props.channel.id}`,
+            )
+          }
+        >
+          <Trans>Open Chat</Trans>
+        </ContextMenuButton>
+        <ContextMenuDivider />
+      </Show>
       <Show
         when={
           props.channel.unread || props.channel.havePermission("InviteOthers")
