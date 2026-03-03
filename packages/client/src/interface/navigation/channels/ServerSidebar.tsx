@@ -450,6 +450,7 @@ function Entry(
 ) {
   const state = useState();
   const voice = useVoice();
+  const navigate = useNavigate();
   const { openModal } = useModals();
 
   const canEditChannel = createMemo(() =>
@@ -484,19 +485,71 @@ function Entry(
   );
 
   return (
-    <Column gap="sm">
-      <MenuButton
-        href={`/server/${props.channel.serverId}/channel/${props.channel.id}`}
-        use:floating={props.menuGenerator(props.channel)}
-        size="normal"
-        alert={alertState()}
-        attention={attentionState()}
-        icon={
-          <>
-            <Switch fallback={<Symbol>grid_3x3</Symbol>}>
-              <Match when={props.channel.isVoice}>
-                <Symbol
-                  color={inCall() ? "var(--md-sys-color-primary)" : undefined}
+    <a
+      href={`/server/${props.channel.serverId}/channel/${props.channel.id}`}
+      onClick={() => {
+        if (props.channel.isVoice && !inCall()) {
+          voice.connect(props.channel);
+        }
+      }}
+    >
+      <Column gap="sm">
+        <MenuButton
+          use:floating={props.menuGenerator(props.channel)}
+          size="normal"
+          alert={alertState()}
+          attention={attentionState()}
+          icon={
+            <>
+              <Switch fallback={<Symbol>grid_3x3</Symbol>}>
+                <Match when={props.channel.isVoice}>
+                  <Symbol
+                    color={inCall() ? "var(--md-sys-color-primary)" : undefined}
+                  >
+                    headset_mic
+                  </Symbol>
+                </Match>
+              </Switch>
+              <Show when={props.channel.icon}>
+                <ChannelIcon
+                  src={props.channel.iconURL}
+                  css={{ marginEnd: "0.2em" }}
+                />
+              </Show>
+            </>
+          }
+          actions={
+            <>
+              <Show when={props.channel.isVoice}>
+                <a
+                  use:floating={{
+                    tooltip: { placement: "top", content: "Open Chat" },
+                  }}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    navigate(
+                      `/server/${props.channel.serverId}/channel/${props.channel.id}`,
+                    );
+                  }}
+                >
+                  <Symbol size={16} fill>
+                    chat
+                  </Symbol>
+                </a>
+              </Show>
+              <Show when={canInvite()}>
+                <a
+                  use:floating={{
+                    tooltip: { placement: "top", content: "Create Invite" },
+                  }}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    openModal({
+                      type: "create_invite",
+                      channel: props.channel,
+                    });
+                  }}
                 >
                   headset_mic
                 </Symbol>

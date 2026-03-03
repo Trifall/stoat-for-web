@@ -2068,6 +2068,10 @@ msgstr ""
 msgid "Open channel settings"
 msgstr ""
 
+#: components/app/menus/ChannelContextMenu.tsx
+msgid "Open Chat"
+msgstr ""
+
 #: components/app/menus/MessageContextMenu.tsx
 msgid "Open file"
 msgstr ""
