@@ -2244,6 +2244,11 @@ msgstr "Прычына"
 msgid "Reason for report"
 msgstr ""
 
+#. js-lingui-explicit-id
+#: components/app/interface/settings/user/voice/NotificationSoundsSettings.tsx
+msgid "notifications.sounds.receiveMessage"
+msgstr ""
+
 #: components/app/interface/settings/user/Notifications.tsx
 msgid "Receive notifications while the app is open and in the background."
 msgstr ""
@@ -2672,8 +2677,8 @@ msgid "Start Minimised to Tray"
 msgstr ""
 
 #: components/ui/components/features/voice/callCard/VoiceCallCardPreview.tsx
-msgid "Start the call"
-msgstr ""
+#~ msgid "Start the call"
+#~ msgstr ""
 
 #: components/app/interface/settings/user/Native.tsx
 msgid "Start with Computer"

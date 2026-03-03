@@ -2240,13 +2240,13 @@ msgstr ""
 msgid "Reason"
 msgstr "Lý do"
 
+#: components/modal/modals/ReportContent.tsx
+msgid "Reason for report"
+msgstr ""
+
 #. js-lingui-explicit-id
 #: components/app/interface/settings/user/voice/NotificationSoundsSettings.tsx
 msgid "notifications.sounds.receiveMessage"
-msgstr ""
-
-#: components/modal/modals/ReportContent.tsx
-msgid "Reason for report"
 msgstr ""
 
 #: components/app/interface/settings/user/Notifications.tsx

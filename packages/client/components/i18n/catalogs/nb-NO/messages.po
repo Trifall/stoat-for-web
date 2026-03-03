@@ -382,6 +382,11 @@ msgstr ""
 msgid "Authenticator App"
 msgstr ""
 
+#. js-lingui-explicit-id
+#: components/app/interface/settings/user/voice/NotificationSoundsSettings.tsx
+msgid "notifications.sounds.autoReconnect"
+msgstr ""
+
 #: components/app/interface/settings/user/profile/UserProfileEditor.tsx
 msgid "Avatar"
 msgstr ""
@@ -940,6 +945,11 @@ msgstr ""
 msgid "Default"
 msgstr ""
 
+#. js-lingui-explicit-id
+#: components/app/interface/settings/user/voice/PushToTalkSettings.tsx
+msgid "ptt.settings.defaultHold"
+msgstr ""
+
 #: components/app/interface/settings/ServerSettings.tsx
 #: components/app/interface/settings/ChannelSettings.tsx
 #: components/app/interface/settings/server/roles/ServerRoleOverview.tsx
@@ -1188,6 +1198,21 @@ msgstr ""
 
 #: components/app/interface/settings/user/Notifications.tsx
 msgid "Enable Desktop Notifications"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: components/app/interface/settings/user/voice/NotificationSoundsSettings.tsx
+msgid "notifications.sounds.enable"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: components/app/interface/settings/user/voice/PushToTalkSettings.tsx
+msgid "ptt.settings.enable"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: components/app/interface/settings/user/voice/PushToTalkSettings.tsx
+msgid "ptt.settings.toggleMode"
 msgstr ""
 
 #: components/app/interface/settings/user/appearance/AppearanceMenu.tsx
@@ -1495,6 +1520,11 @@ msgstr ""
 msgid "Join a server"
 msgstr ""
 
+#. js-lingui-explicit-id
+#: components/app/interface/settings/user/voice/NotificationSoundsSettings.tsx
+msgid "notifications.sounds.joinCall"
+msgstr ""
+
 #: src/interface/Home.tsx
 #: components/app/interface/settings/user/Feedback.tsx
 msgid "Join the Stoat Lounge"
@@ -1694,6 +1724,11 @@ msgstr ""
 
 #: components/app/interface/settings/channel/permissions/ChannelPermissionsEditor.tsx
 msgid "Masquerade"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: components/app/interface/settings/user/voice/NotificationSoundsSettings.tsx
+msgid "notifications.sounds.volume"
 msgstr ""
 
 #: components/app/interface/settings/ServerSettings.tsx
@@ -2184,6 +2219,11 @@ msgstr ""
 msgid "Reason for report"
 msgstr ""
 
+#. js-lingui-explicit-id
+#: components/app/interface/settings/user/voice/NotificationSoundsSettings.tsx
+msgid "notifications.sounds.receiveMessage"
+msgstr ""
+
 #: components/app/interface/settings/user/Notifications.tsx
 msgid "Receive notifications while the app is open and in the background."
 msgstr ""
@@ -2215,6 +2255,11 @@ msgstr ""
 
 #: components/app/menus/UserContextMenu.tsx
 msgid "Reject friend request"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: components/app/interface/settings/user/voice/PushToTalkSettings.tsx
+msgid "ptt.settings.releaseDelay"
 msgstr ""
 
 #: src/interface/channels/text/TextSearchSidebar.tsx
@@ -2595,8 +2640,8 @@ msgid "Start Minimised to Tray"
 msgstr ""
 
 #: components/ui/components/features/voice/callCard/VoiceCallCardPreview.tsx
-msgid "Start the call"
-msgstr ""
+#~ msgid "Start the call"
+#~ msgstr ""
 
 #: components/app/interface/settings/user/Native.tsx
 msgid "Start with Computer"

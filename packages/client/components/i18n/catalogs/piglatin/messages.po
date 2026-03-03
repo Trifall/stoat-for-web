@@ -2244,6 +2244,11 @@ msgstr "Easonray"
 msgid "Reason for report"
 msgstr ""
 
+#. js-lingui-explicit-id
+#: components/app/interface/settings/user/voice/NotificationSoundsSettings.tsx
+msgid "notifications.sounds.receiveMessage"
+msgstr ""
+
 #: components/app/interface/settings/user/Notifications.tsx
 msgid "Receive notifications while the app is open and in the background."
 msgstr ""

@@ -538,80 +538,56 @@ function Entry(
                   </Symbol>
                 </a>
               </Show>
-              <Show when={canInvite()}>
-                <a
-                  use:floating={{
-                    tooltip: { placement: "top", content: "Create Invite" },
-                  }}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    openModal({
-                      type: "create_invite",
-                      channel: props.channel,
-                    });
-                  }}
-                >
-                  headset_mic
-                </Symbol>
-              </Match>
-            </Switch>
-            <Show when={props.channel.icon}>
-              <ChannelIcon
-                src={props.channel.iconURL}
-                css={{ marginEnd: "0.2em" }}
-              />
-            </Show>
-          </>
-        }
-        actions={
-          <Show when={!state.isMobile}>
-            <Show when={canInvite()}>
-              <a
-                use:floating={{
-                  tooltip: { placement: "top", content: "Create Invite" },
-                }}
-                onClick={(e) => {
-                  e.preventDefault();
-                  openModal({
-                    type: "create_invite",
-                    channel: props.channel,
-                  });
-                }}
-              >
-                <Symbol size={16} fill>
-                  person_add
-                </Symbol>
-              </a>
-            </Show>
-            <Show when={canEditChannel()}>
-              <a
-                use:floating={{
-                  tooltip: { placement: "top", content: "Edit Channel" },
-                }}
-                onClick={(e) => {
-                  e.preventDefault();
-                  openModal({
-                    type: "settings",
-                    config: "channel",
-                    context: props.channel,
-                  });
-                }}
-              >
-                <Symbol size={16} fill>
-                  settings
-                </Symbol>
-              </a>
-            </Show>
-          </Show>
-        }
-      >
-        <OverflowingText>
-          <TextWithEmoji content={props.channel.name!} />
-        </OverflowingText>
-      </MenuButton>
+              <Show when={!state.isMobile}>
+                <Show when={canInvite()}>
+                  <a
+                    use:floating={{
+                      tooltip: { placement: "top", content: "Create Invite" },
+                    }}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      openModal({
+                        type: "create_invite",
+                        channel: props.channel,
+                      });
+                    }}
+                  >
+                    <Symbol size={16} fill>
+                      person_add
+                    </Symbol>
+                  </a>
+                </Show>
+                <Show when={canEditChannel()}>
+                  <a
+                    use:floating={{
+                      tooltip: { placement: "top", content: "Edit Channel" },
+                    }}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      openModal({
+                        type: "settings",
+                        config: "channel",
+                        context: props.channel,
+                      });
+                    }}
+                  >
+                    <Symbol size={16} fill>
+                      settings
+                    </Symbol>
+                  </a>
+                </Show>
+              </Show>
+            </>
+          }
+        >
+          <OverflowingText>
+            <TextWithEmoji content={props.channel.name!} />
+          </OverflowingText>
+        </MenuButton>
 
-      <VoiceChannelPreview channel={props.channel} />
-    </Column>
+        <VoiceChannelPreview channel={props.channel} />
+      </Column>
+    </a>
   );
 }
 
