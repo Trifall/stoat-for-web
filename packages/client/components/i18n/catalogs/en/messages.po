@@ -1476,6 +1476,11 @@ msgstr "Impersonation"
 
 #. js-lingui-explicit-id
 #: components/app/interface/settings/user/voice/NotificationSoundsSettings.tsx
+msgid "notifications.sounds.incomingCall"
+msgstr "Incoming Call"
+
+#. js-lingui-explicit-id
+#: components/app/interface/settings/user/voice/NotificationSoundsSettings.tsx
 msgid "notifications.sounds.individual"
 msgstr "Individual Sounds"
 

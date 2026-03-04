@@ -353,43 +353,68 @@ function Entry(
           ),
       }}
     >
-      <NameStatusStack>
-        <Switch>
-          <Match when={local.channel.type === "Group"}>
-            <OverflowingText>
-              <TextWithEmoji content={local.channel.name!} />
-            </OverflowingText>
-            <span class={typography({ class: "_status" })}>
-              {/* <Plural
+      <EntryRow>
+        <NameStatusStack>
+          <Switch>
+            <Match when={local.channel.type === "Group"}>
+              <OverflowingText>
+                <TextWithEmoji content={local.channel.name!} />
+              </OverflowingText>
+              <span class={typography({ class: "_status" })}>
+                {/* <Plural
                   value={local.channel.recipientIds.size}
                   one="# Member"
                   other="# Members"
                 /> */}
-              {local.channel.recipientIds.size}{" "}
-              {local.channel.recipientIds.size > 1 ? `Members` : "Member"}
-            </span>
-          </Match>
-          <Match when={local.channel.type === "DirectMessage"}>
-            <OverflowingText>
-              {local.channel?.recipient?.displayName}
-            </OverflowingText>
-            <Show when={status()}>
-              <Tooltip
-                content={() => <TextWithEmoji content={status()!} />}
-                placement="top-start"
-                aria={status()!}
-              >
-                <OverflowingText class={typography({ class: "_status" })}>
-                  <TextWithEmoji content={status()!} />
-                </OverflowingText>
-              </Tooltip>
-            </Show>
-          </Match>
-        </Switch>
-      </NameStatusStack>
+                {local.channel.recipientIds.size}{" "}
+                {local.channel.recipientIds.size > 1 ? `Members` : "Member"}
+              </span>
+            </Match>
+            <Match when={local.channel.type === "DirectMessage"}>
+              <OverflowingText>
+                {local.channel?.recipient?.displayName}
+              </OverflowingText>
+              <Show when={status()}>
+                <Tooltip
+                  content={() => <TextWithEmoji content={status()!} />}
+                  placement="top-start"
+                  aria={status()!}
+                >
+                  <OverflowingText class={typography({ class: "_status" })}>
+                    <TextWithEmoji content={status()!} />
+                  </OverflowingText>
+                </Tooltip>
+              </Show>
+            </Match>
+          </Switch>
+        </NameStatusStack>
+        <Show when={local.channel.voiceParticipants.size > 0}>
+          <Symbol
+            size={10}
+            style={{
+              color: "var(--brand-presence-online)",
+              "flex-shrink": "0",
+              "margin-left": "auto",
+            }}
+          >
+            call
+          </Symbol>
+        </Show>
+      </EntryRow>
     </MenuButton>
   );
 }
+
+const EntryRow = styled("div", {
+  base: {
+    display: "flex",
+    alignItems: "center",
+    gap: "4px",
+    width: "100%",
+    height: "100%",
+    minWidth: 0,
+  },
+});
 
 /**
  * Inner scrollable list

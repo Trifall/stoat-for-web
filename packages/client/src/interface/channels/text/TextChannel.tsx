@@ -1,4 +1,5 @@
 import {
+  For,
   Match,
   Show,
   Switch,
@@ -16,9 +17,11 @@ import { DraftMessages, Messages } from "@revolt/app";
 import { useClient } from "@revolt/client";
 import { Keybind, KeybindAction, createKeybind } from "@revolt/keybinds";
 import { useNavigate, useSmartParams } from "@revolt/routing";
+import { useVoice } from "@revolt/rtc";
 import { useState } from "@revolt/state";
 import { LAYOUT_SECTIONS } from "@revolt/state/stores/Layout";
 import {
+  Avatar,
   BelowFloatingHeader,
   Header,
   NewMessages,
@@ -26,6 +29,7 @@ import {
   TypingIndicator,
   main,
 } from "@revolt/ui";
+import { Symbol } from "@revolt/ui/components/utils/Symbol";
 import { VoiceChannelCallCardMount } from "@revolt/ui/components/features/voice/callCard/VoiceCallCard";
 
 import { ChannelHeader } from "../ChannelHeader";
@@ -58,6 +62,50 @@ export function canIHasSidebar(ch: Channel) {
 /**
  * Channel component
  */
+function VoiceCallBanner(props: { channel: Channel }) {
+  const voice = useVoice();
+  const client = useClient();
+
+  const participants = () => [...props.channel.voiceParticipants.keys()];
+
+  const showBanner = () =>
+    (props.channel.type === "DirectMessage" || props.channel.type === "Group") &&
+    props.channel.voiceParticipants.size > 0 &&
+    voice.channel()?.id !== props.channel.id;
+
+  return (
+    <Show when={showBanner()}>
+      <Banner>
+        <BannerContent>
+          <BannerAvatars>
+            <For each={participants()}>
+              {(userId) => {
+                const user = () => client().users.get(userId);
+                return (
+                  <Show when={user()}>
+                    <Avatar size={24} src={user()!.avatarURL} fallback={user()!.displayName ?? user()!.username} />
+                  </Show>
+                );
+              }}
+            </For>
+          </BannerAvatars>
+          <BannerText>
+            {(() => {
+              const names = participants().map((userId) => {
+                const u = client().users.get(userId);
+                return u?.displayName ?? u?.username ?? "Unknown";
+              });
+              if (names.length === 1) return `${names[0]} is in the voice call`;
+              if (names.length === 2) return `${names[0]} and ${names[1]} are in the voice call`;
+              return `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]} are in the voice call`;
+            })()}
+          </BannerText>
+        </BannerContent>
+      </Banner>
+    </Show>
+  );
+}
+
 export function TextChannel(props: ChannelPageProps) {
   const state = useState();
   const client = useClient();
@@ -172,6 +220,7 @@ export function TextChannel(props: ChannelPageProps) {
       </Header>
       <Content>
         <main class={main()}>
+          <VoiceCallBanner channel={props.channel} />
           <Show
             when={canConnect()}
             fallback={
@@ -334,3 +383,43 @@ const SidebarTitle = styled("div", {
     color: "var(--md-sys-color-on-surface)",
   },
 });
+
+const Banner = styled("div", {
+  base: {
+    flexShrink: 0,
+    padding: "10px 0",
+    marginInline: "calc(-1 * var(--gap-md))",
+    paddingInline: "var(--gap-lg)",
+    background: "var(--md-sys-color-surface-container)",
+  },
+});
+
+const BannerContent = styled("div", {
+  base: {
+    display: "flex",
+    alignItems: "center",
+    gap: "var(--gap-md)",
+  },
+});
+
+const BannerAvatars = styled("div", {
+  base: {
+    display: "flex",
+    alignItems: "center",
+    "& > *": {
+      marginRight: "-4px",
+    },
+    "& > *:last-child": {
+      marginRight: "0",
+    },
+  },
+});
+
+const BannerText = styled("span", {
+  base: {
+    flex: 1,
+    fontSize: "14px",
+    color: "var(--md-sys-color-on-surface-variant)",
+  },
+});
+

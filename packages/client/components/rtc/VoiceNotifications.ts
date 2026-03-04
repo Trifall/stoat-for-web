@@ -11,7 +11,8 @@ type SoundName =
   | "mute"
   | "unmute"
   | "receive_message"
-  | "disconnect";
+  | "disconnect"
+  | "incoming_call";
 
 const SOUND_FILES: Record<SoundName, string> = {
   join_call: "/assets/audio/join_call.wav",
@@ -22,6 +23,7 @@ const SOUND_FILES: Record<SoundName, string> = {
   unmute: "/assets/audio/unmute.wav",
   receive_message: "/assets/audio/receive_message.wav",
   disconnect: "/assets/audio/leave_call.wav",
+  incoming_call: "/assets/audio/incoming_call.wav",
 };
 
 class VoiceNotificationManager {
@@ -31,6 +33,8 @@ class VoiceNotificationManager {
   private audioContext: AudioContext | null = null;
   private hasUserInteracted = false;
   private currentlyPlaying = new Set<SoundName>();
+  private incomingCallSource: AudioBufferSourceNode | null = null;
+  private incomingCallGain: GainNode | null = null;
 
   constructor() {
     this.handleUserInteraction = this.handleUserInteraction.bind(this);
@@ -96,6 +100,7 @@ class VoiceNotificationManager {
     unmute: true,
     receive_message: true,
     disconnect: true,
+    incoming_call: true,
   };
 
   /**
@@ -195,6 +200,58 @@ class VoiceNotificationManager {
   /** Disconnected from voice channel */
   playDisconnect(): void {
     this.playSound("disconnect");
+  }
+
+  /** Start looping incoming call ringtone */
+  async playIncomingCall(): Promise<void> {
+    if (!this.isSoundEnabled("incoming_call")) return;
+    if (this.incomingCallSource) return; // already ringing
+
+    const ctx = this.getAudioContext();
+    if (!ctx) return;
+
+    if (ctx.state === "suspended" && this.hasUserInteracted) {
+      await ctx.resume();
+    }
+    if (ctx.state === "suspended") return;
+
+    let buffer = this.audioBuffers.get("incoming_call");
+    if (!buffer) {
+      try {
+        const response = await fetch(SOUND_FILES.incoming_call);
+        const arrayBuffer = await response.arrayBuffer();
+        buffer = await ctx.decodeAudioData(arrayBuffer);
+        this.audioBuffers.set("incoming_call", buffer);
+      } catch (e) {
+        console.warn("[VoiceNotifications] Failed to load incoming_call:", e);
+        return;
+      }
+    }
+
+    const source = ctx.createBufferSource();
+    const gainNode = ctx.createGain();
+    source.buffer = buffer;
+    source.loop = true;
+    gainNode.gain.value = this.volume;
+    source.connect(gainNode);
+    gainNode.connect(ctx.destination);
+    source.start();
+
+    this.incomingCallSource = source;
+    this.incomingCallGain = gainNode;
+  }
+
+  /** Stop the incoming call ringtone */
+  stopIncomingCall(): void {
+    if (this.incomingCallSource) {
+      this.incomingCallSource.stop();
+      this.incomingCallSource.disconnect();
+      this.incomingCallSource = null;
+    }
+    if (this.incomingCallGain) {
+      this.incomingCallGain.disconnect();
+      this.incomingCallGain = null;
+    }
   }
 
   setEnabled(enabled: boolean): void {

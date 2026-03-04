@@ -33,6 +33,7 @@ export interface TypeVoice {
   soundUnmute: boolean;
   soundReceiveMessage: boolean;
   soundDisconnect: boolean;
+  soundIncomingCall: boolean;
 
   autoReconnect: boolean;
 }
@@ -82,6 +83,7 @@ export class Voice extends AbstractStore<"voice", TypeVoice> {
       soundUnmute: true,
       soundReceiveMessage: true,
       soundDisconnect: true,
+      soundIncomingCall: true,
       autoReconnect: true,
     };
   }
@@ -194,6 +196,9 @@ export class Voice extends AbstractStore<"voice", TypeVoice> {
     }
     if (typeof input.soundDisconnect === "boolean") {
       data.soundDisconnect = input.soundDisconnect;
+    }
+    if (typeof input.soundIncomingCall === "boolean") {
+      data.soundIncomingCall = input.soundIncomingCall;
     }
     if (typeof input.autoReconnect === "boolean") {
       data.autoReconnect = input.autoReconnect;
@@ -560,6 +565,20 @@ export class Voice extends AbstractStore<"voice", TypeVoice> {
    */
   set soundDisconnect(value: boolean) {
     this.set("soundDisconnect", value);
+  }
+
+  /**
+   * Get sound: incoming call
+   */
+  get soundIncomingCall(): boolean {
+    return this.get().soundIncomingCall;
+  }
+
+  /**
+   * Set sound: incoming call
+   */
+  set soundIncomingCall(value: boolean) {
+    this.set("soundIncomingCall", value);
   }
 
   /**

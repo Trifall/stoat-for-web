@@ -266,6 +266,26 @@ export function NotificationSoundsSettings() {
           >
             <Trans id="notifications.sounds.disconnect">Disconnected</Trans>
           </CategoryButton>
+
+          <CategoryButton
+            icon="blank"
+            disabled={individualSoundsDisabled()}
+            action={
+              <div style={{ "pointer-events": "none" }}>
+                <Checkbox
+                  checked={state.voice.soundIncomingCall}
+                  disabled={individualSoundsDisabled()}
+                />
+              </div>
+            }
+            onClick={() => {
+              if (!individualSoundsDisabled()) {
+                state.voice.soundIncomingCall = !state.voice.soundIncomingCall;
+              }
+            }}
+          >
+            <Trans id="notifications.sounds.incomingCall">Incoming Call</Trans>
+          </CategoryButton>
         </CategoryButton.Group>
       </Column>
 
