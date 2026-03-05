@@ -21,7 +21,7 @@ import { MediaPickerProps } from "../composition/picker/CompositionMediaPicker";
 
 export function MessageToolbar(props: {
   message?: Message;
-  reactPicker: Accessor<MediaPickerProps | undefined>;
+  reactPicker?: Accessor<MediaPickerProps | undefined>;
 }) {
   const user = useUser();
   const state = useState();
@@ -59,7 +59,7 @@ export function MessageToolbar(props: {
         <div
           ref={reactRef}
           class={tool()}
-          onClick={(e) => props.reactPicker()?.onClickEmoji(e, reactRef)}
+          onClick={(e) => props.reactPicker?.()?.onClickEmoji(e, reactRef)}
         >
           <Ripple />
           <MdEmojiEmotions {...iconSize(20)} />

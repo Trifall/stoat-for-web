@@ -295,7 +295,6 @@ export function AppearanceMenu() {
         <Preview>
           <MessagePreview>
             <MessageContainer
-              reactPicker={() => undefined}
               avatar={
                 <Avatar
                   size={36}
@@ -310,7 +309,6 @@ export function AppearanceMenu() {
               Sphinx of black quartz, judge my vow
             </MessageContainer>
             <MessageContainer
-              reactPicker={() => undefined}
               avatar={<Avatar size={36} fallback={"M"} />}
               timestamp={new Date()}
               username={"MysticPixie"}

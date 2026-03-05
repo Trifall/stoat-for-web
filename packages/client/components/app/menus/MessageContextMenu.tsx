@@ -40,7 +40,7 @@ import {
 export function MessageContextMenu(props: {
   message?: Message;
   file?: File;
-  reactPicker: Accessor<MediaPickerProps | undefined>;
+  reactPicker?: Accessor<MediaPickerProps | undefined>;
 }) {
   const user = useUser();
   const state = useState();
@@ -174,7 +174,7 @@ export function MessageContextMenu(props: {
         <Show when={props.message?.channel?.havePermission("React")}>
           <ContextMenuButton
             icon={MdEmojiEmotions}
-            onClick={(e) => props.reactPicker()?.onClickEmoji(e)}
+            onClick={(e) => props.reactPicker?.()?.onClickEmoji(e)}
           >
             <Trans>React</Trans>
           </ContextMenuButton>

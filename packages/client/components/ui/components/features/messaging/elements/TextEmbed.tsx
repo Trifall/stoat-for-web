@@ -134,10 +134,7 @@ export function TextEmbed(props: { embed: TextEmbedClass | WebsiteEmbed }) {
             props.embed.type === "Text" && (props.embed as TextEmbedClass).media
           }
         >
-          <Attachment
-            file={(props.embed as TextEmbedClass).media!}
-            reactPicker={() => undefined}
-          />
+          <Attachment file={(props.embed as TextEmbedClass).media!} />
         </Show>
 
         <Show when={props.embed.type === "Website"}>

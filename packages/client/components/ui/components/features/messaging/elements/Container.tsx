@@ -106,7 +106,7 @@ type Props = CommonProps & {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   ref?: Ref<any>;
-  reactPicker: Accessor<MediaPickerProps | undefined>;
+  reactPicker?: Accessor<MediaPickerProps | undefined>;
 
   /**
    * Additional match cases for the inline-start information element
