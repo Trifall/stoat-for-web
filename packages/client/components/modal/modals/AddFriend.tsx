@@ -1,4 +1,5 @@
 import { createFormControl, createFormGroup } from "solid-forms";
+import { createSignal } from "solid-js";
 
 import { Trans, useLingui } from "@lingui-solid/solid/macro";
 
@@ -15,6 +16,7 @@ export function AddFriendModal(
 ) {
   const { t } = useLingui();
   const { showError } = useModals();
+  const [sent, setSent] = createSignal(false);
 
   const group = createFormGroup({
     username: createFormControl("", { required: true }),
@@ -26,7 +28,7 @@ export function AddFriendModal(
         username: group.controls.username.value,
       });
 
-      props.onClose();
+      setSent(true);
     } catch (error) {
       showError(error);
     }
@@ -42,12 +44,12 @@ export function AddFriendModal(
       actions={[
         { text: <Trans>Close</Trans> },
         {
-          text: <Trans>Send Request</Trans>,
+          text: sent() ? <Trans>Sent!</Trans> : <Trans>Send Request</Trans>,
           onClick: () => {
             onSubmit();
             return false;
           },
-          isDisabled: !Form2.canSubmit(group),
+          isDisabled: sent() || !Form2.canSubmit(group),
         },
       ]}
       isDisabled={group.isPending}
