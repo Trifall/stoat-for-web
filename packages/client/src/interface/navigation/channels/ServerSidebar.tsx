@@ -41,6 +41,7 @@ import MdChevronRight from "@material-design-icons/svg/filled/chevron_right.svg?
 import MdSettings from "@material-symbols/svg-400/outlined/settings-fill.svg?component-solid";
 
 import { SidebarBase } from "./common";
+import { SidebarVoicePanel } from "./SidebarVoicePanel";
 
 interface Props {
   /**
@@ -249,6 +250,7 @@ export const ServerSidebar = (props: Props) => {
           )}
         </Draggable>
       </div>
+      <SidebarVoicePanel />
     </SidebarBase>
   );
 };

@@ -202,11 +202,7 @@ export function VoiceCallCardContext(props: { children: JSX.Element }) {
                 channel={(state() as { channel: Channel }).channel}
               />
             </Match>
-            <Match when={state().type === "floating"}>
-              <InRoom>
-                <VoiceCallCardPiP />
-              </InRoom>
-            </Match>
+            {/* Floating PiP hidden — replaced by SidebarVoicePanel */}
           </Switch>
         </div>
       </Portal>
