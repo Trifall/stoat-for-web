@@ -27,6 +27,7 @@ import MdClose from "@material-design-icons/svg/outlined/close.svg?component-sol
 
 import { useState } from "@revolt/state";
 import { SidebarBase } from "./common";
+import { SidebarVoicePanel } from "./SidebarVoicePanel";
 
 interface Props {
   /**
@@ -69,7 +70,7 @@ export const HomeSidebar = (props: Props) => {
 
   return (
     <SidebarBase class="appSbBase">
-      <div ref={scrollTargetElement} use:invisibleScrollable>
+      <div ref={scrollTargetElement} use:invisibleScrollable style={{ "flex-grow": 1, "min-height": 0 }}>
         <List>
           <SidebarTitle>
             <Trans>Conversations</Trans>
@@ -188,6 +189,7 @@ export const HomeSidebar = (props: Props) => {
           </Deferred>
         </List>
       </div>
+      <SidebarVoicePanel />
     </SidebarBase>
   );
 };
