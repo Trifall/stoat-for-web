@@ -64,7 +64,8 @@ const Call = styled("div", {
   base: {
     flexGrow: 1,
     minHeight: 0,
-    overflowY: "scroll",
+    overflowY: "auto",
+    scrollbarColor: "var(--md-sys-color-primary) transparent",
   },
 });
 

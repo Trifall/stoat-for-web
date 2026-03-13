@@ -30,12 +30,12 @@ import {
   main,
 } from "@revolt/ui";
 import { Symbol } from "@revolt/ui/components/utils/Symbol";
-import { VoiceChannelCallCardMount } from "@revolt/ui/components/features/voice/callCard/VoiceCallCard";
 
 import { ChannelHeader } from "../ChannelHeader";
 import { ChannelPageProps } from "../ChannelPage";
 
 import { Channel } from "stoat.js";
+import { VoiceCallCardActiveRoom } from "@revolt/ui/components/features/voice/callCard/VoiceCallCardActiveRoom";
 import { MessageComposition } from "./Composition";
 import { MemberSidebar } from "./MemberSidebar";
 import { TextSearchSidebar } from "./TextSearchSidebar";
@@ -60,7 +60,7 @@ export function canIHasSidebar(ch: Channel) {
 }
 
 /**
- * Channel component
+ * Compact voice card showing participants in a DM/Group voice call (when not connected)
  */
 function VoiceCallBanner(props: { channel: Channel }) {
   const voice = useVoice();
@@ -75,33 +75,76 @@ function VoiceCallBanner(props: { channel: Channel }) {
 
   return (
     <Show when={showBanner()}>
-      <Banner>
-        <BannerContent>
-          <BannerAvatars>
-            <For each={participants()}>
-              {(userId) => {
-                const user = () => client().users.get(userId);
-                return (
-                  <Show when={user()}>
-                    <Avatar size={24} src={user()!.avatarURL} fallback={user()!.displayName ?? user()!.username} />
-                  </Show>
-                );
-              }}
-            </For>
-          </BannerAvatars>
-          <BannerText>
-            {(() => {
-              const names = participants().map((userId) => {
-                const u = client().users.get(userId);
-                return u?.displayName ?? u?.username ?? "Unknown";
-              });
-              if (names.length === 1) return `${names[0]} is in the voice call`;
-              if (names.length === 2) return `${names[0]} and ${names[1]} are in the voice call`;
-              return `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]} are in the voice call`;
-            })()}
-          </BannerText>
-        </BannerContent>
-      </Banner>
+      <VoiceCard>
+        <VoiceCardLabel>
+          <Symbol size={18}>call</Symbol>
+          Ongoing voice call
+        </VoiceCardLabel>
+        <VoiceCardParticipants>
+          <For each={participants()}>
+            {(userId) => {
+              const user = () => client().users.get(userId);
+              return (
+                <Show when={user()}>
+                  <ParticipantTile>
+                    <Avatar size={40} src={user()!.avatarURL} fallback={user()!.displayName ?? user()!.username} />
+                    <ParticipantName>{user()!.displayName ?? user()!.username}</ParticipantName>
+                  </ParticipantTile>
+                </Show>
+              );
+            }}
+          </For>
+        </VoiceCardParticipants>
+      </VoiceCard>
+    </Show>
+  );
+}
+
+/**
+ * Collapsible voice card for voice channels — shows the full participant grid when expanded
+ */
+function VoiceChannelBanner(props: { channel: Channel }) {
+  const voice = useVoice();
+  const client = useClient();
+  const [expanded, setExpanded] = createSignal(true);
+
+  const participants = () => [...props.channel.voiceParticipants.keys()];
+
+  const isInThisChannel = () => voice.channel()?.id === props.channel.id;
+
+  const showBanner = () =>
+    props.channel.voiceParticipants.size > 0 && isInThisChannel();
+
+  const participantNames = () => {
+    const names = participants().map((userId) => {
+      const u = client().users.get(userId);
+      return u?.displayName ?? u?.username ?? "Unknown";
+    });
+    if (names.length === 0) return "";
+    if (names.length === 1) return names[0];
+    if (names.length === 2) return `${names[0]} and ${names[1]}`;
+    return `${names.slice(0, -1).join(", ")}, and ${names[names.length - 1]}`;
+  };
+
+  return (
+    <Show when={showBanner()}>
+      <VoiceCard>
+        <VoiceCardHeader onClick={() => setExpanded((v) => !v)}>
+          <VoiceCardLabel>
+            <Symbol size={18}>wifi_tethering</Symbol>
+            {participants().length} Participant{participants().length !== 1 ? "s" : ""}:
+            <Show when={!expanded()}>
+              <VoiceCardNames>{participantNames()}</VoiceCardNames>
+            </Show>
+          </VoiceCardLabel>
+          <Symbol size={18}>{expanded() ? "expand_less" : "expand_more"}</Symbol>
+        </VoiceCardHeader>
+        <VoiceCardCollapse expanded={expanded()}>
+          <VoiceCardBody>
+            <VoiceCallCardActiveRoom />
+          </VoiceCardBody>
+        </VoiceCardCollapse>
+      </VoiceCard>
     </Show>
   );
 }
@@ -235,7 +278,7 @@ export function TextChannel(props: ChannelPageProps) {
               </BelowFloatingHeader>
             }
           >
-            <VoiceChannelCallCardMount channel={props.channel} />
+            <VoiceChannelBanner channel={props.channel} />
           </Show>
 
           <Messages
@@ -384,42 +427,112 @@ const SidebarTitle = styled("div", {
   },
 });
 
-const Banner = styled("div", {
+const VoiceCard = styled("div", {
   base: {
     flexShrink: 0,
-    padding: "10px 0",
+    padding: "var(--gap-md) var(--gap-lg)",
     marginInline: "calc(-1 * var(--gap-md))",
-    paddingInline: "var(--gap-lg)",
     background: "var(--md-sys-color-surface-container)",
+    display: "flex",
+    flexDirection: "column",
+    gap: "var(--gap-sm)",
+    userSelect: "none",
   },
 });
 
-const BannerContent = styled("div", {
+const VoiceCardHeader = styled("div", {
   base: {
     display: "flex",
     alignItems: "center",
-    gap: "var(--gap-md)",
-  },
-});
-
-const BannerAvatars = styled("div", {
-  base: {
-    display: "flex",
-    alignItems: "center",
-    "& > *": {
-      marginRight: "-4px",
-    },
-    "& > *:last-child": {
-      marginRight: "0",
-    },
-  },
-});
-
-const BannerText = styled("span", {
-  base: {
-    flex: 1,
-    fontSize: "14px",
+    justifyContent: "space-between",
+    cursor: "pointer",
     color: "var(--md-sys-color-on-surface-variant)",
   },
 });
 
+const VoiceCardLabel = styled("div", {
+  base: {
+    display: "flex",
+    alignItems: "center",
+    gap: "var(--gap-sm)",
+    fontSize: "13px",
+    fontWeight: 600,
+    color: "var(--md-sys-color-primary)",
+    minWidth: 0,
+    overflow: "hidden",
+  },
+});
+
+const VoiceCardNames = styled("span", {
+  base: {
+    fontWeight: 400,
+    color: "var(--md-sys-color-on-surface-variant)",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    whiteSpace: "nowrap",
+    minWidth: 0,
+  },
+});
+
+const VoiceCardCollapse = styled("div", {
+  base: {
+    display: "grid",
+    transition: "grid-template-rows 0.3s ease, opacity 0.3s ease",
+    gridTemplateRows: "0fr",
+    opacity: 0,
+    "& > *": {
+      overflow: "hidden",
+      minHeight: 0,
+    },
+  },
+  variants: {
+    expanded: {
+      true: {
+        gridTemplateRows: "1fr",
+        opacity: 1,
+        "& > *": {
+          height: "min(40vh, 500px)",
+          minHeight: "250px",
+        },
+      },
+    },
+  },
+});
+
+const VoiceCardBody = styled("div", {
+  base: {
+    borderRadius: "var(--borderRadius-lg)",
+    background: "var(--md-sys-color-secondary-container)",
+  },
+});
+
+const VoiceCardParticipants = styled("div", {
+  base: {
+    display: "flex",
+    flexWrap: "wrap",
+    gap: "var(--gap-md)",
+    padding: "var(--gap-sm) 0",
+  },
+});
+
+const ParticipantTile = styled("div", {
+  base: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    gap: "4px",
+    width: "56px",
+  },
+});
+
+const ParticipantName = styled("span", {
+  base: {
+    fontSize: "11px",
+    color: "var(--md-sys-color-on-surface-variant)",
+    textAlign: "center",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    whiteSpace: "nowrap",
+    width: "100%",
+  },
+});
