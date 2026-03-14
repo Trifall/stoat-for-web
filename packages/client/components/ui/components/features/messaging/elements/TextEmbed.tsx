@@ -34,6 +34,7 @@ const SiteInformation = styled("div", {
   base: {
     display: "flex",
     flexDirection: "row",
+    alignItems: "center",
     gap: "var(--gap-md)",
   },
 });
@@ -133,7 +134,10 @@ export function TextEmbed(props: { embed: TextEmbedClass | WebsiteEmbed }) {
             props.embed.type === "Text" && (props.embed as TextEmbedClass).media
           }
         >
-          <Attachment file={(props.embed as TextEmbedClass).media!} />
+          <Attachment
+            file={(props.embed as TextEmbedClass).media!}
+            reactPicker={() => undefined}
+          />
         </Show>
 
         <Show when={props.embed.type === "Website"}>
