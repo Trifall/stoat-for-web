@@ -135,7 +135,11 @@ export function Message(props: Props) {
           />
         </div>
       }
-      contextMenu={() => <MessageContextMenu message={props.message} />}
+      contextMenu={() =>
+        props.editing ? undefined : (
+          <MessageContextMenu message={props.message} />
+        )
+      }
       timestamp={props.message.createdAt}
       edited={props.message.editedAt}
       mentioned={props.message.mentioned}
