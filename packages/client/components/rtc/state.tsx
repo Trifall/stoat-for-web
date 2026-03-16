@@ -63,7 +63,10 @@ declare global {
 }
 
 import { Room } from "livekit-client";
+import { DenoiseTrackProcessor } from "livekit-rnnoise-processor";
 import { Channel } from "stoat.js";
+
+import { NoiseGateProcessor } from "./NoiseGateProcessor";
 
 import { useClient } from "@revolt/client";
 import { useNavigate } from "@revolt/routing";
@@ -71,6 +74,7 @@ import { useState } from "@revolt/state";
 import { Voice as VoiceSettings } from "@revolt/state/stores/Voice";
 import { VoiceCallCardContext } from "@revolt/ui/components/features/voice/callCard/VoiceCallCard";
 
+import { CONFIGURATION } from "@revolt/common";
 import { InRoom } from "./components/InRoom";
 import { IncomingCallPopup } from "./components/IncomingCallPopup";
 import { RoomAudioManager } from "./components/RoomAudioManager";
@@ -111,6 +115,7 @@ class Voice {
   #maxReconnectAttempts = 5;
   #micWasOnBeforeDeafen = false;
   #lastCallMessageSent = new Map<string, number>();
+  #noiseGateProcessor?: NoiseGateProcessor;
 
   constructor(voiceSettings: VoiceSettings) {
     this.#settings = voiceSettings;
@@ -157,7 +162,7 @@ class Voice {
       audioCaptureDefaults: {
         deviceId: this.#settings.preferredAudioInputDevice,
         echoCancellation: this.#settings.echoCancellation,
-        noiseSuppression: this.#settings.noiseSupression,
+        noiseSuppression: this.#settings.noiseSupression === "browser",
       },
       audioOutput: {
         deviceId: this.#settings.preferredAudioOutputDevice,
@@ -192,6 +197,41 @@ class Voice {
       this.#reconnectAttempts = 0; // Reset on successful connection
       console.log("[VoiceNotifications] Playing self join sound");
       voiceNotifications.playSelfJoin();
+      if (this.speakingPermission)
+        room.localParticipant.setMicrophoneEnabled(true).then((track) => {
+          this.#setMicrophone(typeof track !== "undefined");
+
+          // Apply audio processors.
+          // When both noise gate and enhanced denoise are enabled the noise
+          // gate wraps the denoise processor so both run in a single chain:
+          //   Source → RNNoise → Noise Gate → Output
+          if (this.#settings.noiseGateEnabled) {
+            const upstream =
+              this.#settings.noiseSupression === "enhanced"
+                ? new DenoiseTrackProcessor({
+                    workletCDNURL: CONFIGURATION.RNNOISE_WORKLET_CDN_URL,
+                  })
+                : undefined;
+
+            this.#noiseGateProcessor = new NoiseGateProcessor({
+              threshold: this.#settings.noiseGateThreshold,
+              upstream,
+            });
+            const audioTrack = track?.audioTrack;
+            if (audioTrack) {
+              console.info("[NoiseGate] Applying processor to audio track:", audioTrack.sid);
+              audioTrack.setProcessor(this.#noiseGateProcessor as any);
+            } else {
+              console.warn("[NoiseGate] No audio track found, processor not applied. track:", track);
+            }
+          } else if (this.#settings.noiseSupression === "enhanced") {
+            track?.audioTrack?.setProcessor(
+              new DenoiseTrackProcessor({
+                workletCDNURL: CONFIGURATION.RNNOISE_WORKLET_CDN_URL,
+              }),
+            );
+          }
+        });
 
       // Send "started a call" message only when starting a new call (no existing participants)
       if (
@@ -349,6 +389,18 @@ class Voice {
     }
   }
 
+  /** Update the noise gate threshold live (called from settings UI). */
+  updateNoiseGateThreshold(threshold: number) {
+    if (this.#noiseGateProcessor) {
+      this.#noiseGateProcessor.threshold = threshold;
+    }
+  }
+
+  /** Get the active noise gate processor (for the live level meter). */
+  get noiseGateProcessor(): NoiseGateProcessor | undefined {
+    return this.#noiseGateProcessor;
+  }
+
   disconnect() {
     const room = this.room();
     if (!room) return;
@@ -356,6 +408,10 @@ class Voice {
     // Mark as manual disconnect to prevent auto-reconnect
     this.#isManualDisconnect = true;
     this.#reconnectAttempts = 0;
+
+    // Clean up noise gate processor
+    this.#noiseGateProcessor?.destroy();
+    this.#noiseGateProcessor = undefined;
 
     voiceNotifications.playSelfLeave();
 
@@ -814,6 +870,12 @@ export function VoiceContext(props: { children: JSX.Element }) {
     voiceNotifications.setSoundEnabled("receive_message", soundReceiveMessage);
     voiceNotifications.setSoundEnabled("disconnect", soundDisconnect);
     voiceNotifications.setSoundEnabled("incoming_call", soundIncomingCall);
+  });
+
+  // sync noise gate threshold live
+  createEffect(() => {
+    const threshold = state.voice.noiseGateThreshold;
+    voice.updateNoiseGateThreshold(threshold);
   });
 
   return (

@@ -2,15 +2,29 @@ import { State } from "..";
 
 import { AbstractStore } from ".";
 
+/**
+ * Possible noise suppresion states. Browser is browser noise suppresion and enhanced is machine learning suppression via RNNoise.
+ */
+export type NoiseSuppresionState = "disabled" | "browser" | "enhanced";
+
+const NoiseSuppresionStates: NoiseSuppresionState[] = [
+  "disabled",
+  "browser",
+  "enhanced",
+];
+
 export interface TypeVoice {
   preferredAudioInputDevice?: string;
   preferredAudioOutputDevice?: string;
 
   echoCancellation: boolean;
-  noiseSupression: boolean;
+  noiseSupression: NoiseSuppresionState;
 
   inputVolume: number;
   outputVolume: number;
+
+  noiseGateEnabled: boolean;
+  noiseGateThreshold: number;
 
   userVolumes: Record<string, number>;
   userMutes: Record<string, boolean>;
@@ -63,9 +77,11 @@ export class Voice extends AbstractStore<"voice", TypeVoice> {
   default(): TypeVoice {
     return {
       echoCancellation: true,
-      noiseSupression: true,
+      noiseSupression: "browser",
       inputVolume: 1.0,
       outputVolume: 1.0,
+      noiseGateEnabled: false,
+      noiseGateThreshold: -50,
       userVolumes: {},
       userMutes: {},
       pushToTalkEnabled: false,
@@ -106,7 +122,15 @@ export class Voice extends AbstractStore<"voice", TypeVoice> {
       data.echoCancellation = input.echoCancellation;
     }
 
-    if (typeof input.noiseSupression === "boolean") {
+    // migrate legacy noise suppression to new suppression state
+    if ((input.noiseSupression as unknown) === "true") {
+      data.noiseSupression = "browser";
+    } else if ((input.noiseSupression as unknown) === "false") {
+      data.noiseSupression = "disabled";
+    } else if (
+      input.noiseSupression &&
+      NoiseSuppresionStates.includes(input.noiseSupression)
+    ) {
       data.noiseSupression = input.noiseSupression;
     }
 
@@ -116,6 +140,18 @@ export class Voice extends AbstractStore<"voice", TypeVoice> {
 
     if (typeof input.outputVolume === "number") {
       data.outputVolume = input.outputVolume;
+    }
+
+    if (typeof input.noiseGateEnabled === "boolean") {
+      data.noiseGateEnabled = input.noiseGateEnabled;
+    }
+
+    if (
+      typeof input.noiseGateThreshold === "number" &&
+      input.noiseGateThreshold >= -100 &&
+      input.noiseGateThreshold <= 0
+    ) {
+      data.noiseGateThreshold = input.noiseGateThreshold;
     }
 
     if (typeof input.userVolumes === "object") {
@@ -267,7 +303,7 @@ export class Voice extends AbstractStore<"voice", TypeVoice> {
   /**
    * Set noise cancellation
    */
-  set noiseSupression(value: boolean) {
+  set noiseSupression(value: NoiseSuppresionState) {
     this.set("noiseSupression", value);
   }
 
@@ -309,7 +345,7 @@ export class Voice extends AbstractStore<"voice", TypeVoice> {
   /**
    * Get noise supression
    */
-  get noiseSupression(): boolean | undefined {
+  get noiseSupression(): NoiseSuppresionState | undefined {
     return this.get().noiseSupression;
   }
 
@@ -321,10 +357,38 @@ export class Voice extends AbstractStore<"voice", TypeVoice> {
   }
 
   /**
-   * Get noise supression
+   * Get output volume
    */
   get outputVolume(): number {
     return this.get().outputVolume;
+  }
+
+  /**
+   * Set noise gate enabled
+   */
+  set noiseGateEnabled(value: boolean) {
+    this.set("noiseGateEnabled", value);
+  }
+
+  /**
+   * Get noise gate enabled
+   */
+  get noiseGateEnabled(): boolean {
+    return this.get().noiseGateEnabled;
+  }
+
+  /**
+   * Set noise gate threshold (dB)
+   */
+  set noiseGateThreshold(value: number) {
+    this.set("noiseGateThreshold", value);
+  }
+
+  /**
+   * Get noise gate threshold (dB)
+   */
+  get noiseGateThreshold(): number {
+    return this.get().noiseGateThreshold;
   }
 
   /**
