@@ -125,7 +125,20 @@ function VolumeSliders() {
   return (
     <Column>
       <Text class="label">
-        <Trans>Output Volume</Trans>
+        <Trans>Input Volume (Your Microphone)</Trans>
+      </Text>
+      <Slider
+        min={0}
+        max={3}
+        step={0.1}
+        value={state.voice.inputVolume}
+        onInput={(event) =>
+          (state.voice.inputVolume = event.currentTarget.value)
+        }
+        labelFormatter={(label) => (label * 100).toFixed(0) + "%"}
+      />
+      <Text class="label">
+        <Trans>Output Volume (Your Speakers)</Trans>
       </Text>
       <Slider
         min={0}
