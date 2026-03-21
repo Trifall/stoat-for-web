@@ -638,6 +638,10 @@ msgstr "ステータスのクリア"
 msgid "Click on the items below to learn more about different changes!"
 msgstr ""
 
+#: components/ui/components/features/profiles/ProfileBanner.tsx
+msgid "Click to copy username"
+msgstr ""
+
 #: src/interface/channels/ChannelHeader.tsx
 msgid "Click to show full description"
 msgstr ""
@@ -750,6 +754,10 @@ msgstr ""
 #: src/interface/navigation/channels/HomeSidebar.tsx
 msgid "Conversations"
 msgstr "会話"
+
+#: components/ui/components/features/profiles/ProfileBanner.tsx
+msgid "Copied!"
+msgstr ""
 
 #: components/app/menus/CategoryContextMenu.tsx
 msgid "Copy category ID"
