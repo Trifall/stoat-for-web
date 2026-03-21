@@ -36,6 +36,15 @@ export function VoiceProcessingOptions() {
         </CategoryButton>
         <CategoryButton
           icon="blank"
+          action={<Checkbox checked={state.voice.autoGainControl} />}
+          onClick={() =>
+            (state.voice.autoGainControl = !state.voice.autoGainControl)
+          }
+        >
+          <Trans>Automatic Gain Control</Trans>
+        </CategoryButton>
+        <CategoryButton
+          icon="blank"
           action={<Checkbox checked={state.voice.noiseGateEnabled} />}
           onClick={() =>
             (state.voice.noiseGateEnabled = !state.voice.noiseGateEnabled)
