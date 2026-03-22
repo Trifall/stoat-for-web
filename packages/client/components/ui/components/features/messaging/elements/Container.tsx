@@ -216,7 +216,7 @@ const Info = styled("div", {
     compact: {
       true: {},
       false: {
-        width: "52px",
+        width: "54px",
       },
     },
   },
@@ -236,7 +236,6 @@ const Body = styled("div", {
 
     minWidth: 0,
     overflow: "hidden",
-    maxHeight: "200vh",
     paddingInlineEnd: "var(--gap-lg)",
   },
   variants: {
