@@ -281,23 +281,23 @@ const button = cva({
      */
     size: {
       xs: {
-        height: "32px",
+        minHeight: "32px",
         "--padding-inline": "12px",
       },
       sm: {
-        height: "40px",
+        minHeight: "40px",
         "--padding-inline": "16px",
       },
       md: {
-        height: "56px",
+        minHeight: "56px",
         "--padding-inline": "24px",
       },
       lg: {
-        height: "96px",
+        minHeight: "96px",
         "--padding-inline": "48px",
       },
       xl: {
-        height: "136px",
+        minHeight: "136px",
         "--padding-inline": "64px",
       },
 

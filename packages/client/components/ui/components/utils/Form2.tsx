@@ -94,38 +94,6 @@ const EditorBox = styled("div", {
 });
 
 /**
- * Form wrapper for TextField.Select
- */
-FormTextField.Select = (
-  props: {
-    control: IFormControl<string>;
-  } & ComponentProps<typeof TextField.Select>,
-) => {
-  const [local, remote] = splitProps(props, ["control"]);
-
-  return (
-    <>
-      <TextField.Select
-        {...remote}
-        value={local.control.value}
-        onChange={(e) => {
-          local.control.setValue(e.currentTarget.value);
-          local.control.markDirty(true);
-        }}
-        required={local.control.isRequired}
-        disabled={local.control.isDisabled}
-      />
-
-      <Show when={local.control.isTouched && !local.control.isValid}>
-        <For each={Object.keys(local.control.errors!)}>
-          {(errorMsg: string) => <small>{errorMsg}</small>}
-        </For>
-      </Show>
-    </>
-  );
-};
-
-/**
  * Form wrapper for, single file, FileInput
  */
 const FormFileInput = (

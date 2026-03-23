@@ -36,13 +36,16 @@ export default defineConfig({
       devOptions: {
         enabled: true,
       },
+      devOptions: {
+        enabled: true,
+      },
       manifest: {
         name: "Stoat",
         short_name: "Stoat",
         description: "User-first open source chat platform.",
         categories: ["communication", "chat", "messaging"],
         start_url: base,
-        orientation: "portrait",
+        orientation: "any",
         display_override: ["window-controls-overlay"],
         display: "standalone",
         background_color: "#101823",

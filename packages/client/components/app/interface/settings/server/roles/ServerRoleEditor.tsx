@@ -87,12 +87,13 @@ export function ServerRoleEditor(props: { context: Server; roleId: string }) {
             />
           </Column>
           <Column>
-            <Row align>
+            <Row>
               <IconButton
                 ref={setPickerRef}
                 variant="filled"
                 shape="square"
                 size="lg"
+                style={{ height: "auto", width: "95px" }}
                 onPress={() => pickerRef()?.click()}
               >
                 <MDPalette />
@@ -116,7 +117,7 @@ export function ServerRoleEditor(props: { context: Server; roleId: string }) {
                 }}
               />
               <Column gap="lg">
-                <Row justify>
+                <Row justify wrap>
                   <For
                     each={[
                       "#7B68EE",
@@ -144,7 +145,7 @@ export function ServerRoleEditor(props: { context: Server; roleId: string }) {
                   </For>
                 </Row>
 
-                <Row justify>
+                <Row justify wrap>
                   <For
                     each={[
                       "#594CAD",

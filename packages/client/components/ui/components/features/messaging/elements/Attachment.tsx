@@ -31,7 +31,7 @@ export const AttachmentContainer = styled(Column, {
 export function Attachment(props: {
   file: File;
   message?: Message;
-  reactPicker: Accessor<MediaPickerProps | undefined>;
+  reactPicker?: Accessor<MediaPickerProps | undefined>;
 }) {
   const { openModal } = useModals();
 

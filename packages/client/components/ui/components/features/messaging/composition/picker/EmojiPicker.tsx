@@ -4,6 +4,7 @@ import {
   Switch,
   createMemo,
   createSignal,
+  onMount,
   useContext,
 } from "solid-js";
 
@@ -63,16 +64,19 @@ type Item =
       text: string;
     };
 
-const COLUMNS = 10;
-
 export function EmojiPicker() {
   const client = useClient();
   const state = useState();
 
   const [filter, setFilter] = createSignal("");
+  const [colCount, setColCount] = createSignal(0);
 
   let serverScrollTargetElement!: HTMLDivElement;
   let emojiScrollTargetElement!: HTMLDivElement;
+
+  onMount(() =>
+    setColCount(Math.floor(emojiScrollTargetElement.offsetWidth / 40)),
+  );
 
   const items = createMemo(() => {
     const filterText = filter().toLowerCase();
@@ -92,7 +96,8 @@ export function EmojiPicker() {
       ] as Item[];
     }
 
-    const items: Item[] = [];
+    const items: Item[] = [],
+      cols = colCount();
 
     for (const server of state.ordering.orderedServers(client())) {
       const emojis = server.emojis;
@@ -104,7 +109,7 @@ export function EmojiPicker() {
         server,
       });
 
-      while (items.length % COLUMNS) {
+      while (items.length % cols) {
         items.push({ t: 1 });
       }
 
@@ -112,7 +117,7 @@ export function EmojiPicker() {
         items.push({ t: 2, emoji });
       }
 
-      while (items.length % COLUMNS) {
+      while (items.length % cols) {
         items.push({ t: 1 });
       }
     }
@@ -122,7 +127,7 @@ export function EmojiPicker() {
       title: "Default",
     });
 
-    while (items.length % COLUMNS) {
+    while (items.length % cols) {
       items.push({ t: 1 });
     }
 
@@ -140,15 +145,10 @@ export function EmojiPicker() {
   return (
     <Stack>
       <TextField
-        autoFocus
+        autoFocus={!state.isMobile}
         variant="filled"
         placeholder="Search for emojis..."
         value={filter()}
-        onMouseDown={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          e.stopImmediatePropagation();
-        }}
         onInput={(e) => setFilter(e.currentTarget.value)}
       />
       <Row class={compositionContent()}>
@@ -176,11 +176,7 @@ export function EmojiPicker() {
             items={items()}
             scrollTarget={emojiScrollTargetElement}
             itemSize={{ height: 40, width: 40 }}
-            crossAxisCount={(measurements) =>
-              Math.floor(
-                measurements.container.cross / measurements.itemSize.cross,
-              )
-            }
+            crossAxisCount={colCount}
           >
             {EmojiItem}
           </VirtualContainer>
@@ -301,7 +297,7 @@ const EmojiOption = styled("div", {
         display: "flex",
         alignItems: "center",
         paddingInline: "var(--gap-md)",
-        width: `calc(40px * ${COLUMNS}) !important`,
+        width: "100% !important",
       },
     },
     {

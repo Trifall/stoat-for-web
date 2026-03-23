@@ -69,7 +69,7 @@ export const HomeSidebar = (props: Props) => {
   });
 
   return (
-    <SidebarBase class="appSbBase">
+    <SidebarBase class="channel_bar home">
       <div ref={scrollTargetElement} use:invisibleScrollable style={{ "flex-grow": 1, "min-height": 0 }}>
         <List>
           <SidebarTitle>

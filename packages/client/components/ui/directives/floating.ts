@@ -132,7 +132,8 @@ export function floating(element: HTMLElement, accessor: Accessor<Props>) {
     trigger("contextMenu");
   }
 
-  let isTouch = false;
+  let isTouch = false,
+    tTmr: NodeJS.Timeout | undefined;
 
   /**
    * Handle mouse entering
@@ -150,7 +151,11 @@ export function floating(element: HTMLElement, accessor: Accessor<Props>) {
 
   function onTouch() {
     isTouch = true;
-    setTimeout(() => (isTouch = false), 100);
+    clearTimeout(tTmr);
+    tTmr = setTimeout(() => {
+      isTouch = false;
+      tTmr = undefined;
+    }, 100);
   }
 
   createEffect(
