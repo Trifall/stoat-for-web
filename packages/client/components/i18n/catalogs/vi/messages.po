@@ -395,6 +395,10 @@ msgstr "Ứng Dụng Xác Thực"
 msgid "notifications.sounds.autoReconnect"
 msgstr ""
 
+#: components/app/interface/settings/user/voice/VoiceProcessingOptions.tsx
+msgid "Automatic Gain Control"
+msgstr ""
+
 #: components/app/interface/settings/user/profile/UserProfileEditor.tsx
 msgid "Avatar"
 msgstr "Ảnh đại diện"
@@ -1212,8 +1216,8 @@ msgid "Emoji Name"
 msgstr ""
 
 #: components/app/interface/settings/user/appearance/AppearanceMenu.tsx
-msgid "Emoji Pack (affects your messages only)"
-msgstr ""
+#~ msgid "Emoji Pack (affects your messages only)"
+#~ msgstr ""
 
 #: components/app/interface/settings/ServerSettings.tsx
 msgid "Emojis"
@@ -1520,8 +1524,8 @@ msgid "Instead of closing, Stoat will hide in your tray."
 msgstr ""
 
 #: components/app/interface/settings/user/appearance/AppearanceMenu.tsx
-msgid "Interface Font"
-msgstr ""
+#~ msgid "Interface Font"
+#~ msgstr ""
 
 #: src/interface/navigation/servers/UserMenu.tsx
 msgid "Invisible"
@@ -1882,8 +1886,8 @@ msgid "Monochrome"
 msgstr ""
 
 #: components/app/interface/settings/user/appearance/AppearanceMenu.tsx
-msgid "Monospace Font"
-msgstr ""
+#~ msgid "Monospace Font"
+#~ msgstr ""
 
 #: components/app/interface/settings/user/appearance/AppearanceMenu.tsx
 msgid "More Contrast"
