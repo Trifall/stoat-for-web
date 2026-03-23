@@ -66,7 +66,6 @@ import { Room } from "livekit-client";
 import { DenoiseTrackProcessor } from "livekit-rnnoise-processor";
 import { Channel } from "stoat.js";
 
-import { InputGainProcessor } from "./InputGainProcessor";
 import { NoiseGateProcessor } from "./NoiseGateProcessor";
 
 import { useClient } from "@revolt/client";
@@ -117,7 +116,6 @@ class Voice {
   #micWasOnBeforeDeafen = false;
   #lastCallMessageSent = new Map<string, number>();
   #noiseGateProcessor?: NoiseGateProcessor;
-  #inputGainProcessor?: InputGainProcessor;
 
   constructor(voiceSettings: VoiceSettings) {
     this.#settings = voiceSettings;
@@ -202,7 +200,37 @@ class Voice {
       if (this.speakingPermission)
         room.localParticipant.setMicrophoneEnabled(true).then((track) => {
           this.#setMicrophone(typeof track !== "undefined");
-          this.#applyProcessors(track);
+
+          // Apply audio processors.
+          // When both noise gate and enhanced denoise are enabled the noise
+          // gate wraps the denoise processor so both run in a single chain:
+          //   Source → RNNoise → Noise Gate → Output
+          if (this.#settings.noiseGateEnabled) {
+            const upstream =
+              this.#settings.noiseSupression === "enhanced"
+                ? new DenoiseTrackProcessor({
+                    workletCDNURL: CONFIGURATION.RNNOISE_WORKLET_CDN_URL,
+                  })
+                : undefined;
+
+            this.#noiseGateProcessor = new NoiseGateProcessor({
+              threshold: this.#settings.noiseGateThreshold,
+              upstream,
+            });
+            const audioTrack = track?.audioTrack;
+            if (audioTrack) {
+              console.info("[NoiseGate] Applying processor to audio track:", audioTrack.sid);
+              audioTrack.setProcessor(this.#noiseGateProcessor as any);
+            } else {
+              console.warn("[NoiseGate] No audio track found, processor not applied. track:", track);
+            }
+          } else if (this.#settings.noiseSupression === "enhanced") {
+            track?.audioTrack?.setProcessor(
+              new DenoiseTrackProcessor({
+                workletCDNURL: CONFIGURATION.RNNOISE_WORKLET_CDN_URL,
+              }),
+            );
+          }
         });
 
       // Send "started a call" message only when starting a new call (no existing participants)
@@ -361,53 +389,6 @@ class Voice {
     }
   }
 
-  /** Set up the audio processor chain on a mic track. */
-  #applyProcessors(track: any) {
-    // Tear down existing processors
-    this.#inputGainProcessor?.destroy();
-    this.#inputGainProcessor = undefined;
-    this.#noiseGateProcessor = undefined;
-
-    // Chain: Source → [RNNoise] → [Noise Gate] → [Input Gain] → Output
-    let innerProcessor: any;
-
-    if (this.#settings.noiseGateEnabled) {
-      const upstream =
-        this.#settings.noiseSupression === "enhanced"
-          ? new DenoiseTrackProcessor({
-              workletCDNURL: CONFIGURATION.RNNOISE_WORKLET_CDN_URL,
-            })
-          : undefined;
-
-      this.#noiseGateProcessor = new NoiseGateProcessor({
-        threshold: this.#settings.noiseGateThreshold,
-        upstream,
-      });
-      innerProcessor = this.#noiseGateProcessor;
-    } else if (this.#settings.noiseSupression === "enhanced") {
-      innerProcessor = new DenoiseTrackProcessor({
-        workletCDNURL: CONFIGURATION.RNNOISE_WORKLET_CDN_URL,
-      });
-    }
-
-    this.#inputGainProcessor = new InputGainProcessor({
-      gain: this.#settings.inputVolume,
-      upstream: innerProcessor,
-    });
-
-    const audioTrack = track?.audioTrack;
-    if (audioTrack) {
-      audioTrack.setProcessor(this.#inputGainProcessor as any);
-    }
-  }
-
-  /** Update input gain live (called from settings UI). */
-  updateInputGain(gain: number) {
-    if (this.#inputGainProcessor) {
-      this.#inputGainProcessor.gain = gain;
-    }
-  }
-
   /** Update the noise gate threshold live (called from settings UI). */
   updateNoiseGateThreshold(threshold: number) {
     if (this.#noiseGateProcessor) {
@@ -428,9 +409,8 @@ class Voice {
     this.#isManualDisconnect = true;
     this.#reconnectAttempts = 0;
 
-    // Clean up audio processors (InputGainProcessor.destroy() tears down its upstream chain)
-    this.#inputGainProcessor?.destroy();
-    this.#inputGainProcessor = undefined;
+    // Clean up noise gate processor
+    this.#noiseGateProcessor?.destroy();
     this.#noiseGateProcessor = undefined;
 
     voiceNotifications.playSelfLeave();
@@ -896,12 +876,6 @@ export function VoiceContext(props: { children: JSX.Element }) {
   createEffect(() => {
     const threshold = state.voice.noiseGateThreshold;
     voice.updateNoiseGateThreshold(threshold);
-  });
-
-  // sync input gain live
-  createEffect(() => {
-    const inputVolume = state.voice.inputVolume;
-    voice.updateInputGain(inputVolume);
   });
 
   return (

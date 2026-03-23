@@ -395,14 +395,6 @@ msgstr "Authenticator App"
 msgid "notifications.sounds.autoReconnect"
 msgstr "Auto-reconnect"
 
-#: components/app/interface/settings/user/voice/VoiceProcessingOptions.tsx
-#~ msgid "Automatic Gain Control"
-#~ msgstr "Automatic Gain Control"
-
-#: components/app/interface/settings/user/voice/VoiceProcessingOptions.tsx
-#~ msgid "Automatically adjusts your microphone volume"
-#~ msgstr "Automatically adjusts your microphone volume"
-
 #: components/app/interface/settings/user/profile/UserProfileEditor.tsx
 msgid "Avatar"
 msgstr "Avatar"
@@ -1511,14 +1503,6 @@ msgstr "Incoming Call"
 msgid "notifications.sounds.individual"
 msgstr "Individual Sounds"
 
-#: components/app/interface/settings/user/voice/VoiceInputOptions.tsx
-#~ msgid "Input Volume"
-#~ msgstr "Input Volume"
-
-#: components/app/interface/settings/user/voice/VoiceInputOptions.tsx
-msgid "Input Volume (Your Microphone)"
-msgstr "Input Volume (Your Microphone)"
-
 #: components/modal/modals/TryPWA.tsx
 msgid "Install"
 msgstr "Install"
@@ -2138,12 +2122,8 @@ msgid "Other"
 msgstr "Other"
 
 #: components/app/interface/settings/user/voice/VoiceInputOptions.tsx
-#~ msgid "Output Volume"
-#~ msgstr "Output Volume"
-
-#: components/app/interface/settings/user/voice/VoiceInputOptions.tsx
-msgid "Output Volume (Your Speakers)"
-msgstr "Output Volume (Your Speakers)"
+msgid "Output Volume"
+msgstr "Output Volume"
 
 #: components/app/interface/settings/ServerSettings.tsx
 #: components/app/interface/settings/ChannelSettings.tsx
