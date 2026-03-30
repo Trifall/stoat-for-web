@@ -61,11 +61,17 @@ export class NoiseGateProcessor {
       inputTrack = this.#upstream.processedTrack;
     } else {
       // LiveKit passes the raw MediaStreamTrack as opts.track
-      inputTrack = opts.track instanceof MediaStreamTrack ? opts.track : opts.track?.mediaStreamTrack;
+      inputTrack =
+        opts.track instanceof MediaStreamTrack
+          ? opts.track
+          : opts.track?.mediaStreamTrack;
     }
 
     if (!inputTrack) {
-      console.warn("[NoiseGate] No input track available, processor not initialized. opts.track:", opts.track);
+      console.warn(
+        "[NoiseGate] No input track available, processor not initialized. opts.track:",
+        opts.track,
+      );
       return;
     }
 
@@ -78,12 +84,21 @@ export class NoiseGateProcessor {
     this.#source = this.#ctx.createMediaStreamSource(
       new MediaStream([inputTrack]),
     );
+    // force mono to prevent stereo/mono channel
+    this.#source.channelCount = 1;
+    this.#source.channelCountMode = "explicit";
 
     this.#analyser = this.#ctx.createAnalyser();
     this.#analyser.fftSize = 2048;
     this.#analyser.smoothingTimeConstant = 0.3;
+    // analyser must also be mono so getFloatTimeDomainData returns correct sample # for the RMS calc
+    this.#analyser.channelCount = 1;
+    this.#analyser.channelCountMode = "explicit";
 
     this.#gateGain = this.#ctx.createGain();
+    this.#gateGain.channelCount = 1;
+    this.#gateGain.channelCountMode = "explicit";
+
     this.#dest = this.#ctx.createMediaStreamDestination();
 
     // source → analyser (for level metering, no audio output)
@@ -101,8 +116,12 @@ export class NoiseGateProcessor {
       }
     });
 
-    console.info("[NoiseGate] Processor initialized, AudioContext state:", this.#ctx.state,
-      "processedTrack:", this.processedTrack?.id);
+    console.info(
+      "[NoiseGate] Processor initialized, AudioContext state:",
+      this.#ctx.state,
+      "processedTrack:",
+      this.processedTrack?.id,
+    );
     this.#startGating();
   }
 
@@ -126,11 +145,7 @@ export class NoiseGateProcessor {
 
       // Gate: open (1) if above threshold, closed (0) if below
       const target = db >= this.#threshold ? 1 : 0;
-      this.#gateGain.gain.setTargetAtTime(
-        target,
-        this.#ctx.currentTime,
-        0.015,
-      );
+      this.#gateGain.gain.setTargetAtTime(target, this.#ctx.currentTime, 0.015);
     };
 
     this.#intervalId = window.setInterval(process, 20);

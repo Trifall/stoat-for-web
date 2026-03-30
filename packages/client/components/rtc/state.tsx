@@ -1,8 +1,8 @@
 import {
   Accessor,
   JSX,
-  Show,
   Setter,
+  Show,
   batch,
   createContext,
   createEffect,
@@ -116,6 +116,7 @@ class Voice {
   #micWasOnBeforeDeafen = false;
   #lastCallMessageSent = new Map<string, number>();
   #noiseGateProcessor?: NoiseGateProcessor;
+  #mutePromise: Promise<void> = Promise.resolve();
 
   constructor(voiceSettings: VoiceSettings) {
     this.#settings = voiceSettings;
@@ -164,6 +165,8 @@ class Voice {
         echoCancellation: this.#settings.echoCancellation,
         noiseSuppression: this.#settings.noiseSupression === "browser",
         autoGainControl: this.#settings.autoGainControl,
+        // force mono capture
+        channelCount: { ideal: 1 },
       },
       audioOutput: {
         deviceId: this.#settings.preferredAudioOutputDevice,
@@ -202,6 +205,18 @@ class Voice {
         room.localParticipant.setMicrophoneEnabled(true).then((track) => {
           this.#setMicrophone(typeof track !== "undefined");
 
+          // verify the captured track is mono, if the device is still initializing it can return stereo
+          if (track?.audioTrack) {
+            const settings = track.audioTrack.mediaStreamTrack.getSettings();
+            if (settings.channelCount && settings.channelCount > 1) {
+              console.warn(
+                "[Voice] Mic track is stereo (channelCount:",
+                settings.channelCount,
+                ") — remote participants may hear audio in one ear only.",
+              );
+            }
+          }
+
           // Apply audio processors.
           // When both noise gate and enhanced denoise are enabled the noise
           // gate wraps the denoise processor so both run in a single chain:
@@ -220,10 +235,16 @@ class Voice {
             });
             const audioTrack = track?.audioTrack;
             if (audioTrack) {
-              console.info("[NoiseGate] Applying processor to audio track:", audioTrack.sid);
+              console.info(
+                "[NoiseGate] Applying processor to audio track:",
+                audioTrack.sid,
+              );
               audioTrack.setProcessor(this.#noiseGateProcessor as any);
             } else {
-              console.warn("[NoiseGate] No audio track found, processor not applied. track:", track);
+              console.warn(
+                "[NoiseGate] No audio track found, processor not applied. track:",
+                track,
+              );
             }
           } else if (this.#settings.noiseSupression === "enhanced") {
             track?.audioTrack?.setProcessor(
@@ -488,53 +509,65 @@ class Voice {
    * @param enabled true to unmute, false to mute
    */
   async setMute(enabled: boolean) {
-    debugLog("PTT-WEB", "setMute() called:", enabled);
-    const room = this.room();
-    if (!room) {
-      debugLog("PTT-WEB", "setMute() - no room, returning");
-      return;
-    }
+    // serialize concurrent setMute calls to prevent race conditions
+    let resolve!: () => void;
+    const prev = this.#mutePromise;
+    this.#mutePromise = new Promise<void>((r) => {
+      resolve = r;
+    });
+    await prev;
+    try {
+      debugLog("PTT-WEB", "setMute() called:", enabled);
+      const room = this.room();
+      if (!room) {
+        debugLog("PTT-WEB", "setMute() - no room, returning");
+        return;
+      }
 
-    // if user is deafened, don't allow them to unmute
-    if (this.deafen()) {
-      debugLog("PTT-WEB", "Cannot unmute while deafened");
-      return;
-    }
+      // if user is deafened, don't allow them to unmute
+      if (this.deafen()) {
+        debugLog("PTT-WEB", "Cannot unmute while deafened");
+        return;
+      }
 
-    const currentState = room.localParticipant.isMicrophoneEnabled;
-    debugLog(
-      "PTT-WEB",
-      "setMute() - current mic state:",
-      currentState,
-      "target:",
-      enabled,
-    );
-
-    if (currentState !== enabled) {
+      // Re-read state inside the mutex — it may have changed while we waited.
+      const currentState = room.localParticipant.isMicrophoneEnabled;
       debugLog(
         "PTT-WEB",
-        "setMute() - calling setMicrophoneEnabled(",
+        "setMute() - current mic state:",
+        currentState,
+        "target:",
         enabled,
-        ")",
       );
-      await room.localParticipant.setMicrophoneEnabled(enabled);
-      this.#setMicrophone(enabled);
-      debugLog("PTT-WEB", "setMute() - mic state updated to:", enabled);
 
-      // only play sounds if PTT is disabled, or if PTT is enabled with notification sounds on
-      const shouldPlaySound =
-        !this.#settings.pushToTalkEnabled ||
-        this.#settings.pushToTalkNotificationSounds;
+      if (currentState !== enabled) {
+        debugLog(
+          "PTT-WEB",
+          "setMute() - calling setMicrophoneEnabled(",
+          enabled,
+          ")",
+        );
+        await room.localParticipant.setMicrophoneEnabled(enabled);
+        this.#setMicrophone(enabled);
+        debugLog("PTT-WEB", "setMute() - mic state updated to:", enabled);
 
-      if (shouldPlaySound) {
-        if (enabled) {
-          voiceNotifications.playUnmute();
-        } else {
-          voiceNotifications.playMute();
+        // only play sounds if PTT is disabled, or if PTT is enabled with notification sounds on
+        const shouldPlaySound =
+          !this.#settings.pushToTalkEnabled ||
+          this.#settings.pushToTalkNotificationSounds;
+
+        if (shouldPlaySound) {
+          if (enabled) {
+            voiceNotifications.playUnmute();
+          } else {
+            voiceNotifications.playMute();
+          }
         }
+      } else {
+        debugLog("PTT-WEB", "setMute() - no change needed, already:", enabled);
       }
-    } else {
-      debugLog("PTT-WEB", "setMute() - no change needed, already:", enabled);
+    } finally {
+      resolve();
     }
   }
 
@@ -754,7 +787,8 @@ export function VoiceContext(props: { children: JSX.Element }) {
 
           // Cooldown: don't re-trigger for a channel we just dismissed
           const lastDismissed = recentlyDismissed.get(channel.id);
-          if (lastDismissed && Date.now() - lastDismissed < DISMISS_COOLDOWN) return;
+          if (lastDismissed && Date.now() - lastDismissed < DISMISS_COOLDOWN)
+            return;
 
           // Don't ring if user is on DND (Busy) or Focus
           const userStatus = currentClient.user?.status?.presence;
