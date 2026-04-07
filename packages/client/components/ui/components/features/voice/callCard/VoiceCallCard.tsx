@@ -9,6 +9,7 @@ import {
   createSignal,
   on,
   onCleanup,
+  onMount,
   useContext,
 } from "solid-js";
 import { Portal } from "solid-js/web";
@@ -18,10 +19,9 @@ import { Channel } from "stoat.js";
 import { css } from "styled-system/css";
 import { styled } from "styled-system/jsx";
 
-import { InRoom, useVoice } from "@revolt/rtc";
+import { useVoice } from "@revolt/rtc";
 
 import { VoiceCallCardActiveRoom } from "./VoiceCallCardActiveRoom";
-import { VoiceCallCardPiP } from "./VoiceCallCardPiP";
 import { VoiceCallCardPreview } from "./VoiceCallCardPreview";
 
 type State =
@@ -173,14 +173,17 @@ export function VoiceCallCardContext(props: { children: JSX.Element }) {
           style={{
             position: "fixed",
             "z-index": 10,
-            "transition-duration": moving() ? ".2s" : voice.room() && ".3s",
-            "transition-property": "all",
-            "transition-timing-function": moving()
-              ? "cubic-bezier(0, 1.67, 0.85, 0.8)"
-              : "cubic-bezier(1, 0, 0, 1)",
+            transition: moving()
+              ? "all .2s cubic-bezier(0, 1.67, 0.85, 0.8), width 0s"
+              : "all .3s cubic-bezier(1, 0, 0, 1), width 0s",
             ...position(),
             "pointer-events": "none",
-            cursor: moving() ? "grabbing" : "grab",
+            cursor:
+              state().type === "floating"
+                ? moving()
+                  ? "grabbing"
+                  : "grab"
+                : "auto",
             "--offset-x": `${moving() ? offset().x : 0}px`,
             "--offset-y": `${moving() ? offset().y : 0}px`,
           }}
@@ -274,14 +277,40 @@ function VoiceCallCard(props: { channel: Channel }) {
   const voice = useVoice();
   const inCall = () => voice.channel()?.id === props.channel.id;
 
+  let viewRef: HTMLDivElement | undefined;
+
+  onMount(() => {
+    viewRef?.addEventListener("fullscreenchange", () => {
+      if (!document.fullscreenElement) {
+        voice.toggleFullscreen(false);
+      }
+    });
+  });
+
+  createEffect(() => {
+    if (voice.fullscreen() && inCall()) {
+      if (!viewRef?.isSameNode(document.fullscreenElement)) {
+        if (document.fullscreenElement) {
+          document.exitFullscreen();
+        }
+        viewRef?.requestFullscreen();
+      }
+    } else if (document.fullscreenElement) {
+      document.exitFullscreen();
+    }
+  });
+
   return (
-    <Show when={inCall()}>
-      <Base>
-        <Card active={inCall()}>
+    <Base>
+      <Card ref={viewRef} active={inCall()}>
+        <Show
+          when={inCall()}
+          fallback={<VoiceCallCardPreview channel={props.channel} />}
+        >
           <VoiceCallCardActiveRoom />
-        </Card>
-      </Base>
-    </Show>
+        </Show>
+      </Card>
+    </Base>
   );
 }
 

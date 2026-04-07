@@ -234,6 +234,9 @@ export default function ServerOverview(props: ServerSettingsProps) {
             imageJustify={false}
           />
           <Form2.TextField
+            minlength={1}
+            maxlength={32}
+            counter
             name="name"
             control={editGroup.controls.name}
             label={t`Server Name`}
@@ -241,6 +244,8 @@ export default function ServerOverview(props: ServerSettingsProps) {
           <Form2.TextField
             autosize
             min-rows={2}
+            maxlength={1024}
+            counter
             name="description"
             control={editGroup.controls.description}
             label={t`Server Description`}

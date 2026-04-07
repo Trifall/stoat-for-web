@@ -11,7 +11,11 @@ import {
   onMount,
   useContext,
 } from "solid-js";
-import { RoomContext } from "solid-livekit-components";
+import {
+  RoomContext,
+  TrackReferenceOrPlaceholder,
+  useTracks,
+} from "solid-livekit-components";
 
 import { voiceNotifications } from "./VoiceNotifications";
 
@@ -62,19 +66,20 @@ declare global {
   }
 }
 
-import { Room } from "livekit-client";
+import { Room, Track } from "livekit-client";
 import { DenoiseTrackProcessor } from "livekit-rnnoise-processor";
 import { Channel } from "stoat.js";
 
 import { NoiseGateProcessor } from "./NoiseGateProcessor";
 
 import { useClient } from "@revolt/client";
+import { CONFIGURATION } from "@revolt/common";
+import { ModalController, useModals } from "@revolt/modal";
 import { useNavigate } from "@revolt/routing";
 import { useState } from "@revolt/state";
 import { Voice as VoiceSettings } from "@revolt/state/stores/Voice";
 import { VoiceCallCardContext } from "@revolt/ui/components/features/voice/callCard/VoiceCallCard";
 
-import { CONFIGURATION } from "@revolt/common";
 import { InRoom } from "./components/InRoom";
 import { IncomingCallPopup } from "./components/IncomingCallPopup";
 import { RoomAudioManager } from "./components/RoomAudioManager";
@@ -94,6 +99,8 @@ class Voice {
 
   room: Accessor<Room | undefined>;
   #setRoom: Setter<Room | undefined>;
+
+  vidTracks: Accessor<TrackReferenceOrPlaceholder[]>;
 
   state: Accessor<State>;
   #setState: Setter<State>;
@@ -118,7 +125,18 @@ class Voice {
   #noiseGateProcessor?: NoiseGateProcessor;
   #mutePromise: Promise<void> = Promise.resolve();
 
-  constructor(voiceSettings: VoiceSettings) {
+  fullscreen: Accessor<boolean>;
+  #setFullscreen: Setter<boolean>;
+
+  focusId: Accessor<string | undefined>;
+  #setFocus: Setter<string | undefined>;
+
+  showBar: Accessor<boolean>;
+  #setShowBar: Setter<boolean>;
+
+  private openModal;
+
+  constructor(voiceSettings: VoiceSettings, modals: ModalController) {
     this.#settings = voiceSettings;
 
     const [channel, setChannel] = createSignal<Channel>();
@@ -128,6 +146,8 @@ class Voice {
     const [room, setRoom] = createSignal<Room>();
     this.room = room;
     this.#setRoom = setRoom;
+
+    this.vidTracks = () => [];
 
     const [state, setState] = createSignal<State>("READY");
     this.state = state;
@@ -148,6 +168,20 @@ class Voice {
     const [screenshare, setScreenshare] = createSignal(false);
     this.screenshare = screenshare;
     this.#setScreenshare = setScreenshare;
+
+    const [fullscreen, setFullscreen] = createSignal(false);
+    this.fullscreen = fullscreen;
+    this.#setFullscreen = setFullscreen;
+
+    const [focus, setFocus] = createSignal<string>();
+    this.focusId = focus;
+    this.#setFocus = setFocus;
+
+    const [showBar, setShowBar] = createSignal(true);
+    this.showBar = showBar;
+    this.#setShowBar = setShowBar;
+
+    this.openModal = modals.openModal;
   }
 
   async connect(channel: Channel, auth?: { url: string; token: string }) {
@@ -172,6 +206,14 @@ class Voice {
         deviceId: this.#settings.preferredAudioOutputDevice,
       },
     });
+
+    this.vidTracks = useTracks(
+      [
+        { source: Track.Source.Camera, withPlaceholder: true },
+        { source: Track.Source.ScreenShare, withPlaceholder: false },
+      ],
+      { room, onlySubscribed: false },
+    );
 
     batch(() => {
       this.#setRoom(room);
@@ -424,27 +466,33 @@ class Voice {
   }
 
   disconnect() {
-    const room = this.room();
-    if (!room) return;
+    try {
+      const room = this.room();
+      if (!room) return;
 
-    // Mark as manual disconnect to prevent auto-reconnect
-    this.#isManualDisconnect = true;
-    this.#reconnectAttempts = 0;
+      // Mark as manual disconnect to prevent auto-reconnect
+      this.#isManualDisconnect = true;
+      this.#reconnectAttempts = 0;
 
-    // Clean up noise gate processor
-    this.#noiseGateProcessor?.destroy();
-    this.#noiseGateProcessor = undefined;
+      // Clean up noise gate processor
+      this.#noiseGateProcessor?.destroy();
+      this.#noiseGateProcessor = undefined;
 
-    voiceNotifications.playSelfLeave();
+      voiceNotifications.playSelfLeave();
 
-    room.removeAllListeners();
-    room.disconnect();
+      room.removeAllListeners();
+      room.disconnect();
 
-    batch(() => {
-      this.#setState("READY");
-      this.#setRoom(undefined);
-      this.#setChannel(undefined);
-    });
+      batch(() => {
+        this.#setState("READY");
+        this.#setRoom();
+        this.#setChannel();
+        this.#setFullscreen(false);
+        this.vidTracks = () => [];
+      });
+    } catch (e) {
+      this.onErr(e);
+    }
   }
 
   async toggleDeafen() {
@@ -475,32 +523,36 @@ class Voice {
   }
 
   async toggleMute() {
-    const room = this.room();
-    if (!room) throw "invalid state";
+    try {
+      const room = this.room();
+      if (!room) throw "invalid state";
 
-    // if user is deafened, don't allow them to unmute
-    if (this.deafen()) {
-      debugLog("PTT-WEB", "Cannot unmute while deafened");
-      return;
-    }
-
-    await room.localParticipant.setMicrophoneEnabled(
-      !room.localParticipant.isMicrophoneEnabled,
-    );
-
-    this.#setMicrophone(room.localParticipant.isMicrophoneEnabled);
-
-    // only play sounds if PTT is disabled, or if PTT is enabled with notification sounds on
-    const shouldPlaySound =
-      !this.#settings.pushToTalkEnabled ||
-      this.#settings.pushToTalkNotificationSounds;
-
-    if (shouldPlaySound) {
-      if (room.localParticipant.isMicrophoneEnabled) {
-        voiceNotifications.playUnmute();
-      } else {
-        voiceNotifications.playMute();
+      // if user is deafened, don't allow them to unmute
+      if (this.deafen()) {
+        debugLog("PTT-WEB", "Cannot unmute while deafened");
+        return;
       }
+
+      await room.localParticipant.setMicrophoneEnabled(
+        !room.localParticipant.isMicrophoneEnabled,
+      );
+
+      this.#setMicrophone(room.localParticipant.isMicrophoneEnabled);
+
+      // only play sounds if PTT is disabled, or if PTT is enabled with notification sounds on
+      const shouldPlaySound =
+        !this.#settings.pushToTalkEnabled ||
+        this.#settings.pushToTalkNotificationSounds;
+
+      if (shouldPlaySound) {
+        if (room.localParticipant.isMicrophoneEnabled) {
+          voiceNotifications.playUnmute();
+        } else {
+          voiceNotifications.playMute();
+        }
+      }
+    } catch (e) {
+      this.onErr(e);
     }
   }
 
@@ -530,7 +582,7 @@ class Voice {
         return;
       }
 
-      // Re-read state inside the mutex — it may have changed while we waited.
+      // Re-read state inside the mutex - it may have changed while we waited.
       const currentState = room.localParticipant.isMicrophoneEnabled;
       debugLog(
         "PTT-WEB",
@@ -572,23 +624,61 @@ class Voice {
   }
 
   async toggleCamera() {
-    const room = this.room();
-    if (!room) throw "invalid state";
-    await room.localParticipant.setCameraEnabled(
-      !room.localParticipant.isCameraEnabled,
-    );
+    try {
+      const room = this.room();
+      if (!room) throw "invalid state";
+      await room.localParticipant.setCameraEnabled(
+        !room.localParticipant.isCameraEnabled,
+      );
 
-    this.#setVideo(room.localParticipant.isCameraEnabled);
+      this.#setVideo(room.localParticipant.isCameraEnabled);
+    } catch (e) {
+      this.onErr(e);
+    }
   }
 
   async toggleScreenshare() {
-    const room = this.room();
-    if (!room) throw "invalid state";
-    await room.localParticipant.setScreenShareEnabled(
-      !room.localParticipant.isScreenShareEnabled,
-    );
+    try {
+      const room = this.room();
+      if (!room) throw "invalid state";
+      await room.localParticipant.setScreenShareEnabled(
+        !room.localParticipant.isScreenShareEnabled,
+      );
 
-    this.#setScreenshare(room.localParticipant.isScreenShareEnabled);
+      this.#setScreenshare(room.localParticipant.isScreenShareEnabled);
+    } catch (e) {
+      this.onErr(e);
+    }
+  }
+
+  toggleFullscreen(fullscreen: boolean = !this.fullscreen()) {
+    this.#setFullscreen(fullscreen);
+  }
+
+  trackId(t: TrackReferenceOrPlaceholder) {
+    return `${t.source}_${t.participant.sid}`;
+  }
+
+  toggleFocus(t?: TrackReferenceOrPlaceholder) {
+    const id = t ? this.trackId(t) : undefined;
+    this.#setFocus(
+      this.focusId() === id || this.vidTracks().length < 2 ? undefined : id,
+    );
+  }
+
+  isFocus(t: TrackReferenceOrPlaceholder) {
+    return this.trackId(t) === this.focusId();
+  }
+
+  focusTrack() {
+    const id = this.focusId();
+    return id
+      ? this.vidTracks().find((t) => this.trackId(t) === id)
+      : undefined;
+  }
+
+  toggleShowBar() {
+    this.#setShowBar((s) => !s);
   }
 
   getConnectedUser(userId: string) {
@@ -601,6 +691,11 @@ class Voice {
 
   get speakingPermission() {
     return !!this.channel()?.havePermission("Speak");
+  }
+
+  private onErr(e: unknown) {
+    if ((e as Error).name !== "NotAllowedError")
+      this.openModal({ type: "error2", error: e });
   }
 }
 
@@ -617,7 +712,8 @@ type IncomingCall = {
 
 export function VoiceContext(props: { children: JSX.Element }) {
   const state = useState();
-  const voice = new Voice(state.voice);
+  const modals = useModals();
+  const voice = new Voice(state.voice, modals);
   const client = useClient();
   const navigate = useNavigate();
 
@@ -876,7 +972,9 @@ export function VoiceContext(props: { children: JSX.Element }) {
     if (!currentClient) return;
     if (voice.channel()) return; // skip if in a voice channel
     if (!currentClient.ready()) return; // skip if not fully connected
-    console.log("[Better Stoat] Periodic WebSocket reconnect to refresh voice states");
+    console.log(
+      "[Better Stoat] Periodic WebSocket reconnect to refresh voice states",
+    );
     currentClient.events.disconnect();
   }, VOICE_STATE_REFRESH_MS);
   onCleanup(() => clearInterval(voiceRefreshInterval));
