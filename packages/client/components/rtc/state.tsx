@@ -191,7 +191,7 @@ class Voice {
     this.#isManualDisconnect = false;
     this.#reconnectAttempts = 0;
 
-    this.disconnect();
+    this.disconnect(false);
 
     const room = new Room({
       audioCaptureDefaults: {
@@ -465,13 +465,13 @@ class Voice {
     return this.#noiseGateProcessor;
   }
 
-  disconnect() {
+  disconnect(manual: boolean = true) {
     try {
       const room = this.room();
       if (!room) return;
 
-      // Mark as manual disconnect to prevent auto-reconnect
-      this.#isManualDisconnect = true;
+      // Internal disconnects during channel switches should not disable reconnects.
+      this.#isManualDisconnect = manual;
       this.#reconnectAttempts = 0;
 
       // Clean up noise gate processor
