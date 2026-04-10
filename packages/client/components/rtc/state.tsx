@@ -963,21 +963,21 @@ export function VoiceContext(props: { children: JSX.Element }) {
     }
   });
 
-  // Periodically reconnect the WebSocket to refresh voice_states from the
-  // server, clearing any ghost participants caused by missed VoiceChannelLeave
-  // events. Only reconnects when the user is NOT in a voice channel.
-  const VOICE_STATE_REFRESH_MS = 10 * 60 * 1000; // 10 minutes
+  // Periodically reconnect the WebSocket so the Ready event clears any ghost
+  // voice participants. Skip during active calls to avoid disrupting real-time
+  // events (messages, typing, presence).
   const voiceRefreshInterval = setInterval(() => {
-    const currentClient = client();
-    if (!currentClient) return;
-    if (voice.channel()) return; // skip if in a voice channel
-    if (!currentClient.ready()) return; // skip if not fully connected
-    console.log(
-      "[Better Stoat] Periodic WebSocket reconnect to refresh voice states",
-    );
-    currentClient.events.disconnect();
-  }, VOICE_STATE_REFRESH_MS);
+    if (voice.channel()) return;
+    client()?.events.disconnect();
+  }, 10 * 60 * 1000);
   onCleanup(() => clearInterval(voiceRefreshInterval));
+
+  // Manual reconnect for debugging ghost cleanup from DevTools:
+  //   stoatRefreshVoice()
+  (window as any).stoatRefreshVoice = () => {
+    console.log("[VoiceState] Manual reconnect triggered");
+    client()?.events.disconnect();
+  };
 
   // sync notification settings reactively
   createEffect(() => {
