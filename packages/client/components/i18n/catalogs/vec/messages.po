@@ -38,6 +38,16 @@ msgstr ""
 msgid "dddd [at] LT"
 msgstr ""
 
+#. js-lingui-explicit-id
+#: components/app/interface/settings/user/voice/NotificationSoundsSettings.tsx
+#~ msgid "notifications.sounds.title"
+#~ msgstr ""
+
+#. js-lingui-explicit-id
+#: components/app/interface/settings/user/voice/PushToTalkSettings.tsx
+#~ msgid "ptt.settings.title"
+#~ msgstr ""
+
 #: components/app/interface/settings/server/roles/ServerRoleOverview.tsx
 msgid "(changes are being saved…)"
 msgstr ""
@@ -2034,11 +2044,6 @@ msgstr ""
 msgid "ptt.settings.notifications"
 msgstr ""
 
-#. js-lingui-explicit-id
-#: components/app/interface/settings/user/voice/NotificationSoundsSettings.tsx
-msgid "notifications.sounds.title"
-msgstr ""
-
 #: components/app/menus/ServerContextMenu.tsx
 #: components/app/menus/shared/NotificationContextMenu.tsx
 msgid "Notifications"
@@ -2243,11 +2248,6 @@ msgstr ""
 #. js-lingui-explicit-id
 #: components/app/interface/settings/UserSettings.tsx
 msgid "ptt.tab.title"
-msgstr ""
-
-#. js-lingui-explicit-id
-#: components/app/interface/settings/user/voice/PushToTalkSettings.tsx
-msgid "ptt.settings.title"
 msgstr ""
 
 #. js-lingui-explicit-id

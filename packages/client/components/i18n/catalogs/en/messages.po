@@ -38,6 +38,16 @@ msgstr "[Last] dddd [at] LT"
 msgid "dddd [at] LT"
 msgstr "dddd [at] LT"
 
+#. js-lingui-explicit-id
+#: components/app/interface/settings/user/voice/NotificationSoundsSettings.tsx
+#~ msgid "notifications.sounds.title"
+#~ msgstr "Notification Sounds"
+
+#. js-lingui-explicit-id
+#: components/app/interface/settings/user/voice/PushToTalkSettings.tsx
+#~ msgid "ptt.settings.title"
+#~ msgstr "Push to Talk"
+
 #: components/app/interface/settings/server/roles/ServerRoleOverview.tsx
 msgid "(changes are being saved…)"
 msgstr "(changes are being saved…)"
@@ -2034,11 +2044,6 @@ msgstr "Notification Sounds"
 msgid "ptt.settings.notifications"
 msgstr "Notification Sounds"
 
-#. js-lingui-explicit-id
-#: components/app/interface/settings/user/voice/NotificationSoundsSettings.tsx
-msgid "notifications.sounds.title"
-msgstr "Notification Sounds"
-
 #: components/app/menus/ServerContextMenu.tsx
 #: components/app/menus/shared/NotificationContextMenu.tsx
 msgid "Notifications"
@@ -2243,11 +2248,6 @@ msgstr "Provided email or password is wrong."
 #. js-lingui-explicit-id
 #: components/app/interface/settings/UserSettings.tsx
 msgid "ptt.tab.title"
-msgstr "Push to Talk"
-
-#. js-lingui-explicit-id
-#: components/app/interface/settings/user/voice/PushToTalkSettings.tsx
-msgid "ptt.settings.title"
 msgstr "Push to Talk"
 
 #. js-lingui-explicit-id
