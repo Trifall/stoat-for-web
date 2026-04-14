@@ -307,9 +307,12 @@ class Voice {
       console.log("[VoiceNotifications] Playing self join sound");
       voiceNotifications.playSelfJoin();
       if (this.speakingPermission) {
+        const pttActive =
+          this.#settings.pushToTalkEnabled &&
+          !!window.pushToTalk?.getCurrentState().active;
         const targetMicEnabled =
           !this.#settings.deafen &&
-          (this.#settings.pushToTalkEnabled ? false : this.#settings.micOn);
+          (this.#settings.pushToTalkEnabled ? pttActive : this.#settings.micOn);
 
         this.#setMicrophoneEnabled(targetMicEnabled, {
           persistPreference:
@@ -507,6 +510,14 @@ class Voice {
     } else {
       // Restore mic to its previous state when undeafening
       if (this.#micWasOnBeforeDeafen) {
+        const shouldRestoreMic =
+          !this.#settings.pushToTalkEnabled ||
+          !!window.pushToTalk?.getCurrentState().active;
+
+        if (!shouldRestoreMic) {
+          return;
+        }
+
         const room = this.room();
         if (room) {
           await this.#setMicrophoneEnabled(true, { persistPreference: false });
