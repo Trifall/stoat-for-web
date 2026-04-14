@@ -395,12 +395,12 @@ msgstr "Titulusok hozzárendelése"
 #: components/modal/modals/MFAFlow.tsx
 #: components/app/interface/settings/user/Account.tsx
 msgid "Authenticator App"
-msgstr "Hitelesítést végző app<<<<<<< HEAD"
+msgstr "Hitelesítést végző app"
 
 #. js-lingui-explicit-id
 #: components/app/interface/settings/user/voice/NotificationSoundsSettings.tsx
 msgid "notifications.sounds.autoReconnect"
-msgstr "=======>>>>>>> upstream/main"
+msgstr ""
 
 #: components/app/interface/settings/user/voice/VoiceProcessingOptions.tsx
 msgid "Automatic Gain Control"

@@ -395,12 +395,12 @@ msgstr "Assegnare ruoli"
 #: components/modal/modals/MFAFlow.tsx
 #: components/app/interface/settings/user/Account.tsx
 msgid "Authenticator App"
-msgstr "Applicazione di autenticazione<<<<<<< HEAD"
+msgstr "Applicazione di autenticazione"
 
 #. js-lingui-explicit-id
 #: components/app/interface/settings/user/voice/NotificationSoundsSettings.tsx
 msgid "notifications.sounds.autoReconnect"
-msgstr "=======>>>>>>> upstream/main"
+msgstr ""
 
 #: components/app/interface/settings/user/voice/VoiceProcessingOptions.tsx
 msgid "Automatic Gain Control"

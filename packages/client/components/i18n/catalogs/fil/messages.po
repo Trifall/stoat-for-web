@@ -395,12 +395,12 @@ msgstr "Magtalaga ng mga Role"
 #: components/modal/modals/MFAFlow.tsx
 #: components/app/interface/settings/user/Account.tsx
 msgid "Authenticator App"
-msgstr "Taga-authenticate na app<<<<<<< HEAD"
+msgstr "Taga-authenticate na app"
 
 #. js-lingui-explicit-id
 #: components/app/interface/settings/user/voice/NotificationSoundsSettings.tsx
 msgid "notifications.sounds.autoReconnect"
-msgstr "=======>>>>>>> upstream/main"
+msgstr ""
 
 #: components/app/interface/settings/user/voice/VoiceProcessingOptions.tsx
 msgid "Automatic Gain Control"

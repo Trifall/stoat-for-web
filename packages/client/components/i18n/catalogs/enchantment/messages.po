@@ -395,12 +395,12 @@ msgstr "ᔑᓭᓭ╎⊣リ ∷𝙹ꖎᒷᓭ"
 #: components/modal/modals/MFAFlow.tsx
 #: components/app/interface/settings/user/Account.tsx
 msgid "Authenticator App"
-msgstr "ᔑ⚍ℸ⍑ᒷリℸ╎ᓵᔑℸ𝙹∷ ᔑ!¡!¡<<<<<<< HEAD"
+msgstr "ᔑ⚍ℸ⍑ᒷリℸ╎ᓵᔑℸ𝙹∷ ᔑ!¡!¡"
 
 #. js-lingui-explicit-id
 #: components/app/interface/settings/user/voice/NotificationSoundsSettings.tsx
 msgid "notifications.sounds.autoReconnect"
-msgstr "=======>>>>>>> upstream/main"
+msgstr ""
 
 #: components/app/interface/settings/user/voice/VoiceProcessingOptions.tsx
 msgid "Automatic Gain Control"
