@@ -6,6 +6,7 @@ import { Compartment, EditorState } from "@codemirror/state";
 import { EditorView, keymap, placeholder } from "@codemirror/view";
 import { css } from "styled-system/css";
 
+import { scrollableStyles } from "../../../directives/scrollable";
 import { AutoCompleteSearchSpace } from "../../utils/autoComplete";
 
 import { useState } from "@revolt/state";
@@ -72,6 +73,7 @@ const placeholderCompartment = new Compartment();
  */
 export function TextEditor2(props: Props) {
   const { isMobile } = useState();
+  const editorScrollbarClasses = scrollableStyles();
   const codeMirror = document.createElement("div");
   codeMirror.className = editor;
 
@@ -172,6 +174,12 @@ export function TextEditor2(props: Props) {
       ],
     }),
   });
+
+  // Apply shared scrollbar styles from the exported scrollable style classes.
+  const scroller = codeMirror.querySelector<HTMLDivElement>(".cm-scroller");
+  if (scroller) {
+    scroller.classList.add(...editorScrollbarClasses.split(" "));
+  }
 
   // connect signals to extensions
   createEffect(

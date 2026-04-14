@@ -106,10 +106,7 @@ class Voice {
   #setState: Setter<State>;
 
   deafen: Accessor<boolean>;
-  #setDeafen: Setter<boolean>;
-
   microphone: Accessor<boolean>;
-  #setMicrophone: Setter<boolean>;
 
   video: Accessor<boolean>;
   #setVideo: Setter<boolean>;
@@ -153,13 +150,8 @@ class Voice {
     this.state = state;
     this.#setState = setState;
 
-    const [deafen, setDeafen] = createSignal<boolean>(false);
-    this.deafen = deafen;
-    this.#setDeafen = setDeafen;
-
-    const [microphone, setMicrophone] = createSignal(false);
-    this.microphone = microphone;
-    this.#setMicrophone = setMicrophone;
+    this.deafen = () => voiceSettings.deafen;
+    this.microphone = () => voiceSettings.micOn;
 
     const [video, setVideo] = createSignal(false);
     this.video = video;
@@ -219,20 +211,6 @@ class Voice {
       this.#setRoom(room);
       this.#setChannel(channel);
       this.#setState("CONNECTING");
-
-      // only auto-mute when PTT is enabled
-      const pttEnabled = this.#settings.pushToTalkEnabled;
-      if (pttEnabled) {
-        debugLog(
-          "PTT-WEB",
-          "PTT enabled - Setting initial mic state to OFF (muted)",
-        );
-        this.#setMicrophone(false);
-      } else {
-        debugLog("PTT-WEB", "PTT disabled - Keeping mic state as-is");
-        this.#setMicrophone(true);
-      }
-      this.#setDeafen(false);
       this.#setVideo(false);
       this.#setScreenshare(false);
     });
@@ -243,59 +221,65 @@ class Voice {
       this.#reconnectAttempts = 0; // Reset on successful connection
       console.log("[VoiceNotifications] Playing self join sound");
       voiceNotifications.playSelfJoin();
-      if (this.speakingPermission)
-        room.localParticipant.setMicrophoneEnabled(true).then((track) => {
-          this.#setMicrophone(typeof track !== "undefined");
+      if (this.speakingPermission) {
+        const targetMicEnabled =
+          !this.#settings.deafen &&
+          (this.#settings.pushToTalkEnabled ? false : this.#settings.micOn);
 
-          // verify the captured track is mono, if the device is still initializing it can return stereo
-          if (track?.audioTrack) {
-            const settings = track.audioTrack.mediaStreamTrack.getSettings();
-            if (settings.channelCount && settings.channelCount > 1) {
-              console.warn(
-                "[Voice] Mic track is stereo (channelCount:",
-                settings.channelCount,
-                ") — remote participants may hear audio in one ear only.",
+        room.localParticipant
+          .setMicrophoneEnabled(targetMicEnabled)
+          .then((track) => {
+            this.#settings.micOn = track != null;
+
+            // Verify the captured track is mono. If the device is still
+            // initializing it can briefly return stereo.
+            if (track?.audioTrack) {
+              const settings = track.audioTrack.mediaStreamTrack.getSettings();
+              if (settings.channelCount && settings.channelCount > 1) {
+                console.warn(
+                  "[Voice] Mic track is stereo (channelCount:",
+                  settings.channelCount,
+                  ") - remote participants may hear audio in one ear only.",
+                );
+              }
+            }
+
+            // When both noise gate and enhanced denoise are enabled, the noise
+            // gate wraps the denoise processor so both run in a single chain.
+            if (this.#settings.noiseGateEnabled) {
+              const upstream =
+                this.#settings.noiseSupression === "enhanced"
+                  ? new DenoiseTrackProcessor({
+                      workletCDNURL: CONFIGURATION.RNNOISE_WORKLET_CDN_URL,
+                    })
+                  : undefined;
+
+              this.#noiseGateProcessor = new NoiseGateProcessor({
+                threshold: this.#settings.noiseGateThreshold,
+                upstream,
+              });
+              const audioTrack = track?.audioTrack;
+              if (audioTrack) {
+                console.info(
+                  "[NoiseGate] Applying processor to audio track:",
+                  audioTrack.sid,
+                );
+                audioTrack.setProcessor(this.#noiseGateProcessor as any);
+              } else {
+                console.warn(
+                  "[NoiseGate] No audio track found, processor not applied. track:",
+                  track,
+                );
+              }
+            } else if (this.#settings.noiseSupression === "enhanced") {
+              track?.audioTrack?.setProcessor(
+                new DenoiseTrackProcessor({
+                  workletCDNURL: CONFIGURATION.RNNOISE_WORKLET_CDN_URL,
+                }),
               );
             }
-          }
-
-          // Apply audio processors.
-          // When both noise gate and enhanced denoise are enabled the noise
-          // gate wraps the denoise processor so both run in a single chain:
-          //   Source → RNNoise → Noise Gate → Output
-          if (this.#settings.noiseGateEnabled) {
-            const upstream =
-              this.#settings.noiseSupression === "enhanced"
-                ? new DenoiseTrackProcessor({
-                    workletCDNURL: CONFIGURATION.RNNOISE_WORKLET_CDN_URL,
-                  })
-                : undefined;
-
-            this.#noiseGateProcessor = new NoiseGateProcessor({
-              threshold: this.#settings.noiseGateThreshold,
-              upstream,
-            });
-            const audioTrack = track?.audioTrack;
-            if (audioTrack) {
-              console.info(
-                "[NoiseGate] Applying processor to audio track:",
-                audioTrack.sid,
-              );
-              audioTrack.setProcessor(this.#noiseGateProcessor as any);
-            } else {
-              console.warn(
-                "[NoiseGate] No audio track found, processor not applied. track:",
-                track,
-              );
-            }
-          } else if (this.#settings.noiseSupression === "enhanced") {
-            track?.audioTrack?.setProcessor(
-              new DenoiseTrackProcessor({
-                workletCDNURL: CONFIGURATION.RNNOISE_WORKLET_CDN_URL,
-              }),
-            );
-          }
-        });
+          });
+      }
 
       // Send "started a call" message only when starting a new call (no existing participants)
       if (
@@ -359,37 +343,6 @@ class Voice {
       "Room connected successfully, mic state:",
       room.localParticipant.isMicrophoneEnabled,
     );
-
-    // Handle mic state based on PTT setting
-    if (this.#settings.pushToTalkEnabled) {
-      // PTT enabled - mute mic so user must press key to speak
-      if (room.localParticipant.isMicrophoneEnabled) {
-        debugLog(
-          "PTT-WEB",
-          "PTT enabled and mic was auto-enabled by LiveKit, explicitly muting...",
-        );
-        await room.localParticipant.setMicrophoneEnabled(false);
-        debugLog(
-          "PTT-WEB",
-          "Mic explicitly muted, state:",
-          room.localParticipant.isMicrophoneEnabled,
-        );
-      }
-    } else {
-      // PTT disabled - unmute mic so user can speak immediately
-      if (!room.localParticipant.isMicrophoneEnabled) {
-        debugLog(
-          "PTT-WEB",
-          "PTT disabled and mic is muted, explicitly unmuting...",
-        );
-        await room.localParticipant.setMicrophoneEnabled(true);
-        debugLog(
-          "PTT-WEB",
-          "Mic explicitly unmuted, state:",
-          room.localParticipant.isMicrophoneEnabled,
-        );
-      }
-    }
   }
 
   async #handleReconnect() {
@@ -496,7 +449,8 @@ class Voice {
   }
 
   async toggleDeafen() {
-    const willDeafen = !this.deafen();
+    const willDeafen = !this.#settings.deafen;
+    this.#settings.deafen = willDeafen;
 
     if (willDeafen) {
       // Save current mic state so we can restore it on undeafen
@@ -506,20 +460,18 @@ class Voice {
       const room = this.room();
       if (room && room.localParticipant.isMicrophoneEnabled) {
         await room.localParticipant.setMicrophoneEnabled(false);
-        this.#setMicrophone(false);
       }
+      this.#settings.micOn = false;
     } else {
       // Restore mic to its previous state when undeafening
       if (this.#micWasOnBeforeDeafen) {
         const room = this.room();
         if (room) {
           await room.localParticipant.setMicrophoneEnabled(true);
-          this.#setMicrophone(true);
         }
+        this.#settings.micOn = true;
       }
     }
-
-    this.#setDeafen(willDeafen);
   }
 
   async toggleMute() {
@@ -537,7 +489,7 @@ class Voice {
         !room.localParticipant.isMicrophoneEnabled,
       );
 
-      this.#setMicrophone(room.localParticipant.isMicrophoneEnabled);
+      this.#settings.micOn = room.localParticipant.isMicrophoneEnabled;
 
       // only play sounds if PTT is disabled, or if PTT is enabled with notification sounds on
       const shouldPlaySound =
@@ -600,7 +552,7 @@ class Voice {
           ")",
         );
         await room.localParticipant.setMicrophoneEnabled(enabled);
-        this.#setMicrophone(enabled);
+        this.#settings.micOn = enabled;
         debugLog("PTT-WEB", "setMute() - mic state updated to:", enabled);
 
         // only play sounds if PTT is disabled, or if PTT is enabled with notification sounds on
@@ -966,10 +918,13 @@ export function VoiceContext(props: { children: JSX.Element }) {
   // Periodically reconnect the WebSocket so the Ready event clears any ghost
   // voice participants. Skip during active calls to avoid disrupting real-time
   // events (messages, typing, presence).
-  const voiceRefreshInterval = setInterval(() => {
-    if (voice.channel()) return;
-    client()?.events.disconnect();
-  }, 10 * 60 * 1000);
+  const voiceRefreshInterval = setInterval(
+    () => {
+      if (voice.channel()) return;
+      client()?.events.disconnect();
+    },
+    10 * 60 * 1000,
+  );
   onCleanup(() => clearInterval(voiceRefreshInterval));
 
   // Manual reconnect for debugging ghost cleanup from DevTools:

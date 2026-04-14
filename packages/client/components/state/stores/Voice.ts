@@ -23,6 +23,8 @@ export interface TypeVoice {
 
   inputVolume: number;
   outputVolume: number;
+  deafen: boolean;
+  micOn: boolean;
 
   noiseGateEnabled: boolean;
   noiseGateThreshold: number;
@@ -84,6 +86,8 @@ export class Voice extends AbstractStore<"voice", TypeVoice> {
       outputVolume: 1.0,
       noiseGateEnabled: false,
       noiseGateThreshold: -50,
+      deafen: false,
+      micOn: true,
       userVolumes: {},
       userMutes: {},
       pushToTalkEnabled: false,
@@ -158,6 +162,14 @@ export class Voice extends AbstractStore<"voice", TypeVoice> {
       input.noiseGateThreshold <= 0
     ) {
       data.noiseGateThreshold = input.noiseGateThreshold;
+    }
+
+    if (typeof input.deafen === "boolean") {
+      data.deafen = input.deafen;
+    }
+
+    if (typeof input.micOn === "boolean") {
+      data.micOn = input.micOn;
     }
 
     if (typeof input.userVolumes === "object") {
@@ -335,6 +347,20 @@ export class Voice extends AbstractStore<"voice", TypeVoice> {
   }
 
   /**
+   * Set mic status
+   */
+  set micOn(value: boolean) {
+    this.set("micOn", value);
+  }
+
+  /**
+   * Set defean status
+   */
+  set deafen(value: boolean) {
+    this.set("deafen", value);
+  }
+
+  /**
    * Get the preferred audio input device
    */
   get preferredAudioInputDevice(): string | undefined {
@@ -381,6 +407,20 @@ export class Voice extends AbstractStore<"voice", TypeVoice> {
    */
   get outputVolume(): number {
     return this.get().outputVolume;
+  }
+
+  /**
+   * Get deafen status
+   */
+  get deafen(): boolean {
+    return this.get().deafen;
+  }
+
+  /**
+   * Get mic status
+   */
+  get micOn(): boolean {
+    return this.get().micOn;
   }
 
   /**

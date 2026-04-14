@@ -3,20 +3,15 @@ import { Show, createEffect, createSignal, on, onCleanup } from "solid-js";
 import { Trans } from "@lingui-solid/solid/macro";
 
 import { useState } from "@revolt/state";
-import {
-  CategoryButton,
-  Checkbox,
-  Column,
-  Text,
-} from "@revolt/ui";
-import { CategoryCollapse } from "@revolt/ui/components/design/CategoryButton";
+import { CategoryButton, Checkbox, Column, Text } from "@revolt/ui";
+
 import { useVoice } from "../../../../../rtc/state";
 
 /**
  * Voice processing options
  */
 export function VoiceProcessingOptions() {
-  const state = useState();
+  const { voice } = useState();
 
   return (
     <Column>
@@ -24,37 +19,45 @@ export function VoiceProcessingOptions() {
         <Trans>Voice Processing</Trans>
       </Text>
       <CategoryButton.Group>
-        <NoiseSuppression />
+        <CategoryButton.Select
+          icon={"blank"}
+          title={<Trans>Select noise suppression</Trans>}
+          options={{
+            disabled: { title: <Trans>Disabled</Trans> },
+            browser: { title: <Trans>Browser</Trans> },
+            enhanced: {
+              title: <Trans>Enhanced</Trans>,
+              description: <Trans>Powered by RNNoise</Trans>,
+              shortDesc: <Trans>Enhanced (RNNoise)</Trans>,
+            },
+          }}
+          value={voice.noiseSupression}
+          onUpdate={(ns) => (voice.noiseSupression = ns)}
+        />
         <CategoryButton
           icon="blank"
-          action={<Checkbox checked={state.voice.echoCancellation} />}
-          onClick={() =>
-            (state.voice.echoCancellation = !state.voice.echoCancellation)
-          }
+          action={<Checkbox checked={voice.echoCancellation} />}
+          onClick={() => (voice.echoCancellation = !voice.echoCancellation)}
         >
           <Trans>Browser Echo Cancellation</Trans>
         </CategoryButton>
         <CategoryButton
           icon="blank"
-          action={<Checkbox checked={state.voice.autoGainControl} />}
-          onClick={() =>
-            (state.voice.autoGainControl = !state.voice.autoGainControl)
-          }
+          action={<Checkbox checked={voice.autoGainControl} />}
+          onClick={() => (voice.autoGainControl = !voice.autoGainControl)}
         >
           <Trans>Automatic Gain Control</Trans>
         </CategoryButton>
         <CategoryButton
           icon="blank"
-          action={<Checkbox checked={state.voice.noiseGateEnabled} />}
-          onClick={() =>
-            (state.voice.noiseGateEnabled = !state.voice.noiseGateEnabled)
-          }
+          action={<Checkbox checked={voice.noiseGateEnabled} />}
+          onClick={() => (voice.noiseGateEnabled = !voice.noiseGateEnabled)}
           description={<Trans>Silence your mic when you're not speaking</Trans>}
         >
           <Trans>Noise Gate</Trans>
         </CategoryButton>
       </CategoryButton.Group>
-      <Show when={state.voice.noiseGateEnabled}>
+      <Show when={voice.noiseGateEnabled}>
         <NoiseGateSettings />
       </Show>
     </Column>
@@ -73,7 +76,6 @@ function NoiseGateSettings() {
   const voice = useVoice();
   const [micLevel, setMicLevel] = createSignal(-100);
 
-  // --- Fallback preview monitoring (when not in a call) ---
   let audioCtx: AudioContext | undefined;
   let analyser: AnalyserNode | undefined;
   let source: MediaStreamAudioSourceNode | undefined;
@@ -117,7 +119,10 @@ function NoiseGateSettings() {
       };
       measure();
     } catch (err) {
-      console.warn("[NoiseGate] Could not access microphone for level meter:", err);
+      console.warn(
+        "[NoiseGate] Could not access microphone for level meter:",
+        err,
+      );
     }
   }
 
@@ -134,12 +139,10 @@ function NoiseGateSettings() {
     rafId = undefined;
   }
 
-  // --- Wire up the level source ---
   createEffect(() => {
     const processor = voice.noiseGateProcessor;
 
     if (processor) {
-      // In a call with noise gate active: use processor levels (post-RNNoise)
       stopPreviewMonitoring();
       const handler = (db: number) => setMicLevel(db);
       processor.onLevel = handler;
@@ -149,13 +152,11 @@ function NoiseGateSettings() {
         }
       });
     } else {
-      // Not in a call: use preview stream with matching browser constraints
       startPreviewMonitoring();
       onCleanup(stopPreviewMonitoring);
     }
   });
 
-  // Restart preview monitoring if the preferred mic device changes
   createEffect(
     on(
       () => state.voice.preferredAudioInputDevice,
@@ -169,8 +170,6 @@ function NoiseGateSettings() {
     ),
   );
 
-  // Map dB to a 0-100 percentage for the meter bar.
-  // Range: -60 dB (silent) to 0 dB (max).
   const levelPercent = () => {
     const db = micLevel();
     const clamped = Math.max(-60, Math.min(0, db));
@@ -183,7 +182,6 @@ function NoiseGateSettings() {
         <Trans>Noise Gate Threshold</Trans>: {state.voice.noiseGateThreshold} dB
       </Text>
 
-      {/* Custom noise gate control: level meter + draggable threshold */}
       <NoiseGateMeter
         level={levelPercent()}
         threshold={state.voice.noiseGateThreshold}
@@ -215,7 +213,10 @@ function NoiseGateMeter(props: {
     const pad = parseFloat(getComputedStyle(trackRef).fontSize) * 0.625;
     const trackLeft = rect.left + pad;
     const trackWidth = rect.width - pad * 2;
-    const percent = Math.max(0, Math.min(1, (e.clientX - trackLeft) / trackWidth));
+    const percent = Math.max(
+      0,
+      Math.min(1, (e.clientX - trackLeft) / trackWidth),
+    );
     const db = Math.round(-60 + percent * 60);
     props.onThresholdChange(db);
   };
@@ -250,7 +251,6 @@ function NoiseGateMeter(props: {
         "touch-action": "none",
       }}
     >
-      {/* Track background */}
       <div
         style={{
           position: "absolute",
@@ -264,7 +264,6 @@ function NoiseGateMeter(props: {
           overflow: "hidden",
         }}
       >
-        {/* Level fill */}
         <div
           style={{
             width: `${props.level}%`,
@@ -275,7 +274,6 @@ function NoiseGateMeter(props: {
         />
       </div>
 
-      {/* Threshold handle */}
       <div
         style={{
           position: "absolute",
@@ -289,60 +287,6 @@ function NoiseGateMeter(props: {
           "box-shadow": "var(--md-sys-color-shadow) 0 1px 3px",
         }}
       />
-
     </div>
-  );
-}
-
-function NoiseSuppression() {
-  const state = useState();
-
-  const description = () => {
-    if (state.voice.noiseSupression === "disabled") {
-      return <Trans>Disabled</Trans>;
-    }
-    if (state.voice.noiseSupression === "browser") {
-      return <Trans>Browser</Trans>;
-    }
-    if (state.voice.noiseSupression === "enhanced") {
-      return <Trans>Enhanced (RNNoise)</Trans>;
-    }
-  };
-
-  return (
-    <CategoryCollapse
-      icon={"blank"}
-      title={<Trans>Select noise suppression</Trans>}
-      description={description()}
-    >
-      <CategoryButton
-        icon={"blank"}
-        onClick={() => (state.voice.noiseSupression = "disabled")}
-        action={
-          <Checkbox checked={state.voice.noiseSupression === "disabled"} />
-        }
-      >
-        <Trans>Disabled</Trans>
-      </CategoryButton>
-      <CategoryButton
-        icon={"blank"}
-        onClick={() => (state.voice.noiseSupression = "browser")}
-        action={
-          <Checkbox checked={state.voice.noiseSupression === "browser"} />
-        }
-      >
-        <Trans>Browser</Trans>
-      </CategoryButton>
-      <CategoryButton
-        icon={"blank"}
-        onClick={() => (state.voice.noiseSupression = "enhanced")}
-        action={
-          <Checkbox checked={state.voice.noiseSupression === "enhanced"} />
-        }
-        description={<Trans>Powered by RNNoise</Trans>}
-      >
-        <Trans>Enhanced</Trans>
-      </CategoryButton>
-    </CategoryCollapse>
   );
 }
