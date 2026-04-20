@@ -13,10 +13,18 @@
  *   Source → [Upstream (RNNoise)] → Noise Gate → Output
  */
 
+/** Options passed to TrackProcessor init/restart by LiveKit. */
+interface ProcessorOpts {
+  track: any;
+  kind?: any;
+  element?: any;
+  audioContext?: AudioContext;
+}
+
 /** Minimal TrackProcessor shape we need for chaining. */
 interface UpstreamProcessor {
-  init(opts: { track: any; kind?: any; element?: any }): Promise<void>;
-  restart(opts: { track: any; kind?: any; element?: any }): Promise<void>;
+  init(opts: ProcessorOpts): Promise<void>;
+  restart(opts: ProcessorOpts): Promise<void>;
   destroy(): Promise<void>;
   processedTrack?: MediaStreamTrack;
 }
@@ -33,6 +41,11 @@ export class NoiseGateProcessor {
   #intervalId?: number;
   #threshold: number;
   #upstream?: UpstreamProcessor;
+  // LiveKit-owned AudioContext from the most recent init. Preserved across
+  // destroy/re-init so restart() paths that omit it (LiveKit's internal
+  // restartTrack → processor.restart passes only {track, kind, element})
+  // don't break the upstream RNNoise processor, which requires it.
+  #savedAudioContext?: AudioContext;
 
   /** Called every ~20 ms with the current RMS level in dB. */
   onLevel?: (db: number) => void;
@@ -51,13 +64,18 @@ export class NoiseGateProcessor {
     return this.#threshold;
   }
 
-  async init(opts: { track: any; kind?: any; element?: any }) {
+  async init(opts: ProcessorOpts) {
+    if (opts.audioContext) this.#savedAudioContext = opts.audioContext;
+
     let inputTrack: MediaStreamTrack | undefined;
 
     if (this.#upstream) {
       // Initialise the upstream processor first (e.g. RNNoise) so it
       // produces a processedTrack we can feed into the noise gate.
-      await this.#upstream.init(opts);
+      await this.#upstream.init({
+        ...opts,
+        audioContext: opts.audioContext ?? this.#savedAudioContext,
+      });
       inputTrack = this.#upstream.processedTrack;
     } else {
       // LiveKit passes the raw MediaStreamTrack as opts.track
@@ -151,7 +169,7 @@ export class NoiseGateProcessor {
     this.#intervalId = window.setInterval(process, 20);
   }
 
-  async restart(opts: { track: any; kind?: any; element?: any }) {
+  async restart(opts: ProcessorOpts) {
     await this.destroy();
     await this.init(opts);
   }
