@@ -1,11 +1,36 @@
-import { Accessor, createMemo } from "solid-js";
+import { Accessor, createEffect, createMemo } from "solid-js";
 
-import { ServerMember, User } from "stoat.js";
+import { type Client, ServerMember, User } from "stoat.js";
 
 import { useClient } from "@revolt/client";
 import { useSmartParams } from "@revolt/routing";
 
 // TODO: move to @revolt/common?
+
+const pendingUserFetches = new WeakMap<Client, Set<string>>();
+
+function fetchMissingUsers(client: Client, ids: string[]) {
+  let pending = pendingUserFetches.get(client);
+  if (!pending) {
+    pending = new Set();
+    pendingUserFetches.set(client, pending);
+  }
+
+  for (const id of ids) {
+    if (!id || pending.has(id)) continue;
+
+    const user = client.users.get(id);
+    if (user && !client.users.isPartial(id)) continue;
+
+    pending.add(id);
+    void client.users
+      .fetch(id)
+      .catch(() => undefined)
+      .finally(() => {
+        pending.delete(id);
+      });
+  }
+}
 
 /**
  * Resolved user information
@@ -67,6 +92,11 @@ export function useUsers(
 
   // TODO: use a context here for when we do multi view :)
   const params = useSmartParams();
+
+  createEffect(() => {
+    const client = clientAccessor()!;
+    fetchMissingUsers(client, typeof ids === "function" ? ids() : ids);
+  });
 
   // eslint-disable-next-line solid/reactivity
   return createMemo(() => {
