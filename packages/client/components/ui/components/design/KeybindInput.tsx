@@ -1,4 +1,4 @@
-import { createEffect, createSignal, onMount, Show } from "solid-js";
+import { createEffect, createSignal, onCleanup, onMount, Show } from "solid-js";
 
 import { styled } from "styled-system/jsx";
 
@@ -65,7 +65,7 @@ const KeybindButton = styled("button", {
  */
 export function KeybindInput(props: Props) {
   const [capturing, setCapturing] = createSignal(false);
-  const [displayValue, setDisplayValue] = createSignal(props.value);
+  const [displayValue, setDisplayValue] = createSignal("");
 
   onMount(() => {
     setDisplayValue(props.value);
@@ -79,6 +79,7 @@ export function KeybindInput(props: Props) {
   });
 
   const startCapturing = () => {
+    setDisplayValue(props.value);
     setCapturing(true);
   };
 
@@ -94,13 +95,11 @@ export function KeybindInput(props: Props) {
   const handleKeyDown = (e: KeyboardEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    e.stopImmediatePropagation();
 
     if (e.key === "Escape") {
-      if (displayValue() === "") {
-        stopCapturing();
-      } else {
-        clearKeybind();
-      }
+      setDisplayValue(props.value);
+      stopCapturing();
       return;
     }
 
@@ -133,6 +132,15 @@ export function KeybindInput(props: Props) {
     stopCapturing();
   };
 
+  createEffect(() => {
+    if (!capturing()) return;
+
+    document.addEventListener("keydown", handleKeyDown, true);
+    onCleanup(() => {
+      document.removeEventListener("keydown", handleKeyDown, true);
+    });
+  });
+
   const handleBlur = () => {
     stopCapturing();
   };
@@ -148,7 +156,6 @@ export function KeybindInput(props: Props) {
               : undefined
         }
         onClick={startCapturing}
-        onKeyDown={capturing() ? handleKeyDown : undefined}
         onBlur={handleBlur}
         tabIndex={0}
       >

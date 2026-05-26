@@ -28,11 +28,58 @@ function syncToDesktop(settings: {
   }
 }
 
+function splitPushToTalkKeybinds(value: string): [string, string] {
+  let parsed: unknown = value;
+
+  try {
+    parsed = JSON.parse(value);
+  } catch {
+    // legacy configs stored a single accelerator string.
+  }
+
+  const keybinds = Array.isArray(parsed)
+    ? parsed.filter((keybind): keybind is string => typeof keybind === "string")
+    : [value];
+  const [primary = "", secondary = ""] = keybinds;
+
+  return [primary, secondary];
+}
+
+function serializePushToTalkKeybinds(keybinds: [string, string]) {
+  const [primary, secondary] = keybinds;
+  if (secondary) {
+    return JSON.stringify(keybinds);
+  }
+
+  return primary;
+}
+
+function normalizeKeybind(value: string) {
+  return value.trim().toLowerCase();
+}
+
 /**
  * Push to Talk settings configuration
  */
 export function PushToTalkSettings() {
   const state = useState();
+
+  const updateKeybind = (index: 0 | 1, keybind: string) => {
+    const keybinds = splitPushToTalkKeybinds(state.voice.pushToTalkKeybind);
+    const duplicateIndex = index === 0 ? 1 : 0;
+
+    if (
+      keybind &&
+      normalizeKeybind(keybind) === normalizeKeybind(keybinds[duplicateIndex])
+    ) {
+      return;
+    }
+
+    keybinds[index] = keybind;
+    const nextValue = serializePushToTalkKeybinds(keybinds);
+    state.voice.pushToTalkKeybind = nextValue;
+    syncToDesktop({ keybind: nextValue });
+  };
 
   return (
     <Column gap="lg">
@@ -58,12 +105,15 @@ export function PushToTalkSettings() {
           </Text>
 
           <KeybindInput
-            value={state.voice.pushToTalkKeybind}
-            onChange={(value) => {
-              state.voice.pushToTalkKeybind = value;
-              syncToDesktop({ keybind: value });
-            }}
-            placeholder="Click to set keybind"
+            value={splitPushToTalkKeybinds(state.voice.pushToTalkKeybind)[0]}
+            onChange={(value) => updateKeybind(0, value)}
+            placeholder="Click to set primary keybind"
+          />
+
+          <KeybindInput
+            value={splitPushToTalkKeybinds(state.voice.pushToTalkKeybind)[1]}
+            onChange={(value) => updateKeybind(1, value)}
+            placeholder="Click to set secondary keybind"
           />
         </Column>
 

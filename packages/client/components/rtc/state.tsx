@@ -67,7 +67,7 @@ declare global {
   }
 }
 
-import { Room, Track } from "livekit-client";
+import { ConnectionState, Room, RoomEvent, Track } from "livekit-client";
 import { DenoiseTrackProcessor } from "livekit-rnnoise-processor";
 import { Channel } from "stoat.js";
 
@@ -138,6 +138,9 @@ class Voice {
   #lastCallMessageSent = new Map<string, number>();
   #noiseGateProcessor?: NoiseGateProcessor;
   #mutePromise: Promise<void> = Promise.resolve();
+  #pendingLeaveNotifications = new Map<string, ReturnType<typeof setTimeout>>();
+  #suppressedReconnectJoins = new Set<string>();
+  #suppressedReconnectJoinsClearTimeout?: ReturnType<typeof setTimeout>;
 
   fullscreen: Accessor<boolean>;
   #setFullscreen: Setter<boolean>;
@@ -297,6 +300,7 @@ class Voice {
         deviceId: this.#settings.preferredAudioOutputDevice,
       },
     });
+    let participantNotificationsReady = false;
 
     this.vidTracks = useTracks(
       [
@@ -314,7 +318,7 @@ class Voice {
       this.#setScreenshare(false);
     });
 
-    room.addListener("connected", () => {
+    room.addListener(RoomEvent.Connected, () => {
       debugLog("PTT-WEB", "Room connected");
       this.#setState("CONNECTED");
       this.#reconnectAttempts = 0; // Reset on successful connection
@@ -353,7 +357,68 @@ class Voice {
       }
     });
 
-    room.addListener("disconnected", (reason?) => {
+    room.addListener(RoomEvent.SignalReconnecting, () => {
+      debugLog("PTT-WEB", "Room signal reconnecting");
+      this.#setState("RECONNECTING");
+    });
+
+    room.addListener(RoomEvent.Reconnecting, () => {
+      debugLog("PTT-WEB", "Room reconnecting");
+      this.#setState("RECONNECTING");
+    });
+
+    room.addListener(RoomEvent.Reconnected, () => {
+      debugLog("PTT-WEB", "Room reconnected");
+      this.#setState("CONNECTED");
+      this.#reconnectAttempts = 0;
+
+      if (this.#suppressedReconnectJoinsClearTimeout) {
+        clearTimeout(this.#suppressedReconnectJoinsClearTimeout);
+      }
+
+      this.#suppressedReconnectJoinsClearTimeout = setTimeout(() => {
+        this.#suppressedReconnectJoins.clear();
+        this.#suppressedReconnectJoinsClearTimeout = undefined;
+      }, 0);
+    });
+
+    room.addListener(RoomEvent.ParticipantConnected, (participant) => {
+      const pendingLeaveNotification = this.#pendingLeaveNotifications.get(
+        participant.identity,
+      );
+      if (pendingLeaveNotification) {
+        clearTimeout(pendingLeaveNotification);
+        this.#pendingLeaveNotifications.delete(participant.identity);
+      }
+
+      if (this.#suppressedReconnectJoins.delete(participant.identity)) return;
+
+      if (!participantNotificationsReady) return;
+      if (participant.identity === this.getClient().user?.id) return;
+
+      console.log("[VoiceNotifications] Playing join sound");
+      voiceNotifications.playJoin();
+    });
+
+    room.addListener(RoomEvent.ParticipantDisconnected, (participant) => {
+      if (!participantNotificationsReady) return;
+      if (participant.identity === this.getClient().user?.id) return;
+
+      const timeout = setTimeout(() => {
+        this.#pendingLeaveNotifications.delete(participant.identity);
+        if (room.state !== ConnectionState.Connected) {
+          this.#suppressedReconnectJoins.add(participant.identity);
+          return;
+        }
+
+        console.log("[VoiceNotifications] Playing leave sound");
+        voiceNotifications.playLeave();
+      }, 0);
+
+      this.#pendingLeaveNotifications.set(participant.identity, timeout);
+    });
+
+    room.addListener(RoomEvent.Disconnected, (reason?) => {
       debugLog(
         "PTT-WEB",
         "Room disconnected, reason:",
@@ -397,6 +462,7 @@ class Voice {
     await room.connect(auth.url, auth.token, {
       autoSubscribe: false,
     });
+    participantNotificationsReady = true;
     debugLog(
       "PTT-WEB",
       "Room connected successfully, mic state:",
@@ -493,6 +559,15 @@ class Voice {
       voiceNotifications.playSelfLeave();
 
       room.removeAllListeners();
+      this.#pendingLeaveNotifications.forEach((timeout) =>
+        clearTimeout(timeout),
+      );
+      this.#pendingLeaveNotifications.clear();
+      this.#suppressedReconnectJoins.clear();
+      if (this.#suppressedReconnectJoinsClearTimeout) {
+        clearTimeout(this.#suppressedReconnectJoinsClearTimeout);
+        this.#suppressedReconnectJoinsClearTimeout = undefined;
+      }
       room.disconnect();
 
       batch(() => {
@@ -1052,12 +1127,6 @@ export function VoiceContext(props: { children: JSX.Element }) {
         // });
         if (participant.userId === currentClient.user?.id) return;
 
-        if (voice.channel()?.id === channel.id) {
-          console.log("[VoiceNotifications] Playing join sound");
-          voiceNotifications.playJoin();
-          return;
-        }
-
         // Incoming call: someone joined a DM/Group voice channel we're not in
         if (
           (channel.type === "DirectMessage" || channel.type === "Group") &&
@@ -1115,11 +1184,6 @@ export function VoiceContext(props: { children: JSX.Element }) {
         //   shouldPlay: voice.channel()?.id === channel.id && userId !== currentClient.user?.id
         // });
         if (userId === currentClient.user?.id) return;
-
-        if (voice.channel()?.id === channel.id) {
-          console.log("[VoiceNotifications] Playing leave sound");
-          voiceNotifications.playLeave();
-        }
 
         // Dismiss incoming call if the caller left
         const call = incomingCall();
