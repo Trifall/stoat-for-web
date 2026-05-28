@@ -299,6 +299,9 @@ class Voice {
       audioOutput: {
         deviceId: this.#settings.preferredAudioOutputDevice,
       },
+      videoCaptureDefaults: {
+        deviceId: this.#settings.preferredVideoDevice,
+      },
     });
     let participantNotificationsReady = false;
 
