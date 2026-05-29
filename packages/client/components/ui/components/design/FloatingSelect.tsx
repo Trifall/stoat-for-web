@@ -13,13 +13,14 @@ import { Motion, Presence } from "solid-motionone";
 
 import { autoUpdate, flip, offset, shift, size } from "@floating-ui/dom";
 import { MenuItem } from "mdui/components/menu-item";
-import { ControlId, IFormControl } from "solid-forms";
 import { styled } from "styled-system/jsx";
 
-type FloatingSelectProps = {
+type FloatingSelectPropsLabel =
+  | { required: true; label: string }
+  | { required?: false; label?: string };
+
+type FloatingSelectProps = FloatingSelectPropsLabel & {
   value?: string;
-  label?: string;
-  required?: boolean;
   disabled?: boolean;
   variant?: "filled" | "outlined";
   children: JSX.Element;
@@ -109,8 +110,7 @@ export function FloatingSelect(props: FloatingSelectProps) {
         ) as MenuItem);
 
     if (menuItem) {
-      const value = menuItem.getAttribute("value");
-      if (value !== null && local.onChange) {
+      if (menuItem.value != null && local.onChange) {
         // Create a synthetic event that matches the expected interface
         local.onChange({ ...event, currentTarget: menuItem });
       }
@@ -164,33 +164,6 @@ export function FloatingSelect(props: FloatingSelectProps) {
         </Presence>
       </Portal>
     </>
-  );
-}
-
-/**
- * Form wrapper for FloatingSelect
- */
-export function ControlSelect(props: {
-  label?: string;
-  variant?: "filled" | "outlined";
-  control: IFormControl<string, Record<ControlId, unknown>>;
-  children: JSX.Element;
-}) {
-  const [local, others] = splitProps(props, ["control", "children"]);
-
-  return (
-    <FloatingSelect
-      {...others}
-      value={local.control.value}
-      required={local.control.isRequired}
-      disabled={local.control.isDisabled}
-      onChange={(e) => {
-        local.control.setValue(e.currentTarget.value || "");
-        local.control.markDirty(true);
-      }}
-    >
-      {local.children}
-    </FloatingSelect>
   );
 }
 

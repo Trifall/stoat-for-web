@@ -9,7 +9,6 @@ import { CONFIGURATION } from "@revolt/common";
 import {
   CircularProgress,
   Column,
-  ControlSelect,
   Form2,
   MenuItem,
   Row,
@@ -255,7 +254,7 @@ export default function ServerOverview(props: ServerSettingsProps) {
             <Trans>System message channels</Trans>
           </Text>
           <Column>
-            <ControlSelect
+            <Form2.Select
               label={t`User Joined`}
               control={editGroup.controls.sys_user_joined}
             >
@@ -267,10 +266,10 @@ export default function ServerOverview(props: ServerSettingsProps) {
                   <MenuItem value={element.value}>{element.item.name}</MenuItem>
                 )}
               </For>
-            </ControlSelect>
+            </Form2.Select>
           </Column>
           <Column>
-            <ControlSelect
+            <Form2.Select
               label={t`User Left`}
               control={editGroup.controls.sys_user_left}
             >
@@ -282,10 +281,10 @@ export default function ServerOverview(props: ServerSettingsProps) {
                   <MenuItem value={element.value}>{element.item.name}</MenuItem>
                 )}
               </For>
-            </ControlSelect>
+            </Form2.Select>
           </Column>
           <Column>
-            <ControlSelect
+            <Form2.Select
               label={t`User Kicked`}
               control={editGroup.controls.sys_user_kicked}
             >
@@ -297,10 +296,10 @@ export default function ServerOverview(props: ServerSettingsProps) {
                   <MenuItem value={element.value}>{element.item.name}</MenuItem>
                 )}
               </For>
-            </ControlSelect>
+            </Form2.Select>
           </Column>
           <Column>
-            <ControlSelect
+            <Form2.Select
               label={t`User Banned`}
               control={editGroup.controls.sys_user_banned}
             >
@@ -312,7 +311,7 @@ export default function ServerOverview(props: ServerSettingsProps) {
                   <MenuItem value={element.value}>{element.item.name}</MenuItem>
                 )}
               </For>
-            </ControlSelect>
+            </Form2.Select>
           </Column>
           <Row>
             <Form2.Reset group={editGroup} onReset={onReset} />

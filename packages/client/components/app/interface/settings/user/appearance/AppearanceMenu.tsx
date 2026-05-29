@@ -1,6 +1,6 @@
 import { For, Match, Show, Switch, createSignal } from "solid-js";
 
-import { Trans } from "@lingui-solid/solid/macro";
+import { Trans, useLingui } from "@lingui-solid/solid/macro";
 import { css } from "styled-system/css";
 import { styled } from "styled-system/jsx";
 
@@ -40,6 +40,7 @@ import MDPalette from "@material-design-icons/svg/outlined/palette.svg?component
 export function AppearanceMenu() {
   const user = useUser();
   const state = useState();
+  const { t } = useLingui();
   const [pickerRef, setPickerRef] = createSignal<HTMLDivElement>();
 
   return (

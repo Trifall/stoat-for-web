@@ -9,7 +9,6 @@ import { Message } from "@revolt/app";
 import {
   Avatar,
   Column,
-  ControlSelect,
   Dialog,
   DialogProps,
   Form2,
@@ -181,7 +180,7 @@ export function ReportContentModal(
             )}
           </div>
 
-          <ControlSelect
+          <Form2.Select
             label={t`Reason for report`}
             control={group.controls.category}
           >
@@ -191,7 +190,7 @@ export function ReportContentModal(
             <For each={reasons}>
               {(value) => <MenuItem value={value}>{strings[value]}</MenuItem>}
             </For>
-          </ControlSelect>
+          </Form2.Select>
 
           {/* TODO: use TextEditor? */}
           <Form2.TextField

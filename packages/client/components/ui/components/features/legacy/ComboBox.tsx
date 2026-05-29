@@ -3,7 +3,7 @@ import { styled } from "styled-system/jsx";
 /**
  * Dropdown element
  *
- * @deprecated Use FloatingSelect instead
+ * @deprecated Use FloatingSelect or Form2.Select instead
  */
 export const ComboBox = styled("select", {
   base: {
@@ -28,4 +28,4 @@ export const ComboBox = styled("select", {
       boxShadow: "0 0 0 1.5pt var(--colours-component-combo-focus)",
     },
   },
-});
+}); // TODO: re-do this and Input to work like Button
