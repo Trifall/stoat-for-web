@@ -79,6 +79,21 @@ export default defineConfig({
     target: "esnext",
     rollupOptions: {
       external: ["hast"],
+      output: {
+        manualChunks: {
+          markdown: [
+            "lowlight",
+            "rehype-highlight",
+            "rehype-katex",
+            "remark-breaks",
+            "remark-gfm",
+            "remark-math",
+            "remark-parse",
+            "remark-rehype",
+            "vfile",
+          ],
+        },
+      },
     },
     sourcemap: true,
   },
