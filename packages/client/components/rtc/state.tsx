@@ -17,63 +17,7 @@ import {
   useTracks,
 } from "solid-livekit-components";
 
-import { voiceNotifications } from "./VoiceNotifications";
-
-const debugLog = (prefix: string, ...args: unknown[]) => {
-  if (import.meta.env.DEV) {
-    console.log(`[${prefix}]`, ...args);
-  }
-};
-
-// Type declarations for Stoat Desktop push-to-talk API
-declare global {
-  interface Window {
-    pushToTalk?: {
-      onStateChange: (callback: (state: { active: boolean }) => void) => void;
-      offStateChange: (callback: (state: { active: boolean }) => void) => void;
-      setManualState: (active: boolean) => void;
-      getCurrentState: () => { active: boolean };
-      getConfig: () => {
-        enabled: boolean;
-        keybind: string;
-        mode: "hold" | "toggle";
-        releaseDelay: number;
-      };
-      onConfigChange: (
-        callback: (config: {
-          enabled: boolean;
-          keybind: string;
-          mode: "hold" | "toggle";
-          releaseDelay: number;
-        }) => void,
-      ) => void;
-      offConfigChange: (
-        callback: (config: {
-          enabled: boolean;
-          keybind: string;
-          mode: "hold" | "toggle";
-          releaseDelay: number;
-        }) => void,
-      ) => void;
-      updateSettings: (settings: {
-        enabled?: boolean;
-        keybind?: string;
-        mode?: "hold" | "toggle";
-        releaseDelay?: number;
-        notificationSounds?: boolean;
-      }) => void;
-    };
-    stoatRefreshVoice?: () => void;
-  }
-}
-
-import { ConnectionState, Room, RoomEvent, Track } from "livekit-client";
-import { DenoiseTrackProcessor } from "livekit-rnnoise-processor";
-import { Channel } from "stoat.js";
-
-import { NoiseGateProcessor } from "./NoiseGateProcessor";
-
-import { useClient } from "@revolt/client";
+import { useClient, type SoundController, useSound } from "@revolt/client";
 import { CONFIGURATION } from "@revolt/common";
 import { ModalController, useModals } from "@revolt/modal";
 import { useNavigate } from "@revolt/routing";
@@ -153,9 +97,17 @@ class Voice {
 
   private openModal;
   private getClient;
+  private screenShareTracks: Set<string>;
 
-  constructor(voiceSettings: VoiceSettings, modals: ModalController) {
+  private sound: SoundController;
+
+  constructor(
+    voiceSettings: VoiceSettings,
+    modals: ModalController,
+    sound: SoundController,
+  ) {
     this.#settings = voiceSettings;
+    this.sound = sound;
 
     const [channel, setChannel] = createSignal<Channel>();
     this.channel = channel;
@@ -202,6 +154,8 @@ class Voice {
     this.openModal = modals.openModal;
 
     this.getClient = useClient();
+
+    this.screenShareTracks = new Set();
   }
 
   #resetVoiceProcessors() {
@@ -326,9 +280,18 @@ class Voice {
     room.addListener(RoomEvent.Connected, () => {
       debugLog("PTT-WEB", "Room connected");
       this.#setState("CONNECTED");
-      this.#reconnectAttempts = 0; // Reset on successful connection
+      this.#reconnectAttempts = 0;
       console.log("[VoiceNotifications] Playing self join sound");
-      voiceNotifications.playSelfJoin();
+      this.sound.playSound("selfJoinVoice");
+
+      for (const p of room.remoteParticipants.values()) {
+        const screenShareTrack = p.getTrackPublication(
+          Track.Source.ScreenShare,
+        );
+        if (screenShareTrack) {
+          this.screenShareTracks.add(screenShareTrack.trackSid);
+        }
+      }
       if (this.speakingPermission) {
         const pttActive =
           this.#settings.pushToTalkEnabled &&
@@ -402,7 +365,7 @@ class Voice {
       if (participant.identity === this.getClient().user?.id) return;
 
       console.log("[VoiceNotifications] Playing join sound");
-      voiceNotifications.playJoin();
+      this.sound.playSound("userJoinVoice");
     });
 
     room.addListener(RoomEvent.ParticipantDisconnected, (participant) => {
@@ -417,7 +380,7 @@ class Voice {
         }
 
         console.log("[VoiceNotifications] Playing leave sound");
-        voiceNotifications.playLeave();
+        this.sound.playSound("userLeaveVoice");
       }, 0);
 
       this.#pendingLeaveNotifications.set(participant.identity, timeout);
@@ -432,31 +395,45 @@ class Voice {
         this.#isManualDisconnect,
       );
 
-      // If this was a manual disconnect (user clicked leave), don't try to reconnect
       if (this.#isManualDisconnect) {
         debugLog("PTT-WEB", "Manual disconnect - resetting state");
-        voiceNotifications.playSelfLeave();
+        this.sound.playSound("selfLeaveVoice");
         this.#setState("READY");
         this.#setRoom(undefined);
         this.#setChannel(undefined);
         return;
       }
 
-      // Check if auto-reconnect is enabled
       if (!this.#settings.autoReconnect) {
-        debugLog(
-          "PTT-WEB",
-          "Auto-reconnect disabled - setting to DISCONNECTED",
-        );
+        debugLog("PTT-WEB", "Auto-reconnect disabled");
         this.#setState("DISCONNECTED");
         if (this.#settings.soundDisconnect) {
-          voiceNotifications.playDisconnect();
+          this.sound.playSound("disconnect");
         }
         return;
       }
 
-      // Try to reconnect
       this.#handleReconnect();
+    });
+
+    room.addListener("trackPublished", (pub) => {
+      if (pub.source === Track.Source.ScreenShare) {
+        pub.once("subscribed", (track) => {
+          track.once("videoPlaybackStarted", () => {
+            this.sound.playSound("streamStart");
+            if (track.sid) {
+              this.screenShareTracks.add(track.sid);
+            }
+          });
+        });
+      }
+    });
+
+    room.addListener("trackUnpublished", (unpub) => {
+      if (this.screenShareTracks.has(unpub.trackSid)) {
+        this.sound.playSound("streamEnd");
+        this.screenShareTracks.delete(unpub.trackSid);
+      }
     });
 
     if (!auth) {
@@ -481,7 +458,7 @@ class Voice {
       debugLog("PTT-WEB", "No channel to reconnect to");
       this.#setState("DISCONNECTED");
       if (this.#settings.soundDisconnect) {
-        voiceNotifications.playDisconnect();
+        this.sound.playSound("disconnect");
       }
       return;
     }
@@ -530,7 +507,7 @@ class Voice {
         debugLog("PTT-WEB", "Max reconnection attempts reached");
         this.#setState("DISCONNECTED");
         if (this.#settings.soundDisconnect) {
-          voiceNotifications.playDisconnect();
+          this.sound.playSound("disconnect");
         }
       }
     }
@@ -561,7 +538,7 @@ class Voice {
       this.#noiseGateProcessor?.destroy();
       this.#noiseGateProcessor = undefined;
 
-      voiceNotifications.playSelfLeave();
+      this.sound.playSound("selfLeaveVoice");
 
       room.removeAllListeners();
       this.#pendingLeaveNotifications.forEach((timeout) =>
@@ -643,9 +620,9 @@ class Voice {
 
       if (shouldPlaySound) {
         if (room.localParticipant.isMicrophoneEnabled) {
-          voiceNotifications.playUnmute();
+          this.sound.playSound("unmute");
         } else {
-          voiceNotifications.playMute();
+          this.sound.playSound("mute");
         }
       }
     } catch (e) {
@@ -706,9 +683,9 @@ class Voice {
 
         if (shouldPlaySound) {
           if (enabled) {
-            voiceNotifications.playUnmute();
+            this.sound.playSound("unmute");
           } else {
-            voiceNotifications.playMute();
+            this.sound.playSound("mute");
           }
         }
       } else {
@@ -816,6 +793,8 @@ class Voice {
       await room.localParticipant.setScreenShareEnabled(false);
 
       this.#setScreenshare(room.localParticipant.isScreenShareEnabled);
+
+      this.sound.playSound("streamEnd");
     } else {
       const qualities = this.getEnabledScreenShareQualities();
       let screenPickerQualityName: ScreenShareQualityName | undefined;
@@ -1025,7 +1004,8 @@ type IncomingCall = {
 export function VoiceContext(props: { children: JSX.Element }) {
   const state = useState();
   const modals = useModals();
-  const voice = new Voice(state.voice, modals);
+  const sound = useSound();
+  const voice = new Voice(state.voice, modals, sound);
   const client = useClient();
   const navigate = useNavigate();
 
@@ -1041,7 +1021,7 @@ export function VoiceContext(props: { children: JSX.Element }) {
     if (call) {
       recentlyDismissed.set(call.channel.id, Date.now());
     }
-    voiceNotifications.stopIncomingCall();
+      sound.stopIncomingCall();
     setIncomingCall(undefined);
     if (incomingCallTimeout) {
       clearTimeout(incomingCallTimeout);
@@ -1210,12 +1190,12 @@ export function VoiceContext(props: { children: JSX.Element }) {
 
           debugLog("IncomingCall", "Ringing from", callerName);
           setIncomingCall({ channel, callerName, callerAvatar });
-          voiceNotifications.playIncomingCall();
+          sound.playIncomingCall();
 
           // Stop ringing after 15 seconds
           if (incomingCallSoundTimeout) clearTimeout(incomingCallSoundTimeout);
           incomingCallSoundTimeout = setTimeout(() => {
-            voiceNotifications.stopIncomingCall();
+              sound.stopIncomingCall();
             incomingCallSoundTimeout = undefined;
           }, 15_000);
 
@@ -1285,42 +1265,11 @@ export function VoiceContext(props: { children: JSX.Element }) {
 
   // sync notification settings reactively
   createEffect(() => {
-    // track master settings
     const enabled = state.voice.notificationSoundsEnabled;
     const volume = state.voice.notificationVolume;
 
-    // track individual sound toggles (force reactivity)
-    const soundJoinCall = state.voice.soundJoinCall;
-    const soundLeaveCall = state.voice.soundLeaveCall;
-    const soundSomeoneJoined = state.voice.soundSomeoneJoined;
-    const soundSomeoneLeft = state.voice.soundSomeoneLeft;
-    const soundMute = state.voice.soundMute;
-    const soundUnmute = state.voice.soundUnmute;
-    const soundReceiveMessage = state.voice.soundReceiveMessage;
-    const soundDisconnect = state.voice.soundDisconnect;
-    const soundIncomingCall = state.voice.soundIncomingCall;
-
-    console.log(
-      "[VoiceNotifications] Settings updated - enabled:",
-      enabled,
-      "volume:",
-      volume,
-    );
-
-    // apply settings to notification manager
-    voiceNotifications.setEnabled(enabled);
-    voiceNotifications.setVolume(volume);
-
-    // sync individual sound toggles
-    voiceNotifications.setSoundEnabled("join_call", soundJoinCall);
-    voiceNotifications.setSoundEnabled("leave_call", soundLeaveCall);
-    voiceNotifications.setSoundEnabled("someone_joined", soundSomeoneJoined);
-    voiceNotifications.setSoundEnabled("someone_left", soundSomeoneLeft);
-    voiceNotifications.setSoundEnabled("mute", soundMute);
-    voiceNotifications.setSoundEnabled("unmute", soundUnmute);
-    voiceNotifications.setSoundEnabled("receive_message", soundReceiveMessage);
-    voiceNotifications.setSoundEnabled("disconnect", soundDisconnect);
-    voiceNotifications.setSoundEnabled("incoming_call", soundIncomingCall);
+    sound.setEnabled(enabled);
+    sound.setVolume(volume);
   });
 
   // sync noise gate threshold live
