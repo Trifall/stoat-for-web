@@ -50,6 +50,30 @@ export interface TypeVoice {
 
   screenShareVolumes: Record<string, number>;
   screenShareMutes: Record<string, boolean>;
+
+  noiseGateEnabled: boolean;
+  noiseGateThreshold: number;
+
+  pushToTalkEnabled: boolean;
+  pushToTalkKeybind: string;
+  pushToTalkMode: "hold" | "toggle";
+  pushToTalkReleaseDelay: number;
+  pushToTalkNotificationSounds: boolean;
+
+  notificationSoundsEnabled: boolean;
+  notificationVolume: number;
+
+  soundJoinCall: boolean;
+  soundLeaveCall: boolean;
+  soundSomeoneJoined: boolean;
+  soundSomeoneLeft: boolean;
+  soundMute: boolean;
+  soundUnmute: boolean;
+  soundReceiveMessage: boolean;
+  soundDisconnect: boolean;
+  soundIncomingCall: boolean;
+
+  autoReconnect: boolean;
 }
 
 /**
@@ -90,6 +114,25 @@ export class Voice extends AbstractStore<"voice", TypeVoice> {
       userMutes: {},
       screenShareVolumes: {},
       screenShareMutes: {},
+      noiseGateEnabled: false,
+      noiseGateThreshold: -50,
+      pushToTalkEnabled: false,
+      pushToTalkKeybind: "V",
+      pushToTalkMode: "hold",
+      pushToTalkReleaseDelay: 250,
+      pushToTalkNotificationSounds: false,
+      notificationSoundsEnabled: true,
+      notificationVolume: 0.3,
+      soundJoinCall: true,
+      soundLeaveCall: true,
+      soundSomeoneJoined: true,
+      soundSomeoneLeft: true,
+      soundMute: true,
+      soundUnmute: true,
+      soundReceiveMessage: true,
+      soundDisconnect: true,
+      soundIncomingCall: true,
+      autoReconnect: true,
     };
   }
 
@@ -194,6 +237,84 @@ export class Voice extends AbstractStore<"voice", TypeVoice> {
           ([userId, muted]) => typeof userId === "string" && muted === true,
         )
         .forEach(([k, v]) => (data.screenShareMutes[k] = v));
+    }
+
+    if (typeof input.noiseGateEnabled === "boolean") {
+      data.noiseGateEnabled = input.noiseGateEnabled;
+    }
+
+    if (
+      typeof input.noiseGateThreshold === "number" &&
+      input.noiseGateThreshold >= -100 &&
+      input.noiseGateThreshold <= 0
+    ) {
+      data.noiseGateThreshold = input.noiseGateThreshold;
+    }
+
+    if (typeof input.pushToTalkEnabled === "boolean") {
+      data.pushToTalkEnabled = input.pushToTalkEnabled;
+    }
+
+    if (typeof input.pushToTalkKeybind === "string") {
+      data.pushToTalkKeybind = input.pushToTalkKeybind;
+    }
+
+    if (input.pushToTalkMode === "hold" || input.pushToTalkMode === "toggle") {
+      data.pushToTalkMode = input.pushToTalkMode;
+    }
+
+    if (
+      typeof input.pushToTalkReleaseDelay === "number" &&
+      input.pushToTalkReleaseDelay >= 0 &&
+      input.pushToTalkReleaseDelay <= 5000
+    ) {
+      data.pushToTalkReleaseDelay = input.pushToTalkReleaseDelay;
+    }
+
+    if (typeof input.pushToTalkNotificationSounds === "boolean") {
+      data.pushToTalkNotificationSounds = input.pushToTalkNotificationSounds;
+    }
+
+    if (typeof input.notificationSoundsEnabled === "boolean") {
+      data.notificationSoundsEnabled = input.notificationSoundsEnabled;
+    }
+
+    if (typeof input.notificationVolume === "number") {
+      data.notificationVolume = Math.max(
+        0,
+        Math.min(1, input.notificationVolume),
+      );
+    }
+
+    if (typeof input.soundJoinCall === "boolean") {
+      data.soundJoinCall = input.soundJoinCall;
+    }
+    if (typeof input.soundLeaveCall === "boolean") {
+      data.soundLeaveCall = input.soundLeaveCall;
+    }
+    if (typeof input.soundSomeoneJoined === "boolean") {
+      data.soundSomeoneJoined = input.soundSomeoneJoined;
+    }
+    if (typeof input.soundSomeoneLeft === "boolean") {
+      data.soundSomeoneLeft = input.soundSomeoneLeft;
+    }
+    if (typeof input.soundMute === "boolean") {
+      data.soundMute = input.soundMute;
+    }
+    if (typeof input.soundUnmute === "boolean") {
+      data.soundUnmute = input.soundUnmute;
+    }
+    if (typeof input.soundReceiveMessage === "boolean") {
+      data.soundReceiveMessage = input.soundReceiveMessage;
+    }
+    if (typeof input.soundDisconnect === "boolean") {
+      data.soundDisconnect = input.soundDisconnect;
+    }
+    if (typeof input.soundIncomingCall === "boolean") {
+      data.soundIncomingCall = input.soundIncomingCall;
+    }
+    if (typeof input.autoReconnect === "boolean") {
+      data.autoReconnect = input.autoReconnect;
     }
 
     return data;
@@ -451,5 +572,184 @@ export class Voice extends AbstractStore<"voice", TypeVoice> {
    */
   get micOn(): boolean {
     return this.get().micOn;
+  }
+
+  set noiseGateEnabled(value: boolean) {
+    this.set("noiseGateEnabled", value);
+  }
+
+  get noiseGateEnabled(): boolean {
+    return this.get().noiseGateEnabled;
+  }
+
+  set noiseGateThreshold(value: number) {
+    this.set("noiseGateThreshold", value);
+  }
+
+  get noiseGateThreshold(): number {
+    return this.get().noiseGateThreshold;
+  }
+
+  set pushToTalkEnabled(value: boolean) {
+    this.set("pushToTalkEnabled", value);
+  }
+
+  get pushToTalkEnabled(): boolean {
+    return this.get().pushToTalkEnabled;
+  }
+
+  set pushToTalkKeybind(value: string) {
+    this.set("pushToTalkKeybind", value);
+  }
+
+  get pushToTalkKeybind(): string {
+    return this.get().pushToTalkKeybind;
+  }
+
+  set pushToTalkMode(value: "hold" | "toggle") {
+    this.set("pushToTalkMode", value);
+  }
+
+  get pushToTalkMode(): "hold" | "toggle" {
+    return this.get().pushToTalkMode;
+  }
+
+  set pushToTalkReleaseDelay(value: number) {
+    this.set("pushToTalkReleaseDelay", value);
+  }
+
+  get pushToTalkReleaseDelay(): number {
+    return this.get().pushToTalkReleaseDelay;
+  }
+
+  get pushToTalkNotificationSounds(): boolean {
+    return this.get().pushToTalkNotificationSounds;
+  }
+
+  set pushToTalkNotificationSounds(value: boolean) {
+    this.set("pushToTalkNotificationSounds", value);
+  }
+
+  setPushToTalkConfig(config: {
+    enabled?: boolean;
+    keybind?: string;
+    mode?: "hold" | "toggle";
+    releaseDelay?: number;
+    notificationSounds?: boolean;
+  }) {
+    if (import.meta.env.DEV) {
+      console.log("[Voice] Setting PTT config from external source:", config);
+    }
+    if (typeof config.enabled === "boolean") {
+      this.set("pushToTalkEnabled", config.enabled);
+    }
+    if (typeof config.keybind === "string") {
+      this.set("pushToTalkKeybind", config.keybind);
+    }
+    if (config.mode === "hold" || config.mode === "toggle") {
+      this.set("pushToTalkMode", config.mode);
+    }
+    if (typeof config.releaseDelay === "number") {
+      this.set("pushToTalkReleaseDelay", config.releaseDelay);
+    }
+    if (typeof config.notificationSounds === "boolean") {
+      this.set("pushToTalkNotificationSounds", config.notificationSounds);
+    }
+  }
+
+  get notificationSoundsEnabled(): boolean {
+    return this.get().notificationSoundsEnabled;
+  }
+
+  set notificationSoundsEnabled(value: boolean) {
+    this.set("notificationSoundsEnabled", value);
+  }
+
+  get notificationVolume(): number {
+    return this.get().notificationVolume;
+  }
+
+  set notificationVolume(value: number) {
+    this.set("notificationVolume", value);
+  }
+
+  get soundJoinCall(): boolean {
+    return this.get().soundJoinCall;
+  }
+
+  set soundJoinCall(value: boolean) {
+    this.set("soundJoinCall", value);
+  }
+
+  get soundLeaveCall(): boolean {
+    return this.get().soundLeaveCall;
+  }
+
+  set soundLeaveCall(value: boolean) {
+    this.set("soundLeaveCall", value);
+  }
+
+  get soundSomeoneJoined(): boolean {
+    return this.get().soundSomeoneJoined;
+  }
+
+  set soundSomeoneJoined(value: boolean) {
+    this.set("soundSomeoneJoined", value);
+  }
+
+  get soundSomeoneLeft(): boolean {
+    return this.get().soundSomeoneLeft;
+  }
+
+  set soundSomeoneLeft(value: boolean) {
+    this.set("soundSomeoneLeft", value);
+  }
+
+  get soundMute(): boolean {
+    return this.get().soundMute;
+  }
+
+  set soundMute(value: boolean) {
+    this.set("soundMute", value);
+  }
+
+  get soundUnmute(): boolean {
+    return this.get().soundUnmute;
+  }
+
+  set soundUnmute(value: boolean) {
+    this.set("soundUnmute", value);
+  }
+
+  get soundReceiveMessage(): boolean {
+    return this.get().soundReceiveMessage;
+  }
+
+  set soundReceiveMessage(value: boolean) {
+    this.set("soundReceiveMessage", value);
+  }
+
+  get soundDisconnect(): boolean {
+    return this.get().soundDisconnect;
+  }
+
+  set soundDisconnect(value: boolean) {
+    this.set("soundDisconnect", value);
+  }
+
+  get soundIncomingCall(): boolean {
+    return this.get().soundIncomingCall;
+  }
+
+  set soundIncomingCall(value: boolean) {
+    this.set("soundIncomingCall", value);
+  }
+
+  get autoReconnect(): boolean {
+    return this.get().autoReconnect;
+  }
+
+  set autoReconnect(value: boolean) {
+    this.set("autoReconnect", value);
   }
 }

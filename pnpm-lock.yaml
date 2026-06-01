@@ -170,6 +170,9 @@ importers:
       '@solid-devtools/overlay':
         specifier: ^0.30.1
         version: 0.30.1(solid-js@1.9.6)
+      '@solid-primitives/date':
+        specifier: ^2.1.6
+        version: 2.1.6(solid-js@1.9.6)
       '@solid-primitives/i18n':
         specifier: ^2.2.1
         version: 2.2.1(solid-js@1.9.6)
@@ -3114,6 +3117,11 @@ packages:
     peerDependencies:
       solid-js: ^1.6.12
 
+  '@solid-primitives/date@2.1.6':
+    resolution: {integrity: sha512-lKNdQHr4B6q1a1iw3F1o3Sx2eyj6TAZ2S8fp+LQ/Lt/tSg7QQiLCM9WO32X9AxEZ6ZWmGjlGnWDq1AVKfbsJPA==}
+    peerDependencies:
+      solid-js: ^1.6.12
+
   '@solid-primitives/event-bus@0.1.6':
     resolution: {integrity: sha512-UGtBU5zDyjSYnX0BjaYFcs1XfRD6BDN6VEJi4ydxePaUEKlloOG53BsLZjFgTux8cMEmJAaHjoJQH3/SBt3zcw==}
     peerDependencies:
@@ -3171,6 +3179,11 @@ packages:
 
   '@solid-primitives/memo@1.4.2':
     resolution: {integrity: sha512-1w2MoD/25tZOImCI+dEL08n8dyyc6sg6o0zc14sZXBBa4XSz6TDuPYgQ24r+dQerXWoP6OgZ1VZz+Mo7c1Lmvg==}
+    peerDependencies:
+      solid-js: ^1.6.12
+
+  '@solid-primitives/memo@1.4.5':
+    resolution: {integrity: sha512-dMfFShNsyX5virETyDv/Uoy2HP+PL4k8cUTTLb2r4TfoqJb010KIaOuURqp/Qbdznp4ZkDuP57b28d45kaOueQ==}
     peerDependencies:
       solid-js: ^1.6.12
 
@@ -3239,6 +3252,11 @@ packages:
     peerDependencies:
       solid-js: ^1.6.12
 
+  '@solid-primitives/scheduled@1.5.3':
+    resolution: {integrity: sha512-oNwLE6E6lxJAWrc8QXuwM0k2oU1BnANnkChwMw82aK1j3+mWGJkG1IFe5gCwbV+afYmjI76t9JJV3md/8tLw+g==}
+    peerDependencies:
+      solid-js: ^1.6.12
+
   '@solid-primitives/script-loader@2.3.1':
     resolution: {integrity: sha512-NRvrFwDcgsAQlsFPdKQzRN5LuIh3dYFTzcctaxaqEF2cjEz1zbYekAa6dVdSeX5G0vdBsj9PLwVZ2Ps5SlJIpQ==}
     peerDependencies:
@@ -3271,6 +3289,11 @@ packages:
 
   '@solid-primitives/timer@1.4.1':
     resolution: {integrity: sha512-M7xrZ/rIq2qEas3fZHLoKQjvseRgNH5IGOl7ZkDxlSJDa5RxAcnzdNPmJiMZH/9+PWrViCrnO0RxLs8w/YIOpg==}
+    peerDependencies:
+      solid-js: ^1.6.12
+
+  '@solid-primitives/timer@1.4.4':
+    resolution: {integrity: sha512-Ayjyb3+v1hyU92vuLUN0tVHq2mmTCPGxSDLGJMsDydRqx9ZfJIc9xj6cxK4XvdY3pif3ps2mIv52pjgToybEpQ==}
     peerDependencies:
       solid-js: ^1.6.12
 
@@ -3311,6 +3334,11 @@ packages:
 
   '@solid-primitives/utils@6.3.2':
     resolution: {integrity: sha512-hZ/M/qr25QOCcwDPOHtGjxTD8w2mNyVAYvcfgwzBHq2RwNqHNdDNsMZYap20+ruRwW4A3Cdkczyoz0TSxLCAPQ==}
+    peerDependencies:
+      solid-js: ^1.6.12
+
+  '@solid-primitives/utils@6.4.0':
+    resolution: {integrity: sha512-AeGTBg8Wtkh/0s+evyLtP8piQoS4wyqqQaAFs2HJcFMMjYAtUgo+ZPduRXLjPlqKVc2ejeR544oeqpbn8Egn8A==}
     peerDependencies:
       solid-js: ^1.6.12
 
@@ -10156,6 +10184,13 @@ snapshots:
       '@solid-primitives/utils': 6.3.2(solid-js@1.9.6)
       solid-js: 1.9.6
 
+  '@solid-primitives/date@2.1.6(solid-js@1.9.6)':
+    dependencies:
+      '@solid-primitives/memo': 1.4.5(solid-js@1.9.6)
+      '@solid-primitives/timer': 1.4.4(solid-js@1.9.6)
+      '@solid-primitives/utils': 6.4.0(solid-js@1.9.6)
+      solid-js: 1.9.6
+
   '@solid-primitives/event-bus@0.1.6(solid-js@1.9.6)':
     dependencies:
       '@solid-primitives/immutable': 0.1.10(solid-js@1.9.6)
@@ -10217,8 +10252,14 @@ snapshots:
 
   '@solid-primitives/memo@1.4.2(solid-js@1.9.6)':
     dependencies:
-      '@solid-primitives/scheduled': 1.5.1(solid-js@1.9.6)
+      '@solid-primitives/scheduled': 1.5.2(solid-js@1.9.6)
       '@solid-primitives/utils': 6.3.2(solid-js@1.9.6)
+      solid-js: 1.9.6
+
+  '@solid-primitives/memo@1.4.5(solid-js@1.9.6)':
+    dependencies:
+      '@solid-primitives/scheduled': 1.5.3(solid-js@1.9.6)
+      '@solid-primitives/utils': 6.4.0(solid-js@1.9.6)
       solid-js: 1.9.6
 
   '@solid-primitives/mouse@2.1.2(solid-js@1.9.6)':
@@ -10289,6 +10330,10 @@ snapshots:
     dependencies:
       solid-js: 1.9.6
 
+  '@solid-primitives/scheduled@1.5.3(solid-js@1.9.6)':
+    dependencies:
+      solid-js: 1.9.6
+
   '@solid-primitives/script-loader@2.3.1(solid-js@1.9.6)':
     dependencies:
       solid-js: 1.9.6
@@ -10323,6 +10368,10 @@ snapshots:
     dependencies:
       solid-js: 1.9.6
 
+  '@solid-primitives/timer@1.4.4(solid-js@1.9.6)':
+    dependencies:
+      solid-js: 1.9.6
+
   '@solid-primitives/transition-group@1.1.1(solid-js@1.9.6)':
     dependencies:
       solid-js: 1.9.6
@@ -10353,6 +10402,10 @@ snapshots:
       solid-js: 1.9.6
 
   '@solid-primitives/utils@6.3.2(solid-js@1.9.6)':
+    dependencies:
+      solid-js: 1.9.6
+
+  '@solid-primitives/utils@6.4.0(solid-js@1.9.6)':
     dependencies:
       solid-js: 1.9.6
 
