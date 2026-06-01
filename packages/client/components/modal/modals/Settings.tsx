@@ -38,7 +38,7 @@ export function SettingsModal(
     <Portal mount={document.getElementById("floating")!}>
       <div
         style={{
-          "z-index": 100,
+          "z-index": 9999,
           position: "fixed",
           width: "100%",
           height: "100vh",
@@ -52,6 +52,7 @@ export function SettingsModal(
             <Motion.div
               ref={rootRef}
               class="settings_overlay"
+              style={{ "pointer-events": "auto" }}
               initial={{ opacity: 0, scale: 1.1 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 1.1 }}
