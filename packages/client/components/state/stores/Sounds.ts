@@ -194,4 +194,8 @@ export class Sounds extends AbstractStore<"sounds", TypeSounds> {
   toggle(t: keyof TypeSounds) {
     return this.set(t, !this.enabled(t));
   }
+
+  setVolume(volume: number) {
+    this.set("volume", Math.max(0, Math.min(1, volume)));
+  }
 }

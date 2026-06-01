@@ -9,6 +9,7 @@ import {
   Checkbox,
   Column,
   IconButton,
+  Slider,
   Text,
   iconSize,
 } from "@revolt/ui";
@@ -221,7 +222,119 @@ export default function Sounds() {
               </IconButton>
             </Content>
           </CategoryButton>
+          <CategoryButton
+            action={
+              <Checkbox checked={sounds.enabled("selfJoinVoice")} />
+            }
+            onClick={() => sounds.toggle("selfJoinVoice")}
+            icon="blank"
+          >
+            <Content>
+              <Trans>Join Call (Self)</Trans>
+              <IconButton
+                onPress={() =>
+                  soundController.playSound("selfJoinVoice", true)
+                }
+                use:floating={{
+                  tooltip: {
+                    placement: "top",
+                    content: playSoundString,
+                  },
+                }}
+              >
+                <MdVolumeUp {...iconSize(18)} />
+              </IconButton>
+            </Content>
+          </CategoryButton>
+          <CategoryButton
+            action={
+              <Checkbox checked={sounds.enabled("selfLeaveVoice")} />
+            }
+            onClick={() => sounds.toggle("selfLeaveVoice")}
+            icon="blank"
+          >
+            <Content>
+              <Trans>Leave Call (Self)</Trans>
+              <IconButton
+                onPress={() =>
+                  soundController.playSound("selfLeaveVoice", true)
+                }
+                use:floating={{
+                  tooltip: {
+                    placement: "top",
+                    content: playSoundString,
+                  },
+                }}
+              >
+                <MdVolumeUp {...iconSize(18)} />
+              </IconButton>
+            </Content>
+          </CategoryButton>
+          <CategoryButton
+            action={
+              <Checkbox checked={sounds.enabled("incomingCall")} />
+            }
+            onClick={() => sounds.toggle("incomingCall")}
+            icon="blank"
+          >
+            <Content>
+              <Trans>Incoming Call</Trans>
+              <IconButton
+                onPress={() =>
+                  soundController.playSound("incomingCall", true)
+                }
+                use:floating={{
+                  tooltip: {
+                    placement: "top",
+                    content: playSoundString,
+                  },
+                }}
+              >
+                <MdVolumeUp {...iconSize(18)} />
+              </IconButton>
+            </Content>
+          </CategoryButton>
+          <CategoryButton
+            action={
+              <Checkbox checked={sounds.enabled("disconnect")} />
+            }
+            onClick={() => sounds.toggle("disconnect")}
+            icon="blank"
+          >
+            <Content>
+              <Trans>Disconnected</Trans>
+              <IconButton
+                onPress={() =>
+                  soundController.playSound("disconnect", true)
+                }
+                use:floating={{
+                  tooltip: {
+                    placement: "top",
+                    content: playSoundString,
+                  },
+                }}
+              >
+                <MdVolumeUp {...iconSize(18)} />
+              </IconButton>
+            </Content>
+          </CategoryButton>
         </CategoryButton.Group>
+
+        <Text class="title">
+          <Trans>Master Volume</Trans>
+        </Text>
+        <Slider
+          min={0}
+          max={100}
+          step={1}
+          value={sounds.get().volume * 100}
+          onInput={(event) => {
+            const v = event.currentTarget.value / 100;
+            sounds.setVolume(v);
+            soundController.setVolume(v);
+          }}
+          labelFormatter={(value) => `${value}%`}
+        />
       </Column>
     </Show>
   );
