@@ -165,6 +165,11 @@ class Lifecycle {
     };
 
     this.client.events.on("state", this.onState);
+    this.client.on("error", (error) => {
+      if (import.meta.env.DEV) {
+        console.debug("[client] websocket error", error);
+      }
+    });
     this.client.on("ready", this.onReady);
     this.client.on("policyChanges", this.onPolicyChanges);
   }
