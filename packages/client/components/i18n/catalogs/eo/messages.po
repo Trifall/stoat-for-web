@@ -48,6 +48,81 @@ msgstr ""
 #~ msgid "ptt.settings.title"
 #~ msgstr ""
 
+#. js-lingui-explicit-id
+#: components/app/interface/settings/user/voice/NotificationSoundsSettings.tsx
+#~ msgid "notifications.sounds.autoReconnect"
+#~ msgstr ""
+
+#. js-lingui-explicit-id
+#: components/app/interface/settings/user/voice/NotificationSoundsSettings.tsx
+#~ msgid "notifications.sounds.connection"
+#~ msgstr ""
+
+#. js-lingui-explicit-id
+#: components/app/interface/settings/user/voice/NotificationSoundsSettings.tsx
+#~ msgid "notifications.sounds.disconnect"
+#~ msgstr ""
+
+#. js-lingui-explicit-id
+#: components/app/interface/settings/user/voice/NotificationSoundsSettings.tsx
+#~ msgid "notifications.sounds.enable"
+#~ msgstr ""
+
+#. js-lingui-explicit-id
+#: components/app/interface/settings/user/voice/NotificationSoundsSettings.tsx
+#~ msgid "notifications.sounds.incomingCall"
+#~ msgstr ""
+
+#. js-lingui-explicit-id
+#: components/app/interface/settings/user/voice/NotificationSoundsSettings.tsx
+#~ msgid "notifications.sounds.individual"
+#~ msgstr ""
+
+#. js-lingui-explicit-id
+#: components/app/interface/settings/user/voice/NotificationSoundsSettings.tsx
+#~ msgid "notifications.sounds.joinCall"
+#~ msgstr ""
+
+#. js-lingui-explicit-id
+#: components/app/interface/settings/user/voice/NotificationSoundsSettings.tsx
+#~ msgid "notifications.sounds.leaveCall"
+#~ msgstr ""
+
+#. js-lingui-explicit-id
+#: components/app/interface/settings/user/voice/NotificationSoundsSettings.tsx
+#~ msgid "notifications.sounds.volume"
+#~ msgstr ""
+
+#. js-lingui-explicit-id
+#: components/app/interface/settings/user/voice/NotificationSoundsSettings.tsx
+#~ msgid "notifications.sounds.mute"
+#~ msgstr ""
+
+#. js-lingui-explicit-id
+#: components/app/interface/settings/UserSettings.tsx
+#~ msgid "notifications.tab.title"
+#~ msgstr ""
+
+#. js-lingui-explicit-id
+#: components/app/interface/settings/user/voice/NotificationSoundsSettings.tsx
+#~ msgid "notifications.sounds.receiveMessage"
+#~ msgstr ""
+
+#. js-lingui-explicit-id
+#: components/app/interface/settings/user/voice/NotificationSoundsSettings.tsx
+#~ msgid "notifications.sounds.someoneJoined"
+#~ msgstr ""
+
+#. js-lingui-explicit-id
+#: components/app/interface/settings/user/voice/NotificationSoundsSettings.tsx
+#~ msgid "notifications.sounds.someoneLeft"
+#~ msgstr ""
+
+#. js-lingui-explicit-id
+#: components/app/interface/settings/user/voice/NotificationSoundsSettings.tsx
+#~ msgid "notifications.sounds.unmute"
+#~ msgstr ""
+
 #: components/app/interface/settings/server/roles/ServerRoleOverview.tsx
 msgid "(changes are being saved…)"
 msgstr ""
@@ -107,8 +182,8 @@ msgstr ""
 msgid "{0} left"
 msgstr ""
 
-#. placeholder {0}: (message.systemMessage as ChannelOwnershipChangeSystemMessage).from?.username
-#. placeholder {1}: (message.systemMessage as ChannelOwnershipChangeSystemMessage).to?.username
+#. placeholder {0}: (message.systemMessage as ChannelOwnershipChangeSystemMessage).from ?.username
+#. placeholder {1}: (message.systemMessage as ChannelOwnershipChangeSystemMessage).to ?.username
 #: components/client/NotificationsWorker.tsx
 msgid "{0} made {1} the new group owner"
 msgstr ""
@@ -160,6 +235,20 @@ msgstr ""
 #. placeholder {0}: props.member.displayName
 #: components/modal/modals/UserProfileRoles.tsx
 msgid "{0}'s roles"
+msgstr ""
+
+#: src/interface/channels/text/Composition.tsx
+#: src/interface/channels/text/Composition.tsx
+msgid "{h} hours"
+msgstr ""
+
+#: src/interface/channels/text/Composition.tsx
+#: src/interface/channels/text/Composition.tsx
+msgid "{m} minutes"
+msgstr ""
+
+#: src/interface/channels/text/Composition.tsx
+msgid "{sec} seconds"
 msgstr ""
 
 #: components/ui/components/features/messaging/elements/Reactions.tsx
@@ -243,16 +332,41 @@ msgstr ""
 msgid "1 day"
 msgstr ""
 
+#: src/interface/channels/text/Composition.tsx
+#: src/interface/channels/text/Composition.tsx
 #: components/modal/modals/BanMember.tsx
+#: components/app/interface/settings/channel/Overview.tsx
 msgid "1 hour"
+msgstr ""
+
+#: src/interface/channels/text/Composition.tsx
+#: src/interface/channels/text/Composition.tsx
+#: components/app/interface/settings/channel/Overview.tsx
+msgid "1 minute"
 msgstr ""
 
 #: components/ui/components/features/messaging/elements/Reactions.tsx
 msgid "1 person reacted"
 msgstr "1 homo reagis"
 
+#: src/interface/channels/text/Composition.tsx
+msgid "1 second"
+msgstr ""
+
+#: components/app/interface/settings/channel/Overview.tsx
+msgid "10 minutes"
+msgstr ""
+
+#: components/app/interface/settings/channel/Overview.tsx
+msgid "10 seconds"
+msgstr ""
+
 #: components/app/interface/settings/user/Language.tsx
 msgid "12 hours"
+msgstr ""
+
+#: components/app/interface/settings/channel/Overview.tsx
+msgid "2 hours"
 msgstr ""
 
 #: components/app/interface/settings/user/Language.tsx
@@ -263,7 +377,24 @@ msgstr ""
 msgid "3 days"
 msgstr ""
 
+#: components/app/interface/settings/channel/Overview.tsx
+msgid "30 minutes"
+msgstr ""
+
+#: components/app/interface/settings/channel/Overview.tsx
+msgid "30 seconds"
+msgstr ""
+
+#: components/app/interface/settings/channel/Overview.tsx
+msgid "5 minutes"
+msgstr ""
+
+#: components/app/interface/settings/channel/Overview.tsx
+msgid "5 seconds"
+msgstr ""
+
 #: components/modal/modals/BanMember.tsx
+#: components/app/interface/settings/channel/Overview.tsx
 msgid "6 hours"
 msgstr ""
 
@@ -336,6 +467,11 @@ msgstr ""
 #: components/app/menus/MessageContextMenu.tsx
 #: components/app/menus/ChannelContextMenu.tsx
 msgid "Admin Panel"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: components/app/interface/settings/UserSettings.tsx
+msgid "plus.tab.advanced"
 msgstr ""
 
 #: components/app/interface/settings/UserSettings.tsx
@@ -421,6 +557,10 @@ msgstr ""
 msgid "Assign Roles"
 msgstr "Atribui rolojn"
 
+#: components/modal/modals/ScreenShareSettings.tsx
+msgid "Audio disabled by browser"
+msgstr ""
+
 #: components/modal/modals/MFAFlow.tsx
 #: components/modal/modals/MFAFlow.tsx
 #: components/app/interface/settings/user/Account.tsx
@@ -428,12 +568,17 @@ msgid "Authenticator App"
 msgstr "Aŭtentiga apo"
 
 #. js-lingui-explicit-id
-#: components/app/interface/settings/user/voice/NotificationSoundsSettings.tsx
-msgid "notifications.sounds.autoReconnect"
+#: components/app/interface/settings/user/voice/AdvancedSettings.tsx
+msgid "plus.advanced.autoReconnect"
 msgstr ""
 
 #: components/app/interface/settings/user/voice/VoiceProcessingOptions.tsx
 msgid "Automatic Gain Control"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: components/app/interface/settings/user/voice/AdvancedSettings.tsx
+msgid "plus.advanced.autoReconnectDescription"
 msgstr ""
 
 #: components/app/interface/settings/user/profile/UserProfileEditor.tsx
@@ -539,6 +684,15 @@ msgstr ""
 
 #: components/modal/modals/CreateServer.tsx
 msgid "By creating this server, you agree to the <0>Acceptable Use Policy</0>."
+msgstr ""
+
+#: components/app/interface/settings/channel/permissions/ChannelPermissionsEditor.tsx
+msgid "Bypass Slowmode"
+msgstr ""
+
+#: components/app/interface/settings/channel/permissions/ChannelPermissionsEditor.tsx
+#: components/app/interface/settings/channel/permissions/ChannelPermissionsEditor.tsx
+msgid "Bypasses slowmode in channels"
 msgstr ""
 
 #: components/modal/modals/SignOutSessions.tsx
@@ -653,6 +807,10 @@ msgstr "Kanala nomo"
 msgid "Channel Settings"
 msgstr ""
 
+#: components/app/interface/settings/channel/Overview.tsx
+msgid "Channel Slowmode"
+msgstr ""
+
 #: components/app/interface/settings/channel/permissions/ChannelPermissionsEditor.tsx
 msgid "Channels"
 msgstr "Kanaloj"
@@ -738,6 +896,11 @@ msgstr ""
 msgid "Code"
 msgstr ""
 
+#: components/ui/components/features/voice/callCard/VoiceCallCardActions.tsx
+#: components/ui/components/features/voice/callCard/VoiceCallCardActions.tsx
+msgid "Coming soon! 👀"
+msgstr ""
+
 #: components/app/interface/settings/user/Account.tsx
 msgid "Configure a way to get back into your account in case your 2FA is lost"
 msgstr ""
@@ -773,8 +936,8 @@ msgid "Connecting"
 msgstr ""
 
 #. js-lingui-explicit-id
-#: components/app/interface/settings/user/voice/NotificationSoundsSettings.tsx
-msgid "notifications.sounds.connection"
+#: components/app/interface/settings/user/voice/AdvancedSettings.tsx
+msgid "plus.advanced.connection"
 msgstr ""
 
 #: components/modal/modals/ReportContent.tsx
@@ -1005,6 +1168,10 @@ msgstr ""
 msgid "Date format"
 msgstr ""
 
+#: components/app/interface/settings/user/notifications/Sounds.tsx
+msgid "Deafen"
+msgstr ""
+
 #: components/app/interface/settings/channel/permissions/ChannelPermissionsEditor.tsx
 #: components/app/interface/settings/channel/permissions/ChannelPermissionsEditor.tsx
 msgid "Deafen lower-ranking members in voice call"
@@ -1028,6 +1195,10 @@ msgstr ""
 #: components/app/interface/settings/server/roles/ServerRoleOverview.tsx
 #: components/app/interface/settings/channel/permissions/ChannelPermissionsOverview.tsx
 msgid "Default Permissions"
+msgstr ""
+
+#: components/ui/components/features/voice/callCard/VoiceCallCardActions.tsx
+msgid "Defean"
 msgstr ""
 
 #: components/modal/modals/EmojiPreview.tsx
@@ -1133,12 +1304,8 @@ msgid "Disabled"
 msgstr ""
 
 #: components/ui/components/features/voice/callCard/VoiceCallCardStatus.tsx
+#: components/app/interface/settings/user/notifications/Sounds.tsx
 msgid "Disconnected"
-msgstr ""
-
-#. js-lingui-explicit-id
-#: components/app/interface/settings/user/voice/NotificationSoundsSettings.tsx
-msgid "notifications.sounds.disconnect"
 msgstr ""
 
 #: components/app/interface/settings/user/Native.tsx
@@ -1271,8 +1438,8 @@ msgid "Emoji Name"
 msgstr ""
 
 #: components/app/interface/settings/user/appearance/AppearanceMenu.tsx
-#~ msgid "Emoji Pack (affects your messages only)"
-#~ msgstr ""
+msgid "Emoji Pack (affects your messages only)"
+msgstr ""
 
 #: components/app/interface/settings/ServerSettings.tsx
 msgid "Emojis"
@@ -1286,13 +1453,12 @@ msgstr ""
 msgid "Enable authenticator app"
 msgstr "Ebligi aŭtentigan apon"
 
-#: components/app/interface/settings/user/Notifications.tsx
+#: components/app/interface/settings/user/notifications/Notifications.tsx
 msgid "Enable Desktop Notifications"
 msgstr "Ebligi labortablajn sciigojn"
 
-#. js-lingui-explicit-id
-#: components/app/interface/settings/user/voice/NotificationSoundsSettings.tsx
-msgid "notifications.sounds.enable"
+#: components/app/interface/settings/user/notifications/Notifications.tsx
+msgid "Enable Push Notifications"
 msgstr ""
 
 #. js-lingui-explicit-id
@@ -1307,6 +1473,10 @@ msgstr ""
 
 #: components/app/interface/settings/user/appearance/AppearanceMenu.tsx
 msgid "Enable transparency glass/blur effects (slow on older machines)"
+msgstr ""
+
+#: components/ui/components/features/voice/callCard/VoiceCallCardActions.tsx
+msgid "End call"
 msgstr ""
 
 #: components/app/interface/settings/user/voice/VoiceProcessingOptions.tsx
@@ -1362,6 +1532,14 @@ msgstr ""
 
 #: components/modal/modals/ReportContent.tsx
 msgid "Extreme violence, gore or animal cruelty"
+msgstr ""
+
+#: components/client/NotificationsController.ts
+msgid "Failed to enable notifications. Stoat does not have notification permission."
+msgstr ""
+
+#: components/client/NotificationsController.ts
+msgid "Failed to enable push notifications. Please try again later."
 msgstr ""
 
 #: components/i18n/errors.ts
@@ -1573,14 +1751,8 @@ msgstr ""
 msgid "Impersonation"
 msgstr ""
 
-#. js-lingui-explicit-id
-#: components/app/interface/settings/user/voice/NotificationSoundsSettings.tsx
-msgid "notifications.sounds.incomingCall"
-msgstr ""
-
-#. js-lingui-explicit-id
-#: components/app/interface/settings/user/voice/NotificationSoundsSettings.tsx
-msgid "notifications.sounds.individual"
+#: components/app/interface/settings/user/notifications/Sounds.tsx
+msgid "Incoming Call"
 msgstr ""
 
 #: components/modal/modals/TryPWA.tsx
@@ -1592,8 +1764,8 @@ msgid "Instead of closing, Stoat will hide in your tray."
 msgstr ""
 
 #: components/app/interface/settings/user/appearance/AppearanceMenu.tsx
-#~ msgid "Interface Font"
-#~ msgstr ""
+msgid "Interface Font"
+msgstr ""
 
 #: src/interface/navigation/servers/UserMenu.tsx
 msgid "Invisible"
@@ -1653,9 +1825,8 @@ msgstr ""
 #~ msgid "Join call"
 #~ msgstr ""
 
-#. js-lingui-explicit-id
-#: components/app/interface/settings/user/voice/NotificationSoundsSettings.tsx
-msgid "notifications.sounds.joinCall"
+#: components/app/interface/settings/user/notifications/Sounds.tsx
+msgid "Join Call (Self)"
 msgstr ""
 
 #: src/interface/Home.tsx
@@ -1738,9 +1909,8 @@ msgstr "Foriri"
 msgid "Leave {0}?"
 msgstr ""
 
-#. js-lingui-explicit-id
-#: components/app/interface/settings/user/voice/NotificationSoundsSettings.tsx
-msgid "notifications.sounds.leaveCall"
+#: components/app/interface/settings/user/notifications/Sounds.tsx
+msgid "Leave Call (Self)"
 msgstr ""
 
 #: components/app/menus/ChannelContextMenu.tsx
@@ -1763,6 +1933,7 @@ msgstr "Sciigu nin kiel ni povas plibonigi nian apon, prikomentante al ni."
 msgid "Light"
 msgstr ""
 
+#: components/ui/components/features/voice/callCard/VoiceCallCardActions.tsx
 #: components/app/interface/settings/channel/permissions/ChannelPermissionsEditor.tsx
 msgid "Listen"
 msgstr ""
@@ -1860,15 +2031,19 @@ msgstr ""
 msgid "Masquerade"
 msgstr "Maskado"
 
-#. js-lingui-explicit-id
-#: components/app/interface/settings/user/voice/NotificationSoundsSettings.tsx
-msgid "notifications.sounds.volume"
+#: components/app/interface/settings/user/notifications/Sounds.tsx
+msgid "Master Volume"
 msgstr ""
 
 #: components/app/interface/settings/ServerSettings.tsx
 #: components/app/interface/settings/channel/permissions/ChannelPermissionsEditor.tsx
 msgid "Members"
 msgstr "Membroj"
+
+#. placeholder {0}: slowmodeWaitTime()
+#: src/interface/channels/text/Composition.tsx
+msgid "Members can send one message every {0}."
+msgstr ""
 
 #: components/app/menus/UserContextMenu.tsx
 msgid "Mention"
@@ -1919,11 +2094,11 @@ msgstr ""
 msgid "Message not loaded, click to jump"
 msgstr "Mesaĝo ne ŝargiĝis, alklaku por salti"
 
-#: components/app/interface/settings/user/Notifications.tsx
+#: components/app/interface/settings/user/notifications/Sounds.tsx
 msgid "Message Received"
 msgstr "Riceviĝo de mesaĝo"
 
-#: components/app/interface/settings/user/Notifications.tsx
+#: components/app/interface/settings/user/notifications/Sounds.tsx
 msgid "Message Sent"
 msgstr "Sendado de mesaĝo"
 
@@ -1958,8 +2133,8 @@ msgid "Monochrome"
 msgstr ""
 
 #: components/app/interface/settings/user/appearance/AppearanceMenu.tsx
-#~ msgid "Monospace Font"
-#~ msgstr ""
+msgid "Monospace Font"
+msgstr ""
 
 #: components/app/interface/settings/user/appearance/AppearanceMenu.tsx
 msgid "More Contrast"
@@ -1978,13 +2153,10 @@ msgstr ""
 msgid "Multi-factor authentication is already enabled for this account."
 msgstr ""
 
+#: components/ui/components/features/voice/callCard/VoiceCallCardActions.tsx
 #: components/app/menus/UserContextMenu.tsx
+#: components/app/interface/settings/user/notifications/Sounds.tsx
 msgid "Mute"
-msgstr ""
-
-#. js-lingui-explicit-id
-#: components/app/interface/settings/user/voice/NotificationSoundsSettings.tsx
-msgid "notifications.sounds.mute"
 msgstr ""
 
 #: components/app/menus/shared/NotificationContextMenu.tsx
@@ -1999,6 +2171,10 @@ msgstr ""
 #: components/app/interface/settings/channel/permissions/ChannelPermissionsEditor.tsx
 msgid "Mute Members"
 msgstr "Silentigi membrojn"
+
+#: components/app/menus/UserContextMenu.tsx
+msgid "Mute Screen Share"
+msgstr ""
 
 #: components/app/menus/ServerContextMenu.tsx
 msgid "Mute Server"
@@ -2096,17 +2272,13 @@ msgid "Not of minimum age to use the platform"
 msgstr ""
 
 #. js-lingui-explicit-id
-#: components/app/interface/settings/UserSettings.tsx
-msgid "notifications.tab.title"
-msgstr ""
-
-#. js-lingui-explicit-id
 #: components/app/interface/settings/user/voice/PushToTalkSettings.tsx
 msgid "ptt.settings.notifications"
 msgstr ""
 
 #: components/app/menus/ServerContextMenu.tsx
 #: components/app/menus/shared/NotificationContextMenu.tsx
+#: components/app/interface/settings/UserSettings.tsx
 msgid "Notifications"
 msgstr "Sciigoj"
 
@@ -2249,6 +2421,10 @@ msgstr ""
 msgid "ptt.settings.playMuteSounds"
 msgstr ""
 
+#: components/app/interface/settings/user/notifications/Sounds.tsx
+msgid "Play sound"
+msgstr ""
+
 #. js-lingui-explicit-id
 #: components/app/interface/settings/user/voice/PushToTalkSettings.tsx
 msgid "ptt.settings.muteSoundsDescription"
@@ -2360,13 +2536,16 @@ msgstr "Kialo"
 msgid "Reason for report"
 msgstr ""
 
-#. js-lingui-explicit-id
-#: components/app/interface/settings/user/voice/NotificationSoundsSettings.tsx
-msgid "notifications.sounds.receiveMessage"
+#: components/app/interface/settings/user/notifications/Notifications.tsx
+msgid "Receive notifications while the app is open and in the background."
 msgstr ""
 
-#: components/app/interface/settings/user/Notifications.tsx
-msgid "Receive notifications while the app is open and in the background."
+#: components/app/interface/settings/user/notifications/Notifications.tsx
+msgid "Receive notifications while the tab is open."
+msgstr ""
+
+#: components/app/interface/settings/user/notifications/Notifications.tsx
+msgid "Receive push notifications while the app is closed."
 msgstr ""
 
 #: components/ui/components/features/voice/callCard/VoiceCallCardStatus.tsx
@@ -2529,6 +2708,10 @@ msgstr ""
 msgid "Retry sending"
 msgstr ""
 
+#: components/ui/components/features/voice/callCard/VoiceCallCardActions.tsx
+msgid "Return to voice channel"
+msgstr ""
+
 #: components/modal/modals/ReportContent.tsx
 msgid "Revenge or underage pornography"
 msgstr ""
@@ -2588,6 +2771,10 @@ msgstr ""
 msgid "Screen Share Settings"
 msgstr ""
 
+#: components/app/menus/UserContextMenu.tsx
+msgid "Screen Share Volume"
+msgstr ""
+
 #: components/modal/modals/AddBot.tsx
 msgid "Search for groups..."
 msgstr ""
@@ -2619,6 +2806,10 @@ msgstr ""
 
 #: components/app/interface/settings/user/voice/ScreenShareOptions.tsx
 msgid "Select screen share quality"
+msgstr ""
+
+#: components/app/interface/settings/user/voice/VoiceInputOptions.tsx
+msgid "Select video input"
 msgstr ""
 
 #: components/app/interface/settings/user/Language.tsx
@@ -2742,9 +2933,18 @@ msgstr ""
 msgid "Several people are typing…"
 msgstr "Pluraj homoj skribas…"
 
+#: components/modal/modals/ScreenShareSettings.tsx
+#: components/modal/modals/ScreenSharePicker.tsx
+msgid "Share audio"
+msgstr ""
+
 #: components/app/interface/settings/channel/permissions/ChannelPermissionsEditor.tsx
 #: components/app/interface/settings/channel/permissions/ChannelPermissionsEditor.tsx
 msgid "Share camera or screen in voice call"
+msgstr ""
+
+#: components/ui/components/features/voice/callCard/VoiceCallCardActions.tsx
+msgid "Share screen"
 msgstr ""
 
 #: components/app/interface/settings/user/Native.tsx
@@ -2775,14 +2975,16 @@ msgstr ""
 msgid "Silent"
 msgstr ""
 
-#. js-lingui-explicit-id
-#: components/app/interface/settings/user/voice/NotificationSoundsSettings.tsx
-msgid "notifications.sounds.someoneJoined"
+#: src/interface/channels/text/Composition.tsx
+msgid "Slowmode Immune"
 msgstr ""
 
-#. js-lingui-explicit-id
-#: components/app/interface/settings/user/voice/NotificationSoundsSettings.tsx
-msgid "notifications.sounds.someoneLeft"
+#: src/interface/channels/text/Composition.tsx
+msgid "Slowmode is enabled."
+msgstr ""
+
+#: components/app/interface/settings/channel/Overview.tsx
+msgid "Slowmode off"
 msgstr ""
 
 #: components/modal/modals/EditEmail.tsx
@@ -2806,7 +3008,7 @@ msgstr ""
 #~ msgid "Something went wrong! Try again later."
 #~ msgstr ""
 
-#: components/app/interface/settings/user/Notifications.tsx
+#: components/app/interface/settings/user/notifications/Sounds.tsx
 msgid "Sounds"
 msgstr "Sonoj"
 
@@ -2824,6 +3026,10 @@ msgstr "Paroli"
 
 #: components/app/interface/settings/user/Native.tsx
 msgid "Spellchecker"
+msgstr ""
+
+#: components/ui/components/features/voice/callCard/VoiceCallCardActions.tsx
+msgid "Start camera"
 msgstr ""
 
 #: components/app/interface/settings/user/Native.tsx
@@ -2864,6 +3070,22 @@ msgstr ""
 
 #: components/app/interface/settings/user/Native.tsx
 msgid "Stoat will start in the system tray."
+msgstr ""
+
+#: components/ui/components/features/voice/callCard/VoiceCallCardActions.tsx
+msgid "Stop camera"
+msgstr ""
+
+#: components/ui/components/features/voice/callCard/VoiceCallCardActions.tsx
+msgid "Stop sharing"
+msgstr ""
+
+#: components/app/interface/settings/user/notifications/Sounds.tsx
+msgid "Stream End"
+msgstr ""
+
+#: components/app/interface/settings/user/notifications/Sounds.tsx
+msgid "Stream Start"
 msgstr ""
 
 #: components/app/interface/settings/user/Feedback.tsx
@@ -3077,6 +3299,10 @@ msgstr "Malbloki uzanton"
 msgid "Uncaught Stoat error: {0}"
 msgstr ""
 
+#: components/app/interface/settings/user/notifications/Sounds.tsx
+msgid "Undeafen"
+msgstr ""
+
 #: components/markdown/plugins/anchors.tsx
 msgid "Unknown Server"
 msgstr ""
@@ -3093,9 +3319,9 @@ msgstr ""
 msgid "Unmark this channel as mature?"
 msgstr ""
 
-#. js-lingui-explicit-id
-#: components/app/interface/settings/user/voice/NotificationSoundsSettings.tsx
-msgid "notifications.sounds.unmute"
+#: components/ui/components/features/voice/callCard/VoiceCallCardActions.tsx
+#: components/app/interface/settings/user/notifications/Sounds.tsx
+msgid "Unmute"
 msgstr ""
 
 #: components/app/menus/shared/NotificationContextMenu.tsx
@@ -3152,7 +3378,7 @@ msgstr ""
 msgid "User Joined"
 msgstr ""
 
-#: components/app/interface/settings/user/Notifications.tsx
+#: components/app/interface/settings/user/notifications/Sounds.tsx
 msgid "User Joined Call"
 msgstr "Aliĝo de uzanto en voĉbabilejon"
 
@@ -3164,7 +3390,7 @@ msgstr ""
 msgid "User Left"
 msgstr ""
 
-#: components/app/interface/settings/user/Notifications.tsx
+#: components/app/interface/settings/user/notifications/Sounds.tsx
 msgid "User Left Call"
 msgstr "Forlaso de uzanto el voĉbabilejo"
 
