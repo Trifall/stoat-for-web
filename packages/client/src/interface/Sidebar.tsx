@@ -1,6 +1,7 @@
 import { Component, JSX, Match, Show, Switch, createMemo } from "solid-js";
 
 import { Channel, Server as ServerI } from "stoat.js";
+import { styled } from "styled-system/jsx";
 
 import {
   CategoryContextMenu,
@@ -33,7 +34,7 @@ export const Sidebar = (props: {
   const location = useLocation();
 
   return (
-    <div class="main_bar">
+    <SidebarBase>
       <ServerList
         orderedServers={state.ordering.orderedServers(client())}
         setServerOrder={state.ordering.setServerOrder}
@@ -65,7 +66,7 @@ export const Sidebar = (props: {
           </Match>
         </Switch>
       </Show>
-    </div>
+    </SidebarBase>
   );
 };
 
@@ -165,3 +166,10 @@ const Server: Component = () => {
     </Show>
   );
 };
+
+const SidebarBase = styled("div", {
+  base: {
+    display: "flex",
+    minHeight: 0,
+  },
+});
