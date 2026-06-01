@@ -173,7 +173,9 @@ class Voice {
 
     this.deafen = () => voiceSettings.deafen;
 
-    const [microphone, setMicrophone] = createSignal(voiceSettings.micOn);
+    const [microphone, setMicrophone] = createSignal(
+      voiceSettings.micOn && !voiceSettings.deafen,
+    );
     this.microphone = microphone;
     this.#setMicrophone = setMicrophone;
 
