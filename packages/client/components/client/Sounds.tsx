@@ -26,12 +26,20 @@ export class SoundController {
 
   lastPlayedSound?: keyof TypeSounds;
 
+  private _enabled = true;
+  private _volume = 0.3;
+  private _incomingCallNode?: HTMLAudioElement;
+
   constructor(soundState: Sounds) {
     this.soundState = soundState;
 
     this.isPlaying = this.isPlaying.bind(this);
     this.canPlay = this.canPlay.bind(this);
     this.playSound = this.playSound.bind(this);
+    this.playIncomingCall = this.playIncomingCall.bind(this);
+    this.stopIncomingCall = this.stopIncomingCall.bind(this);
+    this.setEnabled = this.setEnabled.bind(this);
+    this.setVolume = this.setVolume.bind(this);
   }
 
   /**
@@ -50,7 +58,10 @@ export class SoundController {
    * @returns Whether the sound passed is playable currently
    */
   canPlay(newSound: keyof TypeSounds): boolean {
-    // Never let a sound turned off play
+    if (!this._enabled) {
+      return false;
+    }
+
     if (!this.soundState.enabled(newSound)) {
       return false;
     }
@@ -133,10 +144,65 @@ export class SoundController {
         this.node = new Audio(userMovedSound);
         break;
       }
+      case "selfJoinVoice": {
+        this.node = new Audio(userJoinVoiceSound);
+        break;
+      }
+      case "selfLeaveVoice": {
+        this.node = new Audio(userLeaveVoiceSound);
+        break;
+      }
+      case "incomingCall": {
+        this.node = new Audio(ringtoneIncomingSound);
+        break;
+      }
+      case "disconnect": {
+        this.node = new Audio(userLeaveVoiceSound);
+        break;
+      }
     }
     this.lastPlayedSound = sound;
-    this.node.play();
+    if (this.node) {
+      this.node.volume = this._volume;
+      this.node.play();
+    }
     return true;
+  }
+
+  /**
+   * Enable or disable all sounds
+   */
+  setEnabled(enabled: boolean): void {
+    this._enabled = enabled;
+  }
+
+  /**
+   * Set master volume for sounds
+   */
+  setVolume(volume: number): void {
+    this._volume = Math.max(0, Math.min(1, volume));
+  }
+
+  /**
+   * Start looping incoming call ringtone
+   */
+  playIncomingCall(): void {
+    if (this._incomingCallNode || !this._enabled) return;
+    this._incomingCallNode = new Audio(ringtoneIncomingSound);
+    this._incomingCallNode.loop = true;
+    this._incomingCallNode.volume = this._volume;
+    this._incomingCallNode.play().catch(() => {});
+  }
+
+  /**
+   * Stop incoming call ringtone
+   */
+  stopIncomingCall(): void {
+    if (this._incomingCallNode) {
+      this._incomingCallNode.pause();
+      this._incomingCallNode.currentTime = 0;
+      this._incomingCallNode = undefined;
+    }
   }
 }
 
