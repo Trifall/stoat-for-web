@@ -1,12 +1,4 @@
-import {
-  createEffect,
-  createSignal,
-  JSX,
-  Match,
-  on,
-  onCleanup,
-  Switch,
-} from "solid-js";
+import { createEffect, JSX, Match, Switch } from "solid-js";
 
 import { Server } from "stoat.js";
 import { styled } from "styled-system/jsx";
@@ -17,13 +9,13 @@ import { Titlebar } from "@revolt/app/interface/desktop/Titlebar";
 import { useClient, useClientLifecycle } from "@revolt/client";
 import { State } from "@revolt/client/Controller";
 import { NotificationsWorker } from "@revolt/client/NotificationsWorker";
+import { useDevice } from "@revolt/common";
 import { useModals } from "@revolt/modal";
 import { Navigate, useBeforeLeave, useLocation } from "@revolt/routing";
 import { useState } from "@revolt/state";
 import { LAYOUT_SECTIONS } from "@revolt/state/stores/Layout";
 import { CircularProgress } from "@revolt/ui";
 
-import { SlideDrawer } from "../components/ui/components/navigation/SlideDrawer";
 import { Sidebar } from "./interface/Sidebar";
 
 const AppRoot = styled("div", {
@@ -43,6 +35,8 @@ const Interface = (props: { children: JSX.Element }) => {
   const { openModal } = useModals();
   const { isLoggedIn, lifecycle } = useClientLifecycle();
   const { pathname } = useLocation();
+  const device = useDevice();
+  const primarySidebarDefault = () => device.layout() !== "phone";
 
   useBeforeLeave((e) => {
     if (!e.defaultPrevented) {
@@ -71,32 +65,9 @@ const Interface = (props: { children: JSX.Element }) => {
     ].includes(lifecycle.state());
   }
 
-  //Drawer slider for mobile
-  let rootRef, sDrawer: SlideDrawer | null;
-  const [contRef, setContRef] = createSignal<HTMLDivElement>();
-  function rstLayout() {
-    state.layout.setSectionState(LAYOUT_SECTIONS.PRIMARY_SIDEBAR, false, false);
-    state.layout.setSectionState(LAYOUT_SECTIONS.MEMBER_SIDEBAR, false, true);
-  }
-  createEffect(
-    on(contRef, (cont) => {
-      if (!cont || sDrawer) return;
-      sDrawer = new SlideDrawer(cont, rootRef!, (en) => {
-        setTimeout(() => {
-          state.setAppDrawer(en ? sDrawer : null);
-          if (en) rstLayout();
-        }, 1);
-      });
-    }),
-  );
-  onCleanup(() => {
-    sDrawer?.delete();
-    state.setAppDrawer((sDrawer = null));
-  });
-
   return (
     <MessageCache client={client()}>
-      <AppRoot ref={rootRef}>
+      <AppRoot>
         <Titlebar />
         <Switch fallback={<CircularProgress />}>
           <Match when={!isLoggedIn()}>
@@ -127,11 +98,10 @@ const Interface = (props: { children: JSX.Element }) => {
                 })}
               />
               <Content
-                ref={setContRef}
                 class="app_body"
                 sidebar={state.layout.getSectionState(
                   LAYOUT_SECTIONS.PRIMARY_SIDEBAR,
-                  true,
+                  primarySidebarDefault(),
                 )}
               >
                 {props.children}
@@ -152,6 +122,7 @@ const Interface = (props: { children: JSX.Element }) => {
 const Layout = styled("div", {
   base: {
     display: "flex",
+    position: "relative",
     height: "100%",
     minWidth: 0,
   },

@@ -3,7 +3,9 @@ import { JSX, Show, splitProps } from "solid-js";
 import { cva } from "styled-system/css";
 import { styled } from "styled-system/jsx";
 
+import { useDevice } from "@revolt/common";
 import { useState } from "@revolt/state";
+import { LAYOUT_SECTIONS } from "@revolt/state/stores/Layout";
 import { Ripple } from "./Ripple";
 import { Unreads } from "./Unreads";
 
@@ -51,7 +53,8 @@ export function MenuButton(
     JSX.HTMLAttributes<HTMLAnchorElement> &
     JSX.HTMLAttributes<HTMLDivElement> & { href?: string },
 ) {
-  const { appDrawer } = useState();
+  const state = useState();
+  const device = useDevice();
   const [local, other] = splitProps(props, [
     "onClick",
     "noDrawer",
@@ -64,7 +67,18 @@ export function MenuButton(
   ]);
 
   function onClick(e: Event) {
-    if (!local.noDrawer) appDrawer()?.setShown(true);
+    if (!local.noDrawer) {
+      state.appDrawer()?.setShown(true);
+
+      if (device.layout() === "phone") {
+        state.layout.setSectionState(
+          LAYOUT_SECTIONS.PRIMARY_SIDEBAR,
+          false,
+          false,
+        );
+      }
+    }
+
     // @ts-expect-error callable listener
     if (local.onClick) local.onClick(e);
   }

@@ -13,6 +13,7 @@ import { useLingui } from "@lingui-solid/solid/macro";
 import type { API, Channel, Server, ServerFlags } from "stoat.js";
 import { styled } from "styled-system/jsx";
 
+import { useDevice } from "@revolt/common";
 import { KeybindAction, createKeybind } from "@revolt/keybinds";
 import { TextWithEmoji } from "@revolt/markdown";
 import { useModals } from "@revolt/modal";
@@ -40,6 +41,7 @@ import MdChevronRight from "@material-design-icons/svg/filled/chevron_right.svg?
 
 import MdSettings from "@material-symbols/svg-400/outlined/settings-fill.svg?component-solid";
 
+import { HeaderIcon } from "../../common/CommonHeader";
 import { SidebarBase } from "./common";
 import { SidebarVoicePanel } from "./SidebarVoicePanel";
 
@@ -263,8 +265,13 @@ function ServerInfo(
     canManageServer: boolean;
   },
 ) {
+  const device = useDevice();
+
   return (
     <Row align grow minWidth={0}>
+      <Show when={device.layout() === "phone"}>
+        <HeaderIcon>{null}</HeaderIcon>
+      </Show>
       <ServerBadge flags={props.server.flags} />
       <ServerName onClick={props.openServerInfo}>
         <TextWithEmoji content={props.server.name} />

@@ -8,6 +8,7 @@ import { styled } from "styled-system/jsx";
 
 import { ChannelContextMenu, UserContextMenu } from "@revolt/app";
 import { useClient } from "@revolt/client";
+import { useDevice } from "@revolt/common";
 import { TextWithEmoji } from "@revolt/markdown";
 import { useModals } from "@revolt/modal";
 import { useLocation, useNavigate } from "@revolt/routing";
@@ -26,6 +27,7 @@ import { Symbol } from "@revolt/ui/components/utils/Symbol";
 import MdClose from "@material-design-icons/svg/outlined/close.svg?component-solid";
 
 import { useState } from "@revolt/state";
+import { HeaderIcon } from "../../common/CommonHeader";
 import { SidebarBase } from "./common";
 import { SidebarVoicePanel } from "./SidebarVoicePanel";
 
@@ -57,6 +59,7 @@ export const HomeSidebar = (props: Props) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { openModal } = useModals();
+  const device = useDevice();
   const { isMobile } = useState();
 
   const savedNotesChannelId = createMemo(() => props.openSavedNotes());
@@ -70,9 +73,16 @@ export const HomeSidebar = (props: Props) => {
 
   return (
     <SidebarBase class="channel_bar home">
-      <div ref={scrollTargetElement} use:invisibleScrollable style={{ "flex-grow": 1, "min-height": 0 }}>
+      <div
+        ref={scrollTargetElement}
+        use:invisibleScrollable
+        style={{ "flex-grow": 1, "min-height": 0 }}
+      >
         <List>
           <SidebarTitle>
+            <Show when={device.layout() === "phone"}>
+              <HeaderIcon>{null}</HeaderIcon>
+            </Show>
             <Trans>Conversations</Trans>
           </SidebarTitle>
 
@@ -199,6 +209,9 @@ export const HomeSidebar = (props: Props) => {
  */
 const SidebarTitle = styled("p", {
   base: {
+    display: "flex",
+    alignItems: "center",
+    gap: "10px",
     paddingBlock: "calc(var(--gap-md) + 15px)",
     paddingInline: "var(--gap-md)",
 

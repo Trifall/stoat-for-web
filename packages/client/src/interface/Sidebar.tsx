@@ -9,6 +9,7 @@ import {
   ServerSidebarContextMenu,
 } from "@revolt/app";
 import { useClient, useUser } from "@revolt/client";
+import { useDevice } from "@revolt/common";
 import { useModals } from "@revolt/modal";
 import { useLocation, useParams, useSmartParams } from "@revolt/routing";
 import { useState } from "@revolt/state";
@@ -29,12 +30,22 @@ export const Sidebar = (props: {
   const state = useState();
   const client = useClient();
   const { openModal } = useModals();
+  const device = useDevice();
 
   const params = useParams<{ server: string }>();
   const location = useLocation();
+  const primarySidebarDefault = () => device.layout() !== "phone";
+  const primarySidebarOpen = () =>
+    state.layout.getSectionState(
+      LAYOUT_SECTIONS.PRIMARY_SIDEBAR,
+      primarySidebarDefault(),
+    );
 
   return (
-    <SidebarBase>
+    <SidebarBase
+      class="main_bar"
+      data-open={primarySidebarOpen() ? "true" : "false"}
+    >
       <ServerList
         orderedServers={state.ordering.orderedServers(client())}
         setServerOrder={state.ordering.setServerOrder}
@@ -56,8 +67,7 @@ export const Sidebar = (props: {
       />
       <Show
         when={
-          state.layout.getSectionState(LAYOUT_SECTIONS.PRIMARY_SIDEBAR, true) &&
-          !location.pathname.startsWith("/discover")
+          primarySidebarOpen() && !location.pathname.startsWith("/discover")
         }
       >
         <Switch fallback={<Home />}>
@@ -171,5 +181,6 @@ const SidebarBase = styled("div", {
   base: {
     display: "flex",
     minHeight: 0,
+    flexShrink: 0,
   },
 });

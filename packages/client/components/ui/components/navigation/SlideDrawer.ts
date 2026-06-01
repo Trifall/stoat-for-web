@@ -41,7 +41,7 @@ export class SlideDrawer {
     const pwMax = getComputedStyle(document.body).getPropertyValue(
       "--phone-max-width",
     );
-    this.media = matchMedia(`(max-width: ${pwMax}`);
+    this.media = matchMedia(`(max-width: ${pwMax})`);
     this.media.onchange = (e) => this.setEnabled(e.matches);
     this.setEnabled(this.media.matches);
   }

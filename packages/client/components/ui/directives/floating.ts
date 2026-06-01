@@ -149,6 +149,13 @@ export function floating(element: HTMLElement, accessor: Accessor<Props>) {
     trigger("tooltip", false);
   }
 
+  /**
+   * Hide tooltips before a click can move the trigger without firing mouseleave.
+   */
+  function onTooltipPress() {
+    trigger("tooltip", false);
+  }
+
   function onTouch() {
     isTouch = true;
     clearTimeout(tTmr);
@@ -185,14 +192,18 @@ export function floating(element: HTMLElement, accessor: Accessor<Props>) {
 
           element.addEventListener("mouseenter", onMouseEnter);
           element.addEventListener("mouseleave", onMouseLeave);
+          element.addEventListener("mousedown", onTooltipPress);
+          element.addEventListener("click", onTooltipPress);
           element.addEventListener("touchstart", onTouch);
           element.addEventListener("touchend", onTouch);
 
           onCleanup(() => {
             element.removeEventListener("mouseenter", onMouseEnter);
             element.removeEventListener("mouseleave", onMouseLeave);
-            element.addEventListener("touchstart", onTouch);
-            element.addEventListener("touchend", onTouch);
+            element.removeEventListener("mousedown", onTooltipPress);
+            element.removeEventListener("click", onTooltipPress);
+            element.removeEventListener("touchstart", onTouch);
+            element.removeEventListener("touchend", onTouch);
           });
         }
       },

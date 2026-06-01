@@ -2,11 +2,10 @@ import { BiRegularChevronLeft, BiRegularChevronRight } from "solid-icons/bi";
 
 import { JSX, Match, Switch } from "solid-js";
 
-import MdArrowBack from "@material-design-icons/svg/outlined/arrow_back.svg?component-solid";
-
 import { useLingui } from "@lingui-solid/solid/macro";
 import { css } from "styled-system/css";
 
+import { useDevice } from "@revolt/common";
 import { useState } from "@revolt/state";
 import { LAYOUT_SECTIONS } from "@revolt/state/stores/Layout";
 
@@ -17,19 +16,23 @@ import { LAYOUT_SECTIONS } from "@revolt/state/stores/Layout";
  */
 export function HeaderIcon(props: { children: JSX.Element }) {
   const state = useState();
+  const device = useDevice();
   const { t } = useLingui();
+  const primarySidebarDefault = () => device.layout() !== "phone";
+  const primarySidebarOpen = () =>
+    state.layout.getSectionState(
+      LAYOUT_SECTIONS.PRIMARY_SIDEBAR,
+      primarySidebarDefault(),
+    );
 
   return (
     <div
       class={container}
       onClick={() => {
-        const ad = state.appDrawer();
-        if (ad) ad.setShown(false);
-        else
-          state.layout.toggleSectionState(
-            LAYOUT_SECTIONS.PRIMARY_SIDEBAR,
-            true,
-          );
+        state.layout.toggleSectionState(
+          LAYOUT_SECTIONS.PRIMARY_SIDEBAR,
+          primarySidebarDefault(),
+        );
       }}
       use:floating={{
         tooltip: {
@@ -46,15 +49,7 @@ export function HeaderIcon(props: { children: JSX.Element }) {
           </>
         }
       >
-        <Match when={state.appDrawer()}>
-          <MdArrowBack />
-        </Match>
-        <Match
-          when={state.layout.getSectionState(
-            LAYOUT_SECTIONS.PRIMARY_SIDEBAR,
-            true,
-          )}
-        >
+        <Match when={primarySidebarOpen()}>
           <BiRegularChevronLeft size={20} />
           {props.children}
         </Match>
