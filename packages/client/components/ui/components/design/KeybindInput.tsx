@@ -168,7 +168,12 @@ export function KeybindInput(props: Props) {
           variant="standard"
           size="md"
           onPress={clearKeybind}
-          title="Clear keybind"
+          use:floating={{
+            tooltip: {
+              placement: "top",
+              content: "Clear keybind",
+            },
+          }}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"

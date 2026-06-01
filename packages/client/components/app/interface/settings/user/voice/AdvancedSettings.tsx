@@ -12,7 +12,7 @@ import {
 /**
  * Advanced voice settings
  */
-export function AdvancedSettings() {
+export function VoiceAdvancedSettings() {
   const state = useState();
 
   return (

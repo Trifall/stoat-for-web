@@ -7,7 +7,15 @@ type Props = JSX.InputHTMLAttributes<HTMLInputElement> & {
 };
 
 export function CompactNumberInput(props: Props) {
-  return <Input {...props} style={{ width: props.width, ...props.style }} />;
+  return (
+    <Input
+      {...props}
+      style={{
+        width: props.width,
+        ...((props.style as Record<string, unknown>) ?? {}),
+      }}
+    />
+  );
 }
 
 const Input = styled("input", {

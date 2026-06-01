@@ -327,7 +327,7 @@ export default function Sounds() {
           min={0}
           max={100}
           step={1}
-          value={sounds.get().volume * 100}
+          value={sounds.getVolume() * 100}
           onInput={(event) => {
             const v = event.currentTarget.value / 100;
             sounds.setVolume(v);

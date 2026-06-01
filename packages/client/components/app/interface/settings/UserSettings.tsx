@@ -40,9 +40,10 @@ import { Feedback } from "./user/Feedback";
 import { LanguageSettings } from "./user/Language";
 import Native from "./user/Native";
 import Notifications from "./user/notifications/Notifications";
+import { EditProfile } from "./user/profile";
 import { Sessions } from "./user/Sessions";
 import { EditSubscription } from "./user/subscriptions";
-import { AdvancedSettings } from "./user/voice/AdvancedSettings";
+import { VoiceAdvancedSettings } from "./user/voice/AdvancedSettings";
 import { PushToTalkSettings } from "./user/voice/PushToTalkSettings";
 import { VoiceSettings } from "./user/voice/VoiceSettings";
 
@@ -102,8 +103,8 @@ const Config: SettingsConfiguration<{ server: Server }> = {
         return <VoiceSettings />;
       case "push_to_talk":
         return <PushToTalkSettings />;
-      case "advanced":
-        return <AdvancedSettings />;
+      case "voice_advanced":
+        return <VoiceAdvancedSettings />;
       case "notifications":
         return <Notifications isDesktop={!!window.native} />;
       default:
@@ -283,7 +284,7 @@ const Config: SettingsConfiguration<{ server: Server }> = {
               title: <Trans id="ptt.tab.title">Push to Talk</Trans>,
             },
             {
-              id: "advanced",
+              id: "voice_advanced",
               icon: <MdScience {...iconSize(20)} />,
               title: (
                 <Trans id="plus.tab.advanced">Advanced</Trans>

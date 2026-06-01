@@ -17,6 +17,12 @@ import {
   useTracks,
 } from "solid-livekit-components";
 
+import { ConnectionState, Room, RoomEvent, Track } from "livekit-client";
+import { DenoiseTrackProcessor } from "livekit-rnnoise-processor";
+import { Channel } from "stoat.js";
+
+import { NoiseGateProcessor } from "./NoiseGateProcessor";
+
 import { useClient, type SoundController, useSound } from "@revolt/client";
 import { CONFIGURATION } from "@revolt/common";
 import { ModalController, useModals } from "@revolt/modal";
@@ -32,6 +38,18 @@ import { ScreenSharePresets, VideoResolution } from "livekit-client";
 import { InRoom } from "./components/InRoom";
 import { IncomingCallPopup } from "./components/IncomingCallPopup";
 import { RoomAudioManager } from "./components/RoomAudioManager";
+
+const debugLog = (prefix: string, ...args: unknown[]) => {
+  if (import.meta.env.DEV) {
+    console.log(`[${prefix}]`, ...args);
+  }
+};
+
+declare global {
+  interface Window {
+    stoatRefreshVoice?: () => void;
+  }
+}
 
 type State =
   | "READY"
@@ -397,7 +415,6 @@ class Voice {
 
       if (this.#isManualDisconnect) {
         debugLog("PTT-WEB", "Manual disconnect - resetting state");
-        this.sound.playSound("selfLeaveVoice");
         this.#setState("READY");
         this.#setRoom(undefined);
         this.#setChannel(undefined);
@@ -538,7 +555,9 @@ class Voice {
       this.#noiseGateProcessor?.destroy();
       this.#noiseGateProcessor = undefined;
 
-      this.sound.playSound("selfLeaveVoice");
+      if (manual) {
+        this.sound.playSound("selfLeaveVoice");
+      }
 
       room.removeAllListeners();
       this.#pendingLeaveNotifications.forEach((timeout) =>
@@ -1263,10 +1282,10 @@ export function VoiceContext(props: { children: JSX.Element }) {
     client()?.events.disconnect();
   };
 
-  // sync notification settings reactively
+  // sync sound settings reactively from Sounds store
   createEffect(() => {
-    const enabled = state.voice.notificationSoundsEnabled;
-    const volume = state.voice.notificationVolume;
+    const enabled = state.sounds.getEnabled();
+    const volume = state.sounds.getVolume();
 
     sound.setEnabled(enabled);
     sound.setVolume(volume);
