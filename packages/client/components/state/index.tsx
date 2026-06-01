@@ -32,7 +32,7 @@ import { Voice } from "./stores/Voice";
 
 export { SyncWorker } from "./SyncWorker";
 
-export type { Sounds, TypeSounds } from "./stores/Sounds";
+export type { BooleanKeys, Sounds, TypeSounds } from "./stores/Sounds";
 
 /**
  * Introduce some delay before writing state to disk

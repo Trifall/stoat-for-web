@@ -405,21 +405,7 @@ class Voice {
     });
 
     room.addListener(RoomEvent.Disconnected, (reason?) => {
-      debugLog(
-        "PTT-WEB",
-        "Room disconnected, reason:",
-        reason,
-        "isManual:",
-        this.#isManualDisconnect,
-      );
-
-      if (this.#isManualDisconnect) {
-        debugLog("PTT-WEB", "Manual disconnect - resetting state");
-        this.#setState("READY");
-        this.#setRoom(undefined);
-        this.#setChannel(undefined);
-        return;
-      }
+      debugLog("PTT-WEB", "Room disconnected, reason:", reason);
 
       if (!this.#settings.autoReconnect) {
         debugLog("PTT-WEB", "Auto-reconnect disabled");

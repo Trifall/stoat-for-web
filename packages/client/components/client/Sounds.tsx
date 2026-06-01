@@ -1,6 +1,6 @@
 import { createContext, JSXElement, useContext } from "solid-js";
 
-import { Sounds, TypeSounds, useState } from "@revolt/state";
+import { BooleanKeys, Sounds, TypeSounds, useState } from "@revolt/state";
 import deafenSound from "../../scripts/assets_fallback/sounds/deafen.ogg";
 import messageSound from "../../scripts/assets_fallback/sounds/message_sound.ogg";
 import muteSound from "../../scripts/assets_fallback/sounds/mute.ogg";
@@ -26,7 +26,7 @@ export class SoundController {
 
   node?: HTMLAudioElement;
 
-  lastPlayedSound?: keyof TypeSounds;
+  lastPlayedSound?: BooleanKeys<TypeSounds>;
 
   private _enabled = true;
   private _volume = 0.3;
@@ -59,7 +59,7 @@ export class SoundController {
    * @param newSound Sound to check for playability
    * @returns Whether the sound passed is playable currently
    */
-  canPlay(newSound: keyof TypeSounds): boolean {
+  canPlay(newSound: BooleanKeys<TypeSounds>): boolean {
     if (!this._enabled) {
       return false;
     }
@@ -85,7 +85,7 @@ export class SoundController {
    * @param force Bypass canPlay check
    * @returns Whether the sound played
    */
-  playSound(sound: keyof TypeSounds, force?: boolean): boolean {
+  playSound(sound: BooleanKeys<TypeSounds>, force?: boolean): boolean {
     if (!force && !this.canPlay(sound)) {
       return false;
     }

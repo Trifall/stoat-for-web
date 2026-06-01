@@ -2,6 +2,10 @@ import { State } from "..";
 
 import { AbstractStore } from ".";
 
+export type BooleanKeys<T> = {
+  [K in keyof T]: T[K] extends boolean ? K : never;
+}[keyof T];
+
 export type TypeSounds = {
   /**
    * Play sound on deafen
@@ -187,12 +191,12 @@ export class Sounds extends AbstractStore<"sounds", TypeSounds> {
     };
   }
 
-  enabled(t: keyof TypeSounds): boolean {
-    return !!this.get()[t as never];
+  enabled(t: BooleanKeys<TypeSounds>): boolean {
+    return this.get()[t];
   }
 
-  toggle(t: keyof TypeSounds) {
-    return this.set(t, !this.enabled(t) as never);
+  toggle(t: BooleanKeys<TypeSounds>) {
+    return this.set(t, !this.enabled(t));
   }
 
   setVolume(volume: number) {
