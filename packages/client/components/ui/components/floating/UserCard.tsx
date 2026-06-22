@@ -42,8 +42,9 @@ export function UserCard(
   }));
 
   function openProfile() {
-    openModal({ type: "user_profile", user: props.user });
+    openModal({ type: "user_profile", user: props.user, member: props.member });
   }
+
   function openFull() {
     openProfile();
     props.onClose();

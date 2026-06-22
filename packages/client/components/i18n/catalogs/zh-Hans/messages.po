@@ -38,91 +38,6 @@ msgstr ""
 msgid "dddd [at] LT"
 msgstr ""
 
-#. js-lingui-explicit-id
-#: components/app/interface/settings/user/voice/NotificationSoundsSettings.tsx
-#~ msgid "notifications.sounds.title"
-#~ msgstr ""
-
-#. js-lingui-explicit-id
-#: components/app/interface/settings/user/voice/PushToTalkSettings.tsx
-#~ msgid "ptt.settings.title"
-#~ msgstr ""
-
-#. js-lingui-explicit-id
-#: components/app/interface/settings/user/voice/NotificationSoundsSettings.tsx
-#~ msgid "notifications.sounds.autoReconnect"
-#~ msgstr ""
-
-#. js-lingui-explicit-id
-#: components/app/interface/settings/user/voice/NotificationSoundsSettings.tsx
-#~ msgid "notifications.sounds.connection"
-#~ msgstr ""
-
-#. js-lingui-explicit-id
-#: components/app/interface/settings/user/voice/NotificationSoundsSettings.tsx
-#~ msgid "notifications.sounds.disconnect"
-#~ msgstr ""
-
-#. js-lingui-explicit-id
-#: components/app/interface/settings/user/voice/NotificationSoundsSettings.tsx
-#~ msgid "notifications.sounds.enable"
-#~ msgstr ""
-
-#. js-lingui-explicit-id
-#: components/app/interface/settings/user/voice/NotificationSoundsSettings.tsx
-#~ msgid "notifications.sounds.incomingCall"
-#~ msgstr ""
-
-#. js-lingui-explicit-id
-#: components/app/interface/settings/user/voice/NotificationSoundsSettings.tsx
-#~ msgid "notifications.sounds.individual"
-#~ msgstr ""
-
-#. js-lingui-explicit-id
-#: components/app/interface/settings/user/voice/NotificationSoundsSettings.tsx
-#~ msgid "notifications.sounds.joinCall"
-#~ msgstr ""
-
-#. js-lingui-explicit-id
-#: components/app/interface/settings/user/voice/NotificationSoundsSettings.tsx
-#~ msgid "notifications.sounds.leaveCall"
-#~ msgstr ""
-
-#. js-lingui-explicit-id
-#: components/app/interface/settings/user/voice/NotificationSoundsSettings.tsx
-#~ msgid "notifications.sounds.volume"
-#~ msgstr ""
-
-#. js-lingui-explicit-id
-#: components/app/interface/settings/user/voice/NotificationSoundsSettings.tsx
-#~ msgid "notifications.sounds.mute"
-#~ msgstr ""
-
-#. js-lingui-explicit-id
-#: components/app/interface/settings/UserSettings.tsx
-#~ msgid "notifications.tab.title"
-#~ msgstr ""
-
-#. js-lingui-explicit-id
-#: components/app/interface/settings/user/voice/NotificationSoundsSettings.tsx
-#~ msgid "notifications.sounds.receiveMessage"
-#~ msgstr ""
-
-#. js-lingui-explicit-id
-#: components/app/interface/settings/user/voice/NotificationSoundsSettings.tsx
-#~ msgid "notifications.sounds.someoneJoined"
-#~ msgstr ""
-
-#. js-lingui-explicit-id
-#: components/app/interface/settings/user/voice/NotificationSoundsSettings.tsx
-#~ msgid "notifications.sounds.someoneLeft"
-#~ msgstr ""
-
-#. js-lingui-explicit-id
-#: components/app/interface/settings/user/voice/NotificationSoundsSettings.tsx
-#~ msgid "notifications.sounds.unmute"
-#~ msgstr ""
-
 #: components/app/interface/settings/server/roles/ServerRoleOverview.tsx
 msgid "(changes are being saved…)"
 msgstr ""
@@ -656,10 +571,6 @@ msgstr ""
 msgid "Browser Echo Cancellation"
 msgstr ""
 
-#: components/app/interface/settings/user/voice/VoiceProcessingOptions.tsx
-#~ msgid "Browser Noise Supression"
-#~ msgstr ""
-
 #: components/app/interface/settings/user/Feedback.tsx
 msgid "Bug Tracker"
 msgstr ""
@@ -777,10 +688,6 @@ msgstr ""
 #: components/app/interface/settings/user/profile/EditProfile.tsx
 msgid "Change your profile per-server"
 msgstr ""
-
-#: components/modal/modals/Changelog.tsx
-#~ msgid "Changelog"
-#~ msgstr ""
 
 #: components/app/interface/settings/channel/Overview.tsx
 msgid "Channel Description"
@@ -941,6 +848,10 @@ msgstr ""
 msgid "Continue"
 msgstr ""
 
+#: src/AndroidNag.tsx
+msgid "Continue in browser"
+msgstr ""
+
 #: components/auth/src/flows/FlowVerify.tsx
 msgid "Continue to app"
 msgstr ""
@@ -965,6 +876,10 @@ msgstr ""
 msgid "Copy channel ID"
 msgstr ""
 
+#: components/app/menus/MessageContextMenu.tsx
+msgid "Copy file link"
+msgstr ""
+
 #: components/app/interface/settings/user/bots/ViewBot.tsx
 msgid "Copy ID"
 msgstr ""
@@ -973,7 +888,6 @@ msgstr ""
 msgid "Copy Invite URL"
 msgstr ""
 
-#: components/app/menus/MessageContextMenu.tsx
 #: components/app/menus/MessageContextMenu.tsx
 #: components/app/menus/ChannelContextMenu.tsx
 msgid "Copy link"
@@ -985,6 +899,10 @@ msgstr ""
 
 #: components/app/menus/MessageContextMenu.tsx
 msgid "Copy message ID"
+msgstr ""
+
+#: components/app/menus/MessageContextMenu.tsx
+msgid "Copy message link"
 msgstr ""
 
 #: components/app/interface/settings/server/roles/ServerRoleEditor.tsx
@@ -1156,6 +1074,7 @@ msgstr ""
 msgid "Date format"
 msgstr ""
 
+#: components/ui/components/features/voice/callCard/VoiceCallCardActions.tsx
 #: components/app/interface/settings/user/notifications/Sounds.tsx
 msgid "Deafen"
 msgstr ""
@@ -1183,10 +1102,6 @@ msgstr ""
 #: components/app/interface/settings/server/roles/ServerRoleOverview.tsx
 #: components/app/interface/settings/channel/permissions/ChannelPermissionsOverview.tsx
 msgid "Default Permissions"
-msgstr ""
-
-#: components/ui/components/features/voice/callCard/VoiceCallCardActions.tsx
-msgid "Defean"
 msgstr ""
 
 #: components/modal/modals/EmojiPreview.tsx
@@ -1330,6 +1245,10 @@ msgstr ""
 
 #: components/modal/modals/LeaveServer.tsx
 msgid "Don't notify others that you've left"
+msgstr ""
+
+#: src/AndroidNag.tsx
+msgid "Don't show this again"
 msgstr ""
 
 #: components/app/interface/settings/UserSettings.tsx
@@ -1612,6 +1531,10 @@ msgstr ""
 msgid "Get active recovery codes"
 msgstr ""
 
+#: src/AndroidNag.tsx
+msgid "Get it on Google Play"
+msgstr ""
+
 #: src/interface/Home.tsx
 msgid "Give feedback on Stoat"
 msgstr ""
@@ -1728,6 +1651,10 @@ msgstr ""
 
 #: components/modal/modals/ReportContent.tsx
 msgid "Impersonation"
+msgstr ""
+
+#: src/AndroidNag.tsx
+msgid "In the meantime, install Stoat from Google Play for a faster, smoother experience designed for Android."
 msgstr ""
 
 #: components/app/interface/settings/user/notifications/Sounds.tsx
@@ -1908,7 +1835,6 @@ msgstr ""
 msgid "Light"
 msgstr ""
 
-#: components/ui/components/features/voice/callCard/VoiceCallCardActions.tsx
 #: components/app/interface/settings/channel/permissions/ChannelPermissionsEditor.tsx
 msgid "Listen"
 msgstr ""
@@ -2489,10 +2415,6 @@ msgstr ""
 msgid "Read Message History"
 msgstr ""
 
-#: components/modal/modals/Changelog.tsx
-#~ msgid "Read More"
-#~ msgstr ""
-
 #: components/app/interface/settings/channel/permissions/ChannelPermissionsEditor.tsx
 msgid "Read past messages sent in channel"
 msgstr ""
@@ -3031,6 +2953,10 @@ msgstr ""
 msgid "Stoat will start in the system tray."
 msgstr ""
 
+#: src/AndroidNag.tsx
+msgid "Stoat works best as an app"
+msgstr ""
+
 #: components/ui/components/features/voice/callCard/VoiceCallCardActions.tsx
 msgid "Stop camera"
 msgstr ""
@@ -3258,6 +3184,7 @@ msgstr ""
 msgid "Uncaught Stoat error: {0}"
 msgstr ""
 
+#: components/ui/components/features/voice/callCard/VoiceCallCardActions.tsx
 #: components/app/interface/settings/user/notifications/Sounds.tsx
 msgid "Undeafen"
 msgstr ""
@@ -3390,14 +3317,6 @@ msgstr ""
 msgid "Users will no longer be asked to confirm their age before joining this channel.<0/> Please ensure the content is appropriate for all ages."
 msgstr ""
 
-#: components/app/interface/settings/user/voice/VoiceInputOptions.tsx
-#~ msgid "Using default microphone"
-#~ msgstr ""
-
-#: components/app/interface/settings/user/voice/VoiceInputOptions.tsx
-#~ msgid "Using default speaker"
-#~ msgstr ""
-
 #: src/interface/navigation/channels/ServerSidebar.tsx
 msgid "Verified"
 msgstr ""
@@ -3462,6 +3381,10 @@ msgstr ""
 
 #: components/app/interface/settings/user/profile/UserProfileEditor.tsx
 msgid "Want to change username?"
+msgstr ""
+
+#: src/AndroidNag.tsx
+msgid "We are working hard on optimising our web app for mobile."
 msgstr ""
 
 #: components/auth/src/flows/FlowCheck.tsx

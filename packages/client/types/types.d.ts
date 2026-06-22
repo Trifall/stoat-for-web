@@ -18,12 +18,14 @@ declare global {
         keybind?: string;
         mode?: "hold" | "toggle";
         releaseDelay?: number;
+        notificationSounds?: boolean;
       }) => void;
       getConfig: () => {
         enabled: boolean;
         keybind: string;
         mode: "hold" | "toggle";
         releaseDelay: number;
+        notificationSounds: boolean;
       };
       onConfigChange: (
         callback: (config: {
@@ -31,6 +33,7 @@ declare global {
           keybind: string;
           mode: "hold" | "toggle";
           releaseDelay: number;
+          notificationSounds: boolean;
         }) => void,
       ) => void;
       offConfigChange: (
@@ -39,6 +42,7 @@ declare global {
           keybind: string;
           mode: "hold" | "toggle";
           releaseDelay: number;
+          notificationSounds: boolean;
         }) => void,
       ) => void;
     };

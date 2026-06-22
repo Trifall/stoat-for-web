@@ -273,6 +273,7 @@ export type Modals =
       user: User;
       isPlaceholder?: boolean;
       placeholderProfile?: API.UserProfile;
+      member?: ServerMember;
     }
   | {
       type: "user_profile_roles";
@@ -281,6 +282,7 @@ export type Modals =
   | {
       type: "user_profile_mutual_friends";
       users: User[];
+      server?: Server;
     }
   | {
       type: "user_profile_mutual_groups";

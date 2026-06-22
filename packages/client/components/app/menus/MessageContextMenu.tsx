@@ -41,6 +41,7 @@ export function MessageContextMenu(props: {
   message?: Message;
   file?: File;
   reactPicker?: Accessor<MediaPickerProps | undefined>;
+  link?: string;
 }) {
   const user = useUser();
   const state = useState();
@@ -106,7 +107,7 @@ export function MessageContextMenu(props: {
   /**
    * Copy message link to clipboard
    */
-  function copyLink() {
+  function copyMessageLink() {
     navigator.clipboard.writeText(
       `${location.origin}${
         props.message!.server ? `/server/${props.message!.server?.id}` : ""
@@ -124,25 +125,29 @@ export function MessageContextMenu(props: {
   /**
    * Opens the file preview in a new tab
    */
-  function OpenFile() {
+  function openFile() {
     window.open(props.file?.originalUrl, "_blank");
   }
 
   /**
    * Copies the link to the original url of the file
    */
-  function CopyLink() {
+  function copyFileLink() {
     navigator.clipboard.writeText(props.file?.originalUrl ?? "");
+  }
+
+  function copyLink() {
+    navigator.clipboard.writeText(props.link ?? "");
   }
 
   return (
     <ContextMenu>
       <Show when={props.file}>
-        <ContextMenuButton icon={MdOpenInNew} onClick={OpenFile}>
+        <ContextMenuButton icon={MdOpenInNew} onClick={openFile}>
           <Trans>Open file</Trans>
         </ContextMenuButton>
-        <ContextMenuButton icon={MdLink} onClick={CopyLink}>
-          <Trans>Copy link</Trans>
+        <ContextMenuButton icon={MdLink} onClick={copyFileLink}>
+          <Trans>Copy file link</Trans>
         </ContextMenuButton>
         <a
           target="_blank"
@@ -153,6 +158,13 @@ export function MessageContextMenu(props: {
             <Trans>Save file</Trans>
           </ContextMenuButton>
         </a>
+
+        <ContextMenuDivider />
+      </Show>
+      <Show when={props.link}>
+        <ContextMenuButton icon={MdLink} onClick={copyLink}>
+          <Trans>Copy link</Trans>
+        </ContextMenuButton>
 
         <ContextMenuDivider />
       </Show>
@@ -271,7 +283,9 @@ export function MessageContextMenu(props: {
             <Trans>Delete message</Trans>
           </ContextMenuButton>
         </Show>
-        <Show when={!props.message!.author?.self}>
+        <Show
+          when={!props.message!.author?.self && !props.message!.systemMessage}
+        >
           <ContextMenuButton icon={MdReport} onClick={report} destructive>
             <Trans>Report message</Trans>
           </ContextMenuButton>
@@ -282,8 +296,8 @@ export function MessageContextMenu(props: {
             <Trans>Admin Panel</Trans>
           </ContextMenuButton>
         </Show>
-        <ContextMenuButton icon={MdShare} onClick={copyLink}>
-          <Trans>Copy link</Trans>
+        <ContextMenuButton icon={MdShare} onClick={copyMessageLink}>
+          <Trans>Copy message link</Trans>
         </ContextMenuButton>
         <Show when={state.settings.getValue("advanced:copy_id")}>
           <ContextMenuButton icon={MdBadge} onClick={copyId}>

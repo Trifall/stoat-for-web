@@ -4,7 +4,7 @@ import { Message } from "stoat.js";
 import { cva } from "styled-system/css";
 import { styled } from "styled-system/jsx";
 
-import { MessageContextMenu } from "@revolt/app";
+import { MessageContextMenu, useMessage } from "@revolt/app";
 import { useUser } from "@revolt/client";
 import { useModals } from "@revolt/modal";
 import { useState } from "@revolt/state";
@@ -22,11 +22,13 @@ import { MediaPickerProps } from "../composition/picker/CompositionMediaPicker";
 export function MessageToolbar(props: {
   message?: Message;
   reactPicker?: Accessor<MediaPickerProps | undefined>;
-}) {
+} = {}) {
   const user = useUser();
   const state = useState();
   const { openModal } = useModals();
   let reactRef;
+  const { message: contextMessage } = useMessage();
+  const message = () => props.message ?? contextMessage;
 
   // todo: a11y for buttons; tabindex
 
@@ -35,27 +37,27 @@ export function MessageToolbar(props: {
    */
   function deleteMessage(ev: MouseEvent) {
     if (ev.shiftKey) {
-      props.message?.delete();
-    } else if (props.message) {
+      message()?.delete();
+    } else if (message()) {
       openModal({
         type: "delete_message",
-        message: props.message,
+        message: message()!,
       });
     }
   }
 
   return (
     <Base class="Toolbar">
-      <Show when={props.message?.channel?.havePermission("SendMessage")}>
+      <Show when={message()?.channel?.havePermission("SendMessage")}>
         <div
           class={tool()}
-          onClick={() => state.draft.addReply(props.message!, user()!.id)}
+          onClick={() => state.draft.addReply(message()!, user()!.id)}
         >
           <Ripple />
           <MdReply {...iconSize(20)} />
         </div>
       </Show>
-      <Show when={props.message?.channel?.havePermission("React")}>
+      <Show when={message()?.channel?.havePermission("React")}>
         <div
           ref={reactRef}
           class={tool()}
@@ -65,10 +67,10 @@ export function MessageToolbar(props: {
           <MdEmojiEmotions {...iconSize(20)} />
         </div>
       </Show>
-      <Show when={props.message?.author?.self}>
+      <Show when={message()?.author?.self}>
         <div
           class={tool()}
-          onClick={() => state.draft.setEditingMessage(props.message)}
+          onClick={() => state.draft.setEditingMessage(message()!)}
         >
           <Ripple />
           <MdEdit {...iconSize(20)} />
@@ -76,8 +78,8 @@ export function MessageToolbar(props: {
       </Show>
       <Show
         when={
-          props.message?.author?.self ||
-          props.message?.channel?.havePermission("ManageMessages")
+          message()?.author?.self ||
+          message()?.channel?.havePermission("ManageMessages")
         }
       >
         <div class={tool()} onClick={deleteMessage}>
@@ -90,7 +92,7 @@ export function MessageToolbar(props: {
         use:floating={{
           contextMenu: () => (
             <MessageContextMenu
-              message={props.message!}
+              message={message()!}
               reactPicker={props.reactPicker}
             />
           ),

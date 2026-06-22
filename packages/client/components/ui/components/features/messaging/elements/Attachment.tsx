@@ -77,6 +77,7 @@ export function Attachment(props: {
           </Show>
           <video
             controls
+            playsinline
             preload="metadata"
             src={props.file.originalUrl}
             use:floating={{

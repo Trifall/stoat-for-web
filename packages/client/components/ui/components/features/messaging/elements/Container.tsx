@@ -5,6 +5,7 @@ import { Message } from "stoat.js";
 import { cva } from "styled-system/css";
 import { styled } from "styled-system/jsx";
 
+import { useMessage } from "@revolt/app";
 import { Ripple, typography } from "@revolt/ui/components/design";
 import { Column, Row } from "@revolt/ui/components/layout";
 import {
@@ -314,10 +315,11 @@ const CompactInfo = styled(Row, {
 export function MessageContainer(props: Props) {
   const { t } = useLingui();
   const { isMobile } = useState();
+  const { message } = useMessage();
 
   return (
     <div
-      id={props.message?.id}
+      id={props.message?.id ?? message?.id}
       ref={props.ref}
       onMouseEnter={() => props.onHover && props.onHover(true)}
       onMouseLeave={() => props.onHover && props.onHover(false)}
@@ -336,13 +338,13 @@ export function MessageContainer(props: Props) {
       <Show
         when={
           !isMobile &&
-          props.message &&
+          (props.message || message) &&
           props.isLink !== true &&
           props.isLink !== "hide"
         }
       >
         <MessageToolbar
-          message={props.message}
+          message={props.message ?? message}
           reactPicker={props.reactPicker}
         />
       </Show>
