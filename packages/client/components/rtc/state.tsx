@@ -23,7 +23,7 @@ import { Channel } from "stoat.js";
 
 import { NoiseGateProcessor } from "./NoiseGateProcessor";
 
-import { useClient, type SoundController, useSound } from "@revolt/client";
+import { type SoundController, useClient, useSound } from "@revolt/client";
 import { CONFIGURATION } from "@revolt/common";
 import { ModalController, useModals } from "@revolt/modal";
 import { useNavigate } from "@revolt/routing";
@@ -590,16 +590,18 @@ class Voice {
           !this.#settings.pushToTalkEnabled ||
           !!window.pushToTalk?.getCurrentState().active;
 
-        if (!shouldRestoreMic) {
-          return;
-        }
-
-        const room = this.room();
-        if (room) {
-          await this.#setMicrophoneEnabled(true, { persistPreference: false });
+        if (shouldRestoreMic) {
+          const room = this.room();
+          if (room) {
+            await this.#setMicrophoneEnabled(true, {
+              persistPreference: false,
+            });
+          }
         }
       }
     }
+
+    this.sound.playSound(willDeafen ? "deafen" : "undeafen");
   }
 
   async toggleMute() {
@@ -1026,7 +1028,7 @@ export function VoiceContext(props: { children: JSX.Element }) {
     if (call) {
       recentlyDismissed.set(call.channel.id, Date.now());
     }
-      sound.stopIncomingCall();
+    sound.stopIncomingCall();
     setIncomingCall(undefined);
     if (incomingCallTimeout) {
       clearTimeout(incomingCallTimeout);
@@ -1200,7 +1202,7 @@ export function VoiceContext(props: { children: JSX.Element }) {
           // Stop ringing after 15 seconds
           if (incomingCallSoundTimeout) clearTimeout(incomingCallSoundTimeout);
           incomingCallSoundTimeout = setTimeout(() => {
-              sound.stopIncomingCall();
+            sound.stopIncomingCall();
             incomingCallSoundTimeout = undefined;
           }, 15_000);
 
