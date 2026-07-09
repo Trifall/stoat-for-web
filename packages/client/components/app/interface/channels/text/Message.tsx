@@ -1,4 +1,5 @@
 import {
+  Accessor,
   For,
   JSX,
   Match,
@@ -11,18 +12,16 @@ import {
 } from "solid-js";
 
 import { useLingui } from "@lingui-solid/solid/macro";
-import {
-  ImageEmbed,
-  Message as MessageInterface,
-  WebsiteEmbed,
-} from "stoat.js";
+import { Message as MessageInterface } from "stoat.js";
 import { cva } from "styled-system/css";
 import { styled } from "styled-system/jsx";
 import { decodeTime } from "ulid";
 
 import { useClient } from "@revolt/client";
+import { isGif } from "@revolt/common/lib/gifs";
 import { useTime } from "@revolt/i18n";
 import { Markdown } from "@revolt/markdown";
+import { startsWithPackPUA } from "@revolt/markdown/emoji/UnicodeEmoji";
 import { useState } from "@revolt/state";
 import {
   Attachment,
@@ -37,6 +36,7 @@ import {
   Tooltip,
   Username,
 } from "@revolt/ui";
+import { MediaPickerProps } from "@revolt/ui/components/features/messaging/composition/picker/CompositionMediaPicker";
 import { Symbol } from "@revolt/ui/components/utils/Symbol";
 
 import { MessageContextMenu } from "../../../menus/MessageContextMenu";
@@ -45,8 +45,6 @@ import {
   floatingUserMenusFromMessage,
 } from "../../../menus/UserContextMenu";
 
-import { startsWithPackPUA } from "@revolt/markdown/emoji/UnicodeEmoji";
-import { MediaPickerProps } from "@revolt/ui/components/features/messaging/composition/picker/CompositionMediaPicker";
 import { EditMessage } from "./EditMessage";
 
 /**
@@ -54,11 +52,6 @@ import { EditMessage } from "./EditMessage";
  */
 const RE_URL =
   /[(http(s)?)://(www.)?a-zA-Z0-9@:%._+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_+.~#?&//=]*)/;
-
-/**
- * Regex for matching gif providers
- */
-const GIF_PROVIDERS_REGEX = /^https:\/\/(tenor\.com|gifbox\.me|giphy\.com)/;
 
 interface Props {
   /**
@@ -88,17 +81,20 @@ interface Props {
 }
 
 interface MessageContextShape {
-  message?: MessageInterface;
+  message: MessageInterface;
+  reactPicker: Accessor<MediaPickerProps | undefined>;
 }
 
-const messageContext = createContext<MessageContextShape>({});
+const messageContext = createContext<Partial<MessageContextShape>>({});
 
-function MessageContext(props: {
-  children: JSX.Element;
-  message: MessageInterface;
-}) {
-  // eslint-disable-next-line solid/reactivity
-  const contextShape = { message: props.message };
+function MessageContext(
+  props: { children: JSX.Element } & MessageContextShape,
+) {
+  /* eslint-disable solid/reactivity */
+  const contextShape = {
+    message: props.message,
+    reactPicker: props.reactPicker,
+  };
 
   return (
     <messageContext.Provider value={contextShape}>
@@ -120,7 +116,7 @@ export function Message(props: Props) {
 
   const [isHovering, setIsHovering] = createSignal(false);
   const [reactPicker, setReactPicker] = createSignal<MediaPickerProps>();
-  let msgRef;
+  let msgRef!: HTMLDivElement;
 
   /**
    * Determine whether this message only contains a GIF
@@ -128,17 +124,7 @@ export function Message(props: Props) {
   const isOnlyGIF = () =>
     props.message.embeds &&
     props.message.embeds.length === 1 &&
-    ((props.message.embeds[0].type === "Website" &&
-      ((props.message.embeds[0] as WebsiteEmbed).specialContent?.type ===
-        "GIF" ||
-        !!(
-          (props.message.embeds[0] as WebsiteEmbed).originalUrl ||
-          (props.message.embeds[0] as WebsiteEmbed).url
-        )?.match(GIF_PROVIDERS_REGEX))) ||
-      (props.message.embeds[0].type === "Image" &&
-        !!(props.message.embeds[0] as ImageEmbed).url?.match(
-          GIF_PROVIDERS_REGEX,
-        ))) &&
+    isGif(props.message.embeds[0]) &&
     props.message.content &&
     !props.message.content.replace(RE_URL, "").length;
 
@@ -155,11 +141,9 @@ export function Message(props: Props) {
   const unreact = (emoji: string) => props.message.unreact(emoji);
 
   return (
-    <MessageContext message={props.message}>
+    <MessageContext message={props.message} reactPicker={reactPicker}>
       <MessageContainer
         ref={msgRef}
-        reactPicker={reactPicker}
-        message={props.message}
         onHover={setIsHovering}
         username={
           <div use:floating={floatingUserMenusFromMessage(props.message)}>
@@ -208,31 +192,29 @@ export function Message(props: Props) {
         isLink={props.isLink}
         tail={props.tail || state.settings.getValue("appearance:compact_mode")}
         header={
-          <Show when={props.message.replyIds}>
-            <For each={props.message.replyIds}>
-              {(reply_id) => {
-                /**
-                 * Signal the actual message
-                 */
-                const message = () => client().messages.get(reply_id);
+          <For each={props.message.replyIds}>
+            {(reply_id) => {
+              /**
+               * Signal the actual message
+               */
+              const message = () => client().messages.get(reply_id);
 
-                onMount(() => {
-                  if (!message()) {
-                    props.message.channel!.fetchMessage(reply_id);
-                  }
-                });
+              onMount(() => {
+                if (!message()) {
+                  props.message.channel!.fetchMessage(reply_id);
+                }
+              });
 
-                return (
-                  <MessageReply
-                    mention={props.message.mentionIds?.includes(
-                      message()!.authorId!,
-                    )}
-                    message={message()}
-                  />
-                );
-              }}
-            </For>
-          </Show>
+              return (
+                <MessageReply
+                  mention={props.message.mentionIds?.includes(
+                    message()!.authorId!,
+                  )}
+                  message={message()}
+                />
+              );
+            }}
+          </For>
         }
         info={
           <Switch fallback={<div />}>
@@ -330,6 +312,21 @@ export function Message(props: Props) {
           </Match>
         }
       >
+        <Show when={props.message.systemMessage}>
+          <SystemMessage
+            systemMessage={props.message.systemMessage!}
+            menuGenerator={(user) =>
+              user
+                ? floatingUserMenus(
+                    user!,
+                    // TODO: try to fetch on demand member
+                    props.message.server?.getMember(user!.id),
+                  )
+                : {}
+            }
+            isServer={!!props.message.server}
+          />
+        </Show>
         <CompositionMediaPicker
           onMessage={(content) =>
             props.message?.channel?.sendMessage({
@@ -353,21 +350,6 @@ export function Message(props: Props) {
             return <></>;
           }}
         </CompositionMediaPicker>
-        <Show when={props.message.systemMessage}>
-          <SystemMessage
-            systemMessage={props.message.systemMessage!}
-            menuGenerator={(user) =>
-              user
-                ? floatingUserMenus(
-                    user!,
-                    // TODO: try to fetch on demand member
-                    props.message.server?.getMember(user!.id),
-                  )
-                : {}
-            }
-            isServer={!!props.message.server}
-          />
-        </Show>
         <Switch>
           <Match when={props.editing}>
             <EditMessage message={props.message} />
@@ -378,29 +360,22 @@ export function Message(props: Props) {
             </BreakText>
           </Match>
         </Switch>
-        <Show when={props.message.attachments}>
-          <For each={props.message.attachments}>
-            {(attachment) => (
-              <Attachment
-                message={props.message}
-                file={attachment}
-                reactPicker={reactPicker}
-              />
-            )}
-          </For>
-        </Show>
-        <Show when={props.message.embeds}>
-          <For each={props.message.embeds}>
-            {(embed) => <Embed embed={embed} />}
-          </For>
-        </Show>
+        <For each={props.message.attachments}>
+          {(attachment) => (
+            <Attachment message={props.message} file={attachment} />
+          )}
+        </For>
+        <For each={props.message.embeds}>
+          {(embed) => <Embed embed={embed} />}
+        </For>
         <Reactions
-          reactions={props.message.reactions as never as Map<string, Set<string>>}
+          reactions={
+            props.message.reactions as never as Map<string, Set<string>>
+          }
           interactions={props.message.interactions}
           userId={client().user!.id}
           addReaction={react}
           removeReaction={unreact}
-          reactPicker={reactPicker}
         />
       </MessageContainer>
     </MessageContext>

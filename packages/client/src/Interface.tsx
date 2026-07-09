@@ -14,17 +14,9 @@ import { useModals } from "@revolt/modal";
 import { Navigate, useBeforeLeave, useLocation } from "@revolt/routing";
 import { useState } from "@revolt/state";
 import { LAYOUT_SECTIONS } from "@revolt/state/stores/Layout";
-import { CircularProgress } from "@revolt/ui";
 
+import { LoadingScreen } from "./LoadingScreen";
 import { Sidebar } from "./interface/Sidebar";
-
-const AppRoot = styled("div", {
-  base: {
-    display: "flex",
-    flexDirection: "column",
-    height: "100%",
-  },
-});
 
 /**
  * Application layout
@@ -69,7 +61,7 @@ const Interface = (props: { children: JSX.Element }) => {
     <MessageCache client={client()}>
       <AppRoot>
         <Titlebar />
-        <Switch fallback={<CircularProgress />}>
+        <Switch fallback={<LoadingScreen />}>
           <Match when={!isLoggedIn()}>
             <Navigate href="/login" />
           </Match>
@@ -115,6 +107,14 @@ const Interface = (props: { children: JSX.Element }) => {
     </MessageCache>
   );
 };
+
+const AppRoot = styled("div", {
+  base: {
+    display: "flex",
+    flexDirection: "column",
+    height: "100%",
+  },
+});
 
 /**
  * Parent container

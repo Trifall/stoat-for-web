@@ -109,6 +109,7 @@ export function ServerRoleEditor(props: { context: Server; roleId: string }) {
                 variant="filled"
                 shape="square"
                 size="lg"
+                style={{ height: "auto", width: "95px" }}
                 onPress={() => pickerRef()?.click()}
               >
                 <MDPalette />

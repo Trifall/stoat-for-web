@@ -1,15 +1,14 @@
-import { Accessor, Match, Show, Switch } from "solid-js";
+import { Match, Show, Switch } from "solid-js";
 
 import { File, ImageEmbed, Message, VideoEmbed } from "stoat.js";
 import { css } from "styled-system/css";
 import { styled } from "styled-system/jsx";
 
-import { MessageContextMenu } from "@revolt/app";
+import { MessageContextMenu, useMessage } from "@revolt/app";
 import { useModals } from "@revolt/modal";
 import { Column } from "@revolt/ui/components/layout";
 import { SizedContent, Spoiler } from "@revolt/ui/components/utils";
 
-import { MediaPickerProps } from "../composition/picker/CompositionMediaPicker";
 import { FileInfo } from "./FileInfo";
 import { TextFile } from "./TextFile";
 
@@ -28,12 +27,9 @@ export const AttachmentContainer = styled(Column, {
 /**
  * Render a given list of files
  */
-export function Attachment(props: {
-  file: File;
-  message?: Message;
-  reactPicker?: Accessor<MediaPickerProps | undefined>;
-}) {
+export function Attachment(props: { file: File; message?: Message }) {
   const { openModal } = useModals();
+  const { reactPicker } = useMessage();
 
   return (
     <Switch fallback={`Could not render ${props.file.metadata.type}!`}>
@@ -59,8 +55,8 @@ export function Attachment(props: {
               contextMenu: () => (
                 <MessageContextMenu
                   message={props.message}
+                  reactPicker={reactPicker}
                   file={props.file}
-                  reactPicker={props.reactPicker}
                 />
               ),
             }}
@@ -84,8 +80,8 @@ export function Attachment(props: {
               contextMenu: () => (
                 <MessageContextMenu
                   message={props.message}
+                  reactPicker={reactPicker}
                   file={props.file}
-                  reactPicker={props.reactPicker}
                 />
               ),
             }}
@@ -103,8 +99,8 @@ export function Attachment(props: {
                 contextMenu: () => (
                   <MessageContextMenu
                     message={props.message}
+                    reactPicker={reactPicker}
                     file={props.file}
-                    reactPicker={props.reactPicker}
                   />
                 ),
               }}

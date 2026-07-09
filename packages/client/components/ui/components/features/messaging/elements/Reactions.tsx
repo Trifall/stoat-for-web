@@ -1,9 +1,10 @@
-import { Accessor, For, Show, createMemo } from "solid-js";
+import { For, Show, createMemo } from "solid-js";
 
 import { useLingui } from "@lingui-solid/solid/macro";
 import { API } from "stoat.js";
 import { styled } from "styled-system/jsx";
 
+import { useMessage } from "@revolt/app";
 import { Emoji } from "@revolt/markdown";
 import { useUsers } from "@revolt/markdown/users";
 import { Ripple, Text } from "@revolt/ui/components/design";
@@ -11,8 +12,6 @@ import { Tooltip } from "@revolt/ui/components/floating";
 import { Row } from "@revolt/ui/components/layout";
 
 import MdAdd from "@material-design-icons/svg/outlined/add.svg?component-solid";
-
-import { MediaPickerProps } from "../composition/picker/CompositionMediaPicker";
 
 interface Props {
   /**
@@ -41,14 +40,14 @@ interface Props {
    * @param reaction ID
    */
   removeReaction(reaction: string): void;
-
-  reactPicker: Accessor<MediaPickerProps | undefined>;
 }
 
 /**
  * Message reactions
  */
 export function Reactions(props: Props) {
+  const { reactPicker } = useMessage();
+
   /**
    * Determine two lists of 'required' and 'optional' reactions
    */
@@ -120,7 +119,7 @@ export function Reactions(props: Props) {
         </For>
         <div
           ref={reactRef}
-          onClick={(e) => props.reactPicker()?.onClickEmoji(e, reactRef)}
+          onClick={(e) => reactPicker!()?.onClickEmoji(e, reactRef)}
         >
           <AddReaction class="add">
             <Ripple />

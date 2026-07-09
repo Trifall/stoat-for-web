@@ -26,7 +26,6 @@ import { Symbol } from "@revolt/ui/components/utils/Symbol";
 
 import MdClose from "@material-design-icons/svg/outlined/close.svg?component-solid";
 
-import { useState } from "@revolt/state";
 import { HeaderIcon } from "../../common/CommonHeader";
 import { SidebarBase } from "./common";
 import { SidebarVoicePanel } from "./SidebarVoicePanel";
@@ -60,7 +59,7 @@ export const HomeSidebar = (props: Props) => {
   const location = useLocation();
   const { openModal } = useModals();
   const device = useDevice();
-  const { isMobile } = useState();
+  const { isMobile } = device;
 
   const savedNotesChannelId = createMemo(() => props.openSavedNotes());
 

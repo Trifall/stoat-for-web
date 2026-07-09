@@ -1,11 +1,11 @@
-import { Accessor, JSX, Match, Ref, Show, Switch } from "solid-js";
+import { JSX, Match, Show, Switch } from "solid-js";
 
 import { useLingui } from "@lingui-solid/solid/macro";
-import { Message } from "stoat.js";
 import { cva } from "styled-system/css";
 import { styled } from "styled-system/jsx";
 
 import { useMessage } from "@revolt/app";
+import { useDevice } from "@revolt/common";
 import { Ripple, typography } from "@revolt/ui/components/design";
 import { Column, Row } from "@revolt/ui/components/layout";
 import {
@@ -14,8 +14,6 @@ import {
   Time,
 } from "@revolt/ui/components/utils";
 
-import { useState } from "@revolt/state";
-import { MediaPickerProps } from "../composition/picker/CompositionMediaPicker";
 import { MessageToolbar } from "./MessageToolbar";
 
 interface CommonProps {
@@ -38,8 +36,6 @@ interface CommonProps {
 }
 
 type Props = CommonProps & {
-  message?: Message;
-
   /**
    * Avatar URL
    */
@@ -105,9 +101,7 @@ type Props = CommonProps & {
    */
   contextMenu?: () => JSX.Element;
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ref?: Ref<any>;
-  reactPicker?: Accessor<MediaPickerProps | undefined>;
+  ref?: HTMLDivElement;
 
   /**
    * Additional match cases for the inline-start information element
@@ -314,12 +308,12 @@ const CompactInfo = styled(Row, {
  */
 export function MessageContainer(props: Props) {
   const { t } = useLingui();
-  const { isMobile } = useState();
   const { message } = useMessage();
+  const { isMobile } = useDevice();
 
   return (
     <div
-      id={props.message?.id ?? message?.id}
+      id={message?.id}
       ref={props.ref}
       onMouseEnter={() => props.onHover && props.onHover(true)}
       onMouseLeave={() => props.onHover && props.onHover(false)}
@@ -338,15 +332,12 @@ export function MessageContainer(props: Props) {
       <Show
         when={
           !isMobile &&
-          (props.message || message) &&
+          message &&
           props.isLink !== true &&
           props.isLink !== "hide"
         }
       >
-        <MessageToolbar
-          message={props.message ?? message}
-          reactPicker={props.reactPicker}
-        />
+        <MessageToolbar />
       </Show>
 
       <Show when={props.isLink}>

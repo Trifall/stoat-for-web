@@ -14,6 +14,7 @@ import { cva } from "styled-system/css";
 import { styled } from "styled-system/jsx";
 
 import { useClient } from "@revolt/client";
+import { useDevice } from "@revolt/common";
 import { UnicodeEmoji } from "@revolt/markdown/emoji";
 import { UNICODE_EMOJI_PACK_PUA } from "@revolt/markdown/emoji/UnicodeEmoji";
 import { useState } from "@revolt/state";
@@ -66,7 +67,8 @@ type Item =
 
 export function EmojiPicker() {
   const client = useClient();
-  const state = useState();
+  const device = useDevice();
+  const { ordering } = useState();
 
   const [filter, setFilter] = createSignal("");
   const [colCount, setColCount] = createSignal(0);
@@ -75,7 +77,9 @@ export function EmojiPicker() {
   let emojiScrollTargetElement!: HTMLDivElement;
 
   onMount(() =>
-    setColCount(Math.floor(emojiScrollTargetElement.offsetWidth / 40)),
+    setColCount(
+      Math.max(1, Math.floor(emojiScrollTargetElement.offsetWidth / 40)),
+    ),
   );
 
   const items = createMemo(() => {
@@ -83,7 +87,7 @@ export function EmojiPicker() {
 
     if (filterText) {
       return [
-        ...state.ordering
+        ...ordering
           .orderedServers(client())
           .flatMap((server) =>
             server.emojis
@@ -99,7 +103,7 @@ export function EmojiPicker() {
     const items: Item[] = [],
       cols = colCount();
 
-    for (const server of state.ordering.orderedServers(client())) {
+    for (const server of ordering.orderedServers(client())) {
       const emojis = server.emojis;
 
       if (emojis.length === 0) continue;
@@ -145,13 +149,13 @@ export function EmojiPicker() {
   return (
     <Stack>
       <TextField
-        autoFocus={!state.isMobile}
-        variant="filled"
+        autoFocus={!device.isMobile}
+        variant="outlined"
         placeholder="Search for emojis..."
         value={filter()}
         onInput={(e) => setFilter(e.currentTarget.value)}
       />
-      <Row class={compositionContent()}>
+      <Row gap={"none"} class={compositionContent()}>
         <div
           ref={serverScrollTargetElement}
           use:invisibleScrollable={{
@@ -159,11 +163,28 @@ export function EmojiPicker() {
           }}
         >
           <VirtualContainer
-            items={[1, 2, 3]}
+            items={ordering
+              .orderedServers(client())
+              .filter((s) => s.emojis.length > 0)}
             scrollTarget={serverScrollTargetElement}
             itemSize={{ height: 40 }}
           >
-            {ServerItem}
+            {(props) => (
+              <ServerItem
+                style={props.style}
+                tabIndex={props.tabIndex}
+                item={props.item}
+                onClick={() => {
+                  const idx = items().findIndex(
+                    (item) => item.t === 0 && item.server.id === props.item.id,
+                  );
+                  if (idx !== -1 && emojiScrollTargetElement) {
+                    emojiScrollTargetElement.scrollTop =
+                      Math.floor(idx / colCount()) * 40;
+                  }
+                }}
+              />
+            )}
           </VirtualContainer>
         </div>
         <div
@@ -191,6 +212,7 @@ const Stack = styled("div", {
     minHeight: 0,
     display: "flex",
     flexDirection: "column",
+    gap: "var(--gap-md)",
   },
 });
 
@@ -199,9 +221,11 @@ const scrollContainer = cva({
   variants: {
     component: {
       serverRail: {
-        display: "none",
-        // flexShrink: 0,
-        // width: "40px",
+        display: "flex",
+        flexDirection: "column",
+        flexShrink: 0,
+        width: "40px",
+        gap: "var(--gap-sm)",
       },
       emoji: {
         flexGrow: 1,
@@ -213,20 +237,34 @@ const scrollContainer = cva({
 const ServerItem = (props: {
   style: unknown;
   tabIndex: number;
-  item: number;
+  item: Server;
+  onClick: (e: MouseEvent) => void;
 }) => (
   <ServerOption
     style={props.style as never}
     tabIndex={props.tabIndex}
     role="listitem"
+    onMouseDown={(e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      e.stopImmediatePropagation();
+    }}
+    onClick={props.onClick}
   >
-    {props.item}
+    <Avatar
+      size={32}
+      src={props.item.animatedIconURL}
+      fallback={props.item.name}
+    />
   </ServerOption>
 );
 
 const ServerOption = styled("div", {
   base: {
     width: "100%",
+    cursor: "pointer",
+    display: "flex",
+    justifyContent: "center",
   },
 });
 
@@ -294,10 +332,13 @@ const EmojiOption = styled("div", {
     {
       type: [0, 3],
       css: {
+        position: "absolute",
+        left: 0,
+        width: "100% !important",
         display: "flex",
         alignItems: "center",
         paddingInline: "var(--gap-md)",
-        width: "100% !important",
+        zIndex: 1,
       },
     },
     {
@@ -310,7 +351,6 @@ const EmojiOption = styled("div", {
         borderRadius: "var(--borderRadius-sm)",
 
         "--emoji-size": "100%",
-
         "& img": {
           width: "100%",
           height: "100%",

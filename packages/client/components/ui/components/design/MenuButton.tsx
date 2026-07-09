@@ -65,7 +65,6 @@ export function MenuButton(
     "alert",
     "actions",
   ]);
-
   function onClick(e: Event) {
     if (!local.noDrawer) {
       state.appDrawer()?.setShown(true);

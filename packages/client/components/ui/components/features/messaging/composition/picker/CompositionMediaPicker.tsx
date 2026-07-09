@@ -3,7 +3,6 @@ import {
   Accessor,
   JSX,
   Match,
-  Ref,
   Setter,
   Show,
   Switch,
@@ -25,13 +24,10 @@ import { Row } from "@revolt/ui/components/layout";
 import { EmojiPicker } from "./EmojiPicker";
 import { GifPicker } from "./GifPicker";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type AnyRef = Ref<any>;
-
 export type MediaPickerProps = {
-  ref: AnyRef;
-  onClickGif: (_: AnyRef, ref?: AnyRef) => void;
-  onClickEmoji: (_: AnyRef, ref?: AnyRef) => void;
+  ref: Setter<HTMLElement | undefined>;
+  onClickGif: (_: unknown, ref?: HTMLDivElement) => void;
+  onClickEmoji: (_: unknown, ref?: HTMLDivElement) => void;
 };
 
 interface Props {
@@ -59,10 +55,20 @@ export const CompositionMediaPickerContext = createContext(
 export function CompositionMediaPicker(props: Props) {
   const [anchor, setAnchor] = createSignal<HTMLElement>();
   const [show, setShow] = createSignal<"gif" | "emoji">();
-  let altRef: AnyRef | undefined;
+  let altRef: HTMLDivElement | undefined;
 
   return (
-    <CompositionMediaPickerContext.Provider value={props}>
+    <CompositionMediaPickerContext.Provider
+      value={{
+        ...props,
+        // close the picker once a GIF is sent
+        // (technically any message, but what else are you gonna be sending out the gif picker)
+        onMessage: (content) => {
+          props.onMessage(content);
+          setShow(undefined);
+        },
+      }}
+    >
       {props.children({
         ref: setAnchor,
         onClickGif: (_, ref) => {
@@ -113,8 +119,8 @@ function Picker(
     middleware: [offset(5), flip(), shift()],
   });
 
-  function onMouseDown(ev: MouseEvent) {
-    if (!floating()?.contains(ev.target as never)) props.setShow();
+  function onMouseDown(e: MouseEvent) {
+    if (!floating()?.contains(e.target as Node)) props.setShow();
   }
   function onResize() {
     const el = floating();

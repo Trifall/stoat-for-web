@@ -7,6 +7,7 @@ import { useClient, useUser } from "@revolt/client";
 import { CustomEmoji, UnicodeEmoji } from "@revolt/markdown/emoji";
 import { useModals } from "@revolt/modal";
 import { useState } from "@revolt/state";
+import { MediaPickerProps } from "@revolt/ui/components/features/messaging/composition/picker/CompositionMediaPicker";
 
 import MdBadge from "@material-design-icons/svg/outlined/badge.svg?component-solid";
 import MdContentCopy from "@material-design-icons/svg/outlined/content_copy.svg?component-solid";
@@ -26,7 +27,6 @@ import MdShield from "@material-design-icons/svg/outlined/shield.svg?component-s
 
 import MdSentimentContent from "@material-symbols/svg-400/outlined/sentiment_content.svg?component-solid";
 
-import { MediaPickerProps } from "@revolt/ui/components/features/messaging/composition/picker/CompositionMediaPicker";
 import {
   ContextMenu,
   ContextMenuButton,
@@ -39,8 +39,8 @@ import {
  */
 export function MessageContextMenu(props: {
   message?: Message;
-  file?: File;
   reactPicker?: Accessor<MediaPickerProps | undefined>;
+  file?: File;
   link?: string;
 }) {
   const user = useUser();
@@ -183,10 +183,14 @@ export function MessageContextMenu(props: {
 
         <ContextMenuDivider />
 
-        <Show when={props.message?.channel?.havePermission("React")}>
+        <Show
+          when={
+            props.reactPicker && props.message?.channel?.havePermission("React")
+          }
+        >
           <ContextMenuButton
             icon={MdEmojiEmotions}
-            onClick={(e) => props.reactPicker?.()?.onClickEmoji(e)}
+            onClick={(e) => props.reactPicker!()?.onClickEmoji(e)}
           >
             <Trans>React</Trans>
           </ContextMenuButton>

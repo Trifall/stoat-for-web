@@ -1,12 +1,12 @@
-import { JSX, Show } from "solid-js";
+import { JSX, onMount, Show } from "solid-js";
 
 import { useQuery } from "@tanstack/solid-query";
 import { cva } from "styled-system/css";
 import { styled } from "styled-system/jsx";
 
+import { useDevice } from "@revolt/common";
 import { useModals } from "@revolt/modal";
 
-import { useState } from "@revolt/state";
 import { Profile } from "../features";
 
 /**
@@ -34,24 +34,24 @@ export function UserCard(
   props: JSX.Directives["floating"]["userCard"] &
     object & { onClose: () => void },
 ) {
-  const { isMobile } = useState();
+  const { isMobile } = useDevice();
   const { openModal } = useModals();
   const query = useQuery(() => ({
     queryKey: ["profile", props.user.id],
     queryFn: () => props.user.fetchProfile(),
   }));
 
-  function openProfile() {
-    openModal({ type: "user_profile", user: props.user, member: props.member });
-  }
-
   function openFull() {
-    openProfile();
+    openModal({ type: "user_profile", user: props.user, member: props.member });
     props.onClose();
   }
 
+  onMount(() => {
+    if (isMobile) openFull();
+  });
+
   return (
-    <Show when={!isMobile || openProfile()}>
+    <Show when={!isMobile}>
       <div
         use:invisibleScrollable={{ class: base() }}
         onMouseDown={(e) => {
@@ -68,7 +68,12 @@ export function UserCard(
             onClick={openFull}
           />
 
-          <Profile.Actions user={props.user} member={props.member} width={2} />
+          <Profile.Actions
+            user={props.user}
+            member={props.member}
+            onClose={props.onClose}
+            width={2}
+          />
           <Profile.Roles member={props.member} />
           <Profile.Badges user={props.user} />
           <Profile.Status user={props.user} />
