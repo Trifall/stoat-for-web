@@ -1,22 +1,22 @@
 import { createContext, JSXElement, useContext } from "solid-js";
 
 import { BooleanKeys, Sounds, TypeSounds, useState } from "@revolt/state";
-import deafenSound from "../../scripts/assets_fallback/sounds/deafen.ogg";
-import messageSound from "../../scripts/assets_fallback/sounds/message_sound.ogg";
-import muteSound from "../../scripts/assets_fallback/sounds/mute.ogg";
-import ringtoneIncomingSound from "../../scripts/assets_fallback/sounds/ringtone_incoming.ogg";
-import ringtoneOutgoingSound from "../../scripts/assets_fallback/sounds/ringtone_outgoing.ogg";
+import deafenSound from "../../public/assets/sounds/deafen.ogg";
+import messageSound from "../../public/assets/sounds/message_sound.ogg";
+import muteSound from "../../public/assets/sounds/mute.ogg";
+import ringtoneIncomingSound from "../../public/assets/sounds/ringtone_incoming.ogg";
+import ringtoneOutgoingSound from "../../public/assets/sounds/ringtone_outgoing.ogg";
+import streamEndSound from "../../public/assets/sounds/stream_end.ogg";
+import streamStartSound from "../../public/assets/sounds/stream_start.ogg";
+import streamViewerJoinSound from "../../public/assets/sounds/stream_viewer_join.ogg";
+import streamViewerLeaveSound from "../../public/assets/sounds/stream_viewer_leave.ogg";
+import undeafenSound from "../../public/assets/sounds/undeafen.ogg";
+import unmuteSound from "../../public/assets/sounds/unmute.ogg";
+import userJoinVoiceSound from "../../public/assets/sounds/user_join_voice.ogg";
+import userLeaveVoiceSound from "../../public/assets/sounds/user_leave_voice.ogg";
+import userMovedSound from "../../public/assets/sounds/user_moved.ogg";
 import selfJoinVoiceSound from "../../scripts/assets_fallback/sounds/self_join_voice.ogg";
 import selfLeaveVoiceSound from "../../scripts/assets_fallback/sounds/self_leave_voice.ogg";
-import streamEndSound from "../../scripts/assets_fallback/sounds/stream_end.ogg";
-import streamStartSound from "../../scripts/assets_fallback/sounds/stream_start.ogg";
-import streamViewerJoinSound from "../../scripts/assets_fallback/sounds/stream_viewer_join.ogg";
-import streamViewerLeaveSound from "../../scripts/assets_fallback/sounds/stream_viewer_leave.ogg";
-import undeafenSound from "../../scripts/assets_fallback/sounds/undeafen.ogg";
-import unmuteSound from "../../scripts/assets_fallback/sounds/unmute.ogg";
-import userJoinVoiceSound from "../../scripts/assets_fallback/sounds/user_join_voice.ogg";
-import userLeaveVoiceSound from "../../scripts/assets_fallback/sounds/user_leave_voice.ogg";
-import userMovedSound from "../../scripts/assets_fallback/sounds/user_moved.ogg";
 
 /**
  * A controller class for making sure sounds are managed in one place and to prevent undesirable sound overlaps
