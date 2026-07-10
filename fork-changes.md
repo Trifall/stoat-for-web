@@ -106,9 +106,16 @@ The store default keeps these enabled by default, with volume defaulting to `0.3
 
 ### Sound Assets
 
-Sound assets are stored under:
+Standard sound assets come from the brand assets submodule through:
+
+- `packages/client/assets/sounds/`
+- `packages/client/public/assets` (created as a symlink by `scripts/copyAssets.mjs`)
+
+`SoundController` imports standard sounds through `packages/client/public/assets/sounds/` so Vite bundles the configured brand assets. Fork-only sounds that do not exist in the brand repository may be imported from:
 
 - `packages/client/scripts/assets_fallback/sounds/`
+
+Do not move all sound imports to `assets_fallback`. Some fallback audio files are silent placeholders, so a build can succeed while producing no audible sound. When changing asset paths, inspect the emitted files under `packages/client/dist/assets/` and verify that their sizes or audio levels match the intended source files.
 
 Important fork voice assets include:
 
@@ -300,6 +307,7 @@ Deafen behavior:
 - When deafening, mutes the mic without persisting `micOn`.
 - When undeafening, restores the mic only if it was previously on.
 - If PTT is enabled, undeafen restore only happens when desktop PTT state is currently active.
+- Plays `deafen` or `undeafen` after applying the state change. The undeafen sound still plays when PTT is inactive and microphone restoration is skipped.
 
 ## Auto-Reconnect
 
@@ -520,6 +528,101 @@ The fork uses forked submodule URLs for at least:
 
 During upstream merges, ensure fork-specific submodule URLs in `.gitmodules` are preserved where intended. Do not blindly take upstream `.gitmodules` if it reverts fork SDK/livekit submodules back to upstream remotes.
 
+## Reusable Upstream Merge Process
+
+### Before Merging
+
+1. Fetch both remotes and inspect the exact divergence:
+
+   ```sh
+   git fetch --all --prune
+   git rev-list --left-right --count main...upstream/main
+   git log --oneline main..upstream/main
+   ```
+
+2. Inspect `git status --short --branch` and `git submodule status` before changing anything. A lowercase `m` in status means a submodule working tree is locally modified. Do not stage, reset, update, or clean that submodule unless the owner explicitly asks.
+3. Confirm the pull request head is the same upstream history being merged. The PR is useful for reviewing the missing commits, but resolve the merge locally when GitHub reports conflicts.
+4. Merge the upstream branch directly:
+
+   ```sh
+   git merge --no-ff upstream/main
+   ```
+
+   Do not cherry-pick, squash, rebase, or recreate upstream commits. The upstream tip must remain an ancestor of fork `main`.
+
+### Resolving Conflicts
+
+- Resolve coordinated refactors as a group. If upstream changes a provider, context, or component API across several files, mixing old and new versions file-by-file can compile incorrectly or leave inconsistent runtime behavior.
+- Use `fork-changes.md` to identify fork-owned behavior, then compare all three conflict stages when intent is unclear:
+
+  ```sh
+  git show :1:path/to/file  # merge base
+  git show :2:path/to/file  # fork side
+  git show :3:path/to/file  # upstream side
+  ```
+
+- Preserve fork behavior without rejecting unrelated upstream improvements. For example, keep fork voice controls while incorporating upstream layout, mobile, accessibility, or navigation changes around them.
+- Search the whole tree for conflict markers before staging:
+
+  ```sh
+  rg '^(<<<<<<<|=======|>>>>>>>)'
+  ```
+
+- Translation catalogs are generated files. Resolve source conflicts first, choose a clean catalog side only to remove conflict markers, then regenerate all catalogs rather than hand-merging repeated `.po` conflicts:
+
+  ```sh
+  pnpm --filter client exec lingui extract
+  ```
+
+- Run the formatter on manually combined source files. Formatting also catches malformed JSX and import ordering that can be hard to see in a large conflict resolution.
+
+### Verification Before Pushing
+
+1. Run the type check and the real project build path:
+
+   ```sh
+   pnpm --filter client exec tsc --noEmit
+   mise build
+   ```
+
+   `mise build` is preferable to invoking Vite alone for final verification because it runs the asset setup and Lingui compilation dependencies used by normal project builds.
+
+2. Run `git diff --check` and confirm `git diff --name-only --diff-filter=U` is empty.
+3. Re-run the preservation checklist below and inspect `.gitmodules` explicitly.
+4. Verify the merge commit has both expected parents and upstream is an ancestor:
+
+   ```sh
+   git show --no-patch --format='%H%n%P%n%s' HEAD
+   git merge-base --is-ancestor upstream/main main
+   git rev-list --left-right --count main...upstream/main
+   ```
+
+   The second number from `rev-list` must be `0` before pushing.
+
+5. Fetch `origin` immediately before pushing and ensure it is still an ancestor of local `main`. This avoids overwriting concurrent fork work:
+
+   ```sh
+   git fetch origin --prune
+   git merge-base --is-ancestor origin/main main
+   git push origin main
+   ```
+
+6. Confirm GitHub recognizes the fork as not behind. A direct API comparison is more reliable than only checking the local refs:
+
+   ```sh
+   gh api repos/stoatchat/for-web/compare/main...Trifall:main \
+     --jq '{status: .status, ahead_by: .ahead_by, behind_by: .behind_by}'
+   ```
+
+   `behind_by` must be `0`. A PR whose head was upstream may automatically become merged once fork `main` contains that upstream tip.
+
+### Build Artifact Checks
+
+- The desktop build copies `packages/client/dist` into its bundled `web-dist`, so verify the web artifacts before packaging desktop.
+- `mise build` runs `install:assets`, which executes `packages/client/scripts/copyAssets.mjs` and configures `packages/client/public/assets` from the brand asset submodule when it is populated.
+- A successful build only proves that an audio file was bundled, not that it is audible. For sound regressions, locate the hashed output in `packages/client/dist/assets/`, compare its size to the intended source, and use `ffprobe`/`ffmpeg` volume detection when necessary.
+- Keep build output and generated `dist` directories out of commits unless the repository explicitly starts tracking them.
+
 ## Merge Checklist for Future Agents
 
 When merging upstream, verify these before finalizing:
@@ -539,12 +642,15 @@ When merging upstream, verify these before finalizing:
 - PTT mute changes do not persist `state.voice.micOn`.
 - `setMute()` remains serialized through `#mutePromise`.
 - `toggleMute()` and `toggleDeafen()` remain PTT-aware.
+- Deafen and undeafen state changes still call their corresponding `SoundController` sounds, including undeafen while PTT prevents microphone restoration.
 - Auto-reconnect remains enabled by default and fetches fresh voice tokens.
 - Disconnect sound remains gated by `state.voice.soundDisconnect`.
 - Noise gate still chains after RNNoise when both are enabled.
 - Noise gate processor is destroyed when mic disables or voice disconnects.
 - `types.d.ts` includes `notificationSounds` in the PTT bridge.
 - `.gitmodules` keeps fork remotes for forked submodules.
+- Standard sounds resolve through `public/assets/sounds`; only genuinely fork-only sounds use `scripts/assets_fallback/sounds`.
+- Built sound artifacts are not silent placeholders.
 
 ## Recommended Verification After Voice/Sound Merges
 
@@ -552,7 +658,7 @@ Run at least:
 
 ```sh
 pnpm --filter client exec tsc --noEmit
-pnpm --filter client exec vite build
+mise build
 ```
 
 Manual smoke checks to consider:
