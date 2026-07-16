@@ -12,6 +12,12 @@ import { useVoice } from "../../../../../rtc/state";
  */
 export function VoiceProcessingOptions() {
   const { voice } = useState();
+  const rtcVoice = useVoice();
+
+  const updateProcessing = (update: () => void) => {
+    update();
+    void rtcVoice.updateVoiceProcessing();
+  };
 
   return (
     <Column>
@@ -32,26 +38,40 @@ export function VoiceProcessingOptions() {
             },
           }}
           value={voice.noiseSupression}
-          onUpdate={(ns) => (voice.noiseSupression = ns)}
+          onUpdate={(ns) =>
+            updateProcessing(() => (voice.noiseSupression = ns))
+          }
         />
         <CategoryButton
           icon="blank"
           action={<Checkbox checked={voice.echoCancellation} />}
-          onClick={() => (voice.echoCancellation = !voice.echoCancellation)}
+          onClick={() =>
+            updateProcessing(
+              () => (voice.echoCancellation = !voice.echoCancellation),
+            )
+          }
         >
           <Trans>Browser Echo Cancellation</Trans>
         </CategoryButton>
         <CategoryButton
           icon="blank"
           action={<Checkbox checked={voice.autoGainControl} />}
-          onClick={() => (voice.autoGainControl = !voice.autoGainControl)}
+          onClick={() =>
+            updateProcessing(
+              () => (voice.autoGainControl = !voice.autoGainControl),
+            )
+          }
         >
           <Trans>Automatic Gain Control</Trans>
         </CategoryButton>
         <CategoryButton
           icon="blank"
           action={<Checkbox checked={voice.noiseGateEnabled} />}
-          onClick={() => (voice.noiseGateEnabled = !voice.noiseGateEnabled)}
+          onClick={() =>
+            updateProcessing(
+              () => (voice.noiseGateEnabled = !voice.noiseGateEnabled),
+            )
+          }
           description={<Trans>Silence your mic when you're not speaking</Trans>}
         >
           <Trans>Noise Gate</Trans>

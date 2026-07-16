@@ -17,7 +17,14 @@ import {
   useTracks,
 } from "solid-livekit-components";
 
-import { ConnectionState, Room, RoomEvent, Track } from "livekit-client";
+import {
+  ConnectionState,
+  MediaDeviceFailure,
+  Room,
+  RoomEvent,
+  Track,
+  TrackInvalidError,
+} from "livekit-client";
 import { DenoiseTrackProcessor } from "livekit-rnnoise-processor";
 import { Channel } from "stoat.js";
 
@@ -99,7 +106,10 @@ class Voice {
   #micWasOnBeforeDeafen = false;
   #lastCallMessageSent = new Map<string, number>();
   #noiseGateProcessor?: NoiseGateProcessor;
+  #pushToTalkActive = false;
   #mutePromise: Promise<void> = Promise.resolve();
+  #voiceProcessingPromise: Promise<void> = Promise.resolve();
+  #mediaDevicesChangeHandler?: () => void;
   #pendingLeaveNotifications = new Map<string, ReturnType<typeof setTimeout>>();
   #suppressedReconnectJoins = new Set<string>();
   #suppressedReconnectJoinsClearTimeout?: ReturnType<typeof setTimeout>;
@@ -181,21 +191,17 @@ class Voice {
     this.#noiseGateProcessor = undefined;
   }
 
-  #configureMicrophoneTrack(track?: MicrophonePublication) {
-    this.#resetVoiceProcessors();
+  #microphoneCaptureOptions() {
+    return {
+      deviceId: this.#settings.preferredAudioInputDevice,
+      echoCancellation: this.#settings.echoCancellation,
+      noiseSuppression: this.#settings.noiseSupression === "browser",
+      autoGainControl: this.#settings.autoGainControl,
+      channelCount: { ideal: 1 },
+    };
+  }
 
-    const audioTrack = track?.audioTrack;
-    if (!audioTrack) return;
-
-    const settings = audioTrack.mediaStreamTrack.getSettings();
-    if (settings.channelCount && settings.channelCount > 1) {
-      console.warn(
-        "[Voice] Mic track is stereo (channelCount:",
-        settings.channelCount,
-        ") - remote participants may hear audio in one ear only.",
-      );
-    }
-
+  #createMicrophoneProcessor() {
     if (this.#settings.noiseGateEnabled) {
       const upstream =
         this.#settings.noiseSupression === "enhanced"
@@ -208,20 +214,128 @@ class Voice {
         threshold: this.#settings.noiseGateThreshold,
         upstream,
       });
-      console.info(
-        "[NoiseGate] Applying processor to audio track:",
-        audioTrack.sid,
-      );
-      audioTrack.setProcessor(this.#noiseGateProcessor as never);
-      return;
+      return this.#noiseGateProcessor;
     }
 
     if (this.#settings.noiseSupression === "enhanced") {
-      audioTrack.setProcessor(
-        new DenoiseTrackProcessor({
-          workletCDNURL: CONFIGURATION.RNNOISE_WORKLET_CDN_URL,
-        }),
+      return new DenoiseTrackProcessor({
+        workletCDNURL: CONFIGURATION.RNNOISE_WORKLET_CDN_URL,
+      });
+    }
+  }
+
+  #isUnavailableMicrophoneError(error: unknown) {
+    if (!error || typeof error !== "object") return false;
+
+    return (
+      MediaDeviceFailure.getFailure(error) === MediaDeviceFailure.NotFound ||
+      (error instanceof DOMException &&
+        error.name === "OverconstrainedError") ||
+      error instanceof TrackInvalidError
+    );
+  }
+
+  async #switchToDefaultMicrophone(room: Room) {
+    this.#settings.preferredAudioInputDevice = undefined;
+    await room.switchActiveDevice("audioinput", "default", false);
+  }
+
+  #handleMicrophoneError(error: unknown) {
+    const room = this.room();
+    const audioTrack = room?.localParticipant.getTrackPublication(
+      Track.Source.Microphone,
+    )?.audioTrack;
+    this.#setMicrophone(
+      !!audioTrack &&
+        audioTrack.mediaStreamTrack.readyState === "live" &&
+        room.localParticipant.isMicrophoneEnabled,
+    );
+
+    if (this.#isUnavailableMicrophoneError(error)) {
+      console.warn("[Voice] Microphone is currently unavailable:", error);
+    } else {
+      this.onErr(error);
+    }
+  }
+
+  async #setLiveKitMicrophoneEnabled(room: Room, enabled: boolean) {
+    const audioTrack = room.localParticipant.getTrackPublication(
+      Track.Source.Microphone,
+    )?.audioTrack;
+    if (enabled && audioTrack?.mediaStreamTrack.readyState === "ended") {
+      await audioTrack.restartTrack(this.#microphoneCaptureOptions());
+    }
+
+    return room.localParticipant.setMicrophoneEnabled(
+      enabled,
+      enabled ? this.#microphoneCaptureOptions() : undefined,
+    );
+  }
+
+  async #handleMediaDevicesChanged(room: Room) {
+    try {
+      const devices = await Room.getLocalDevices("audioinput", false);
+      const preferredDevice = this.#settings.preferredAudioInputDevice;
+      const activeDevice = room.getActiveDevice("audioinput");
+      const selectedDevice = preferredDevice ?? activeDevice;
+
+      const selectedDeviceUnavailable =
+        selectedDevice !== undefined &&
+        selectedDevice !== "default" &&
+        !devices.some((device) => device.deviceId === selectedDevice);
+
+      if (selectedDeviceUnavailable) {
+        console.warn(
+          "[Voice] Selected microphone disconnected; falling back to the default input.",
+        );
+        await this.#switchToDefaultMicrophone(room);
+      }
+
+      const shouldEnableMicrophone =
+        !this.#settings.deafen &&
+        (this.#settings.pushToTalkEnabled
+          ? this.#pushToTalkActive
+          : this.#settings.micOn);
+      const audioTrack = room.localParticipant.getTrackPublication(
+        Track.Source.Microphone,
+      )?.audioTrack;
+      const microphoneTrackEnded =
+        audioTrack?.mediaStreamTrack.readyState === "ended";
+      if (
+        devices.length > 0 &&
+        shouldEnableMicrophone &&
+        (microphoneTrackEnded || !room.localParticipant.isMicrophoneEnabled)
+      ) {
+        await this.setMute(true);
+      }
+    } catch (error) {
+      this.#handleMicrophoneError(error);
+    }
+  }
+
+  async #configureMicrophoneTrack(track?: MicrophonePublication) {
+    const audioTrack = track?.audioTrack;
+    if (!audioTrack) return;
+    if (audioTrack.getProcessor()) return;
+
+    this.#resetVoiceProcessors();
+
+    const settings = audioTrack.mediaStreamTrack.getSettings();
+    if (settings.channelCount && settings.channelCount > 1) {
+      console.warn(
+        "[Voice] Mic track is stereo (channelCount:",
+        settings.channelCount,
+        ") - remote participants may hear audio in one ear only.",
       );
+    }
+
+    const processor = this.#createMicrophoneProcessor();
+    if (processor) {
+      console.info(
+        "[Voice] Applying processor to audio track:",
+        audioTrack.sid,
+      );
+      await audioTrack.setProcessor(processor as never);
     }
   }
 
@@ -232,21 +346,49 @@ class Voice {
     const room = this.room();
     if (!room) throw "invalid state";
 
-    const track = await room.localParticipant.setMicrophoneEnabled(enabled);
+    let track: Awaited<
+      ReturnType<Room["localParticipant"]["setMicrophoneEnabled"]>
+    >;
+    try {
+      track = await this.#setLiveKitMicrophoneEnabled(room, enabled);
+    } catch (error) {
+      const preferredDevice = this.#settings.preferredAudioInputDevice;
+      const shouldRetryWithDefault =
+        enabled &&
+        preferredDevice !== undefined &&
+        this.#isUnavailableMicrophoneError(error);
+
+      if (!shouldRetryWithDefault) throw error;
+
+      console.warn(
+        "[Voice] Could not use the selected microphone; retrying with the default input.",
+      );
+      await this.#switchToDefaultMicrophone(room);
+      track = await this.#setLiveKitMicrophoneEnabled(room, true);
+    }
     const isEnabled = enabled && typeof track !== "undefined";
 
     this.#setMicrophone(isEnabled);
+
+    if (
+      isEnabled &&
+      this.#settings.pushToTalkEnabled &&
+      !this.#pushToTalkActive
+    ) {
+      const audioTrack = track?.audioTrack;
+      if (audioTrack) {
+        audioTrack.mediaStreamTrack.enabled = false;
+      }
+    }
 
     if (options.persistPreference ?? true) {
       this.#settings.micOn = isEnabled;
     }
 
     if (isEnabled) {
-      this.#configureMicrophoneTrack(
+      await this.#configureMicrophoneTrack(
         track as MicrophonePublication | undefined,
       );
-    } else {
-      this.#resetVoiceProcessors();
     }
 
     return track;
@@ -263,12 +405,7 @@ class Voice {
 
     const room = new Room({
       audioCaptureDefaults: {
-        deviceId: this.#settings.preferredAudioInputDevice,
-        echoCancellation: this.#settings.echoCancellation,
-        noiseSuppression: this.#settings.noiseSupression === "browser",
-        autoGainControl: this.#settings.autoGainControl,
-        // force mono capture
-        channelCount: { ideal: 1 },
+        ...this.#microphoneCaptureOptions(),
       },
       audioOutput: {
         deviceId: this.#settings.preferredAudioOutputDevice,
@@ -277,6 +414,13 @@ class Voice {
         deviceId: this.#settings.preferredVideoDevice,
       },
     });
+    this.#mediaDevicesChangeHandler = () => {
+      void this.#handleMediaDevicesChanged(room);
+    };
+    navigator.mediaDevices?.addEventListener(
+      "devicechange",
+      this.#mediaDevicesChangeHandler,
+    );
     let participantNotificationsReady = false;
 
     this.vidTracks = useTracks(
@@ -321,13 +465,15 @@ class Voice {
         this.#setMicrophoneEnabled(targetMicEnabled, {
           persistPreference:
             !this.#settings.pushToTalkEnabled && !this.#settings.deafen,
-        }).then((track) => {
-          if (targetMicEnabled && !track?.audioTrack) {
-            console.warn(
-              "[Voice] Microphone enabled but no audio track was returned.",
-            );
-          }
-        });
+        })
+          .then((track) => {
+            if (targetMicEnabled && !track?.audioTrack) {
+              console.warn(
+                "[Voice] Microphone enabled but no audio track was returned.",
+              );
+            }
+          })
+          .catch((error) => this.#handleMicrophoneError(error));
       }
 
       // Send "started a call" message only when starting a new call (no existing participants)
@@ -528,8 +674,64 @@ class Voice {
     return this.#noiseGateProcessor;
   }
 
+  updateVoiceProcessing() {
+    const applySettings = async () => {
+      const room = this.room();
+      const publication = room?.localParticipant.getTrackPublication(
+        Track.Source.Microphone,
+      );
+      const audioTrack = publication?.audioTrack;
+      if (!audioTrack || !room?.localParticipant.isMicrophoneEnabled) return;
+
+      if (audioTrack.getProcessor()) {
+        await audioTrack.stopProcessor();
+      }
+      this.#noiseGateProcessor = undefined;
+
+      await audioTrack.restartTrack(this.#microphoneCaptureOptions());
+      await this.#configureMicrophoneTrack(
+        publication as MicrophonePublication,
+      );
+    };
+
+    this.#voiceProcessingPromise = this.#voiceProcessingPromise
+      .then(applySettings, applySettings)
+      .catch((error) => this.#handleMicrophoneError(error));
+    return this.#voiceProcessingPromise;
+  }
+
+  setPushToTalkActive(active: boolean) {
+    this.#pushToTalkActive = active;
+    if (!active) {
+      const audioTrack = this.room()?.localParticipant.getTrackPublication(
+        Track.Source.Microphone,
+      )?.audioTrack;
+      if (audioTrack) {
+        audioTrack.mediaStreamTrack.enabled = false;
+      }
+    }
+    if (this.#settings.pushToTalkEnabled) {
+      void this.setMute(active);
+    }
+  }
+
+  reconcilePushToTalk(enabled: boolean) {
+    const microphoneEnabled = enabled
+      ? this.#pushToTalkActive
+      : !this.#settings.deafen && this.#settings.micOn;
+    void this.setMute(microphoneEnabled);
+  }
+
   disconnect(manual: boolean = true) {
     try {
+      if (this.#mediaDevicesChangeHandler) {
+        navigator.mediaDevices?.removeEventListener(
+          "devicechange",
+          this.#mediaDevicesChangeHandler,
+        );
+        this.#mediaDevicesChangeHandler = undefined;
+      }
+
       const room = this.room();
       if (!room) return;
 
@@ -584,19 +786,16 @@ class Voice {
         await this.#setMicrophoneEnabled(false, { persistPreference: false });
       }
     } else {
-      // Restore mic to its previous state when undeafening
-      if (this.#micWasOnBeforeDeafen) {
-        const shouldRestoreMic =
-          !this.#settings.pushToTalkEnabled ||
-          !!window.pushToTalk?.getCurrentState().active;
+      const shouldRestoreMic = this.#settings.pushToTalkEnabled
+        ? this.#pushToTalkActive
+        : this.#micWasOnBeforeDeafen;
 
-        if (shouldRestoreMic) {
-          const room = this.room();
-          if (room) {
-            await this.#setMicrophoneEnabled(true, {
-              persistPreference: false,
-            });
-          }
+      if (shouldRestoreMic) {
+        const room = this.room();
+        if (room) {
+          await this.#setMicrophoneEnabled(true, {
+            persistPreference: false,
+          });
         }
       }
     }
@@ -657,6 +856,14 @@ class Voice {
         return;
       }
 
+      if (
+        enabled &&
+        this.#settings.pushToTalkEnabled &&
+        !this.#pushToTalkActive
+      ) {
+        enabled = false;
+      }
+
       // if user is deafened, don't allow them to unmute
       if (this.deafen()) {
         debugLog("PTT-WEB", "Cannot unmute while deafened");
@@ -665,6 +872,9 @@ class Voice {
 
       // Re-read state inside the mutex - it may have changed while we waited.
       const currentState = room.localParticipant.isMicrophoneEnabled;
+      const microphoneTrackEnded =
+        room.localParticipant.getTrackPublication(Track.Source.Microphone)
+          ?.audioTrack?.mediaStreamTrack.readyState === "ended";
       debugLog(
         "PTT-WEB",
         "setMute() - current mic state:",
@@ -673,7 +883,7 @@ class Voice {
         enabled,
       );
 
-      if (currentState !== enabled) {
+      if (currentState !== enabled || (enabled && microphoneTrackEnded)) {
         debugLog(
           "PTT-WEB",
           "setMute() - calling setMicrophoneEnabled(",
@@ -698,6 +908,8 @@ class Voice {
       } else {
         debugLog("PTT-WEB", "setMute() - no change needed, already:", enabled);
       }
+    } catch (error) {
+      this.#handleMicrophoneError(error);
     } finally {
       resolve();
     }
@@ -1088,7 +1300,7 @@ export function VoiceContext(props: { children: JSX.Element }) {
 
         // e.active = true means PTT key is pressed (mic should be ON/unmuted)
         // e.active = false means PTT key is released (mic should be OFF/muted)
-        if (voice.room()) {
+        if (voice.room() && state.voice.pushToTalkEnabled) {
           const shouldEnableMic = e.active;
           debugLog(
             "PTT-WEB",
@@ -1097,9 +1309,10 @@ export function VoiceContext(props: { children: JSX.Element }) {
             "-> Mic enabled:",
             shouldEnableMic,
           );
-          voice.setMute(shouldEnableMic);
+          voice.setPushToTalkActive(shouldEnableMic);
         } else {
           debugLog("PTT-WEB", "⚠ No active room, cannot mute/unmute");
+          voice.setPushToTalkActive(e.active);
         }
       };
 
@@ -1119,6 +1332,7 @@ export function VoiceContext(props: { children: JSX.Element }) {
       }) => {
         debugLog("PTT-WEB", "Received config from desktop:", config);
         state.voice.setPushToTalkConfig(config);
+        voice.reconcilePushToTalk(config.enabled);
       };
 
       // get initial config
