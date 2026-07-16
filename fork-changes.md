@@ -1,8 +1,14 @@
-# Fork Changes
+# Fork Changes — Stoat for Web
 
-This document records fork-specific behavior that must be preserved during upstream merges and future PRs. Treat it as merge context for agents working on this fork.
+This document records fork-specific behavior in `Trifall/stoat-for-web` that must be preserved during upstream merges and future PRs. Treat it as required merge context for humans and agents working on this web-client fork.
 
 The fork adds substantial voice, sound, push-to-talk, and settings behavior on top of upstream Stoat for Web. Many of these changes intentionally differ from upstream behavior. Do not remove or simplify them unless the fork owner explicitly asks for that.
+
+- **Fork repository:** https://github.com/Trifall/stoat-for-web
+- **Upstream repository:** https://github.com/stoatchat/for-web (remote name `upstream`)
+- **Paired desktop fork:** https://github.com/Trifall/stoat-for-desktop
+
+> **If you are an agent performing an upstream merge:** preserve the behavior documented here, create a real merge commit rather than cherry-picking or squashing upstream, and follow the material-conflict approval process below. General permission to "merge upstream" is not permission to remove or redesign a documented fork feature.
 
 ## High-Priority Preservation Rules
 
@@ -10,12 +16,14 @@ The fork adds substantial voice, sound, push-to-talk, and settings behavior on t
 - Do not resurrect the old standalone voice notification implementation. Current notification behavior is integrated through `SoundController`, the `Sounds` store, and `VoiceContext`.
 - Do not replace fork mute/deafen behavior with upstream wholesale. The fork intentionally has push-to-talk-aware mute/deafen logic.
 - Do not move push-to-talk source of truth fully into the web client. Desktop/main process config and active state are authoritative.
+- More precisely, desktop is currently authoritative for PTT `enabled`, `keybind`, `mode`, `releaseDelay`, and resolved active state. `pushToTalkNotificationSounds` remains client-local because the current desktop bridge ignores `notificationSounds`.
 - Do not collapse self voice sounds into other-user voice sounds. Self join/leave and remote participant join/leave must remain separate.
 - Manual leave sound must only play on real user-initiated disconnects, not channel switches, reconnect cleanup, or internal disconnects.
 - Incoming call ringtone is a separate looping audio node and must be stopped explicitly.
 - `state.sounds` is the current primary sound source of truth, but `state.voice.soundDisconnect` still gates disconnect sound calls.
 - `<SoundContext>` must wrap `<VoiceContext>` because `VoiceContext` calls `useSound()`.
 - Noise gate processing must stay compatible with enhanced RNNoise processing by chaining processors when both are enabled.
+- Do not replace the forked `packages/solid-livekit-components` submodule with upstream solely because the APIs appear compatible. Its audio track behavior is part of deafen, gain, and output-device handling.
 
 ## Main Fork Feature Areas
 
@@ -139,10 +147,21 @@ Important fork voice assets include:
 - Reconnect churn must not produce false leave/join sounds. `#pendingLeaveNotifications` and `#suppressedReconnectJoins` handle this.
 - Disconnect sound plays on failed/no-reconnect paths and is still gated by `state.voice.soundDisconnect` before calling `sound.playSound("disconnect")`.
 - Incoming call ringtone uses `SoundController.playIncomingCall()` and `SoundController.stopIncomingCall()` so the looping ringtone can be stopped independently of one-shot sounds.
+- Remote stream-start playback is tied to screenshare publication/subscription and actual video playback; remote stream-end is tied to the tracked publication ending.
+- Local screenshare end explicitly plays `streamEnd`. There is currently no equivalent explicit local `streamStart` call, so do not claim both directions are symmetric without verifying the current runtime.
 
 ### Current Sound UI Caveat
 
-The store and controller support a master sound enable flag (`state.sounds.enabled`), and `VoiceContext` syncs it into `SoundController`. Verify the current sound settings UI before assuming there is an obvious master enable toggle exposed to users.
+The store and controller support a master sound enable flag (`state.sounds.enabled`), and `VoiceContext` syncs it into `SoundController`, but the current settings UI exposes only event-specific toggles and master volume. It does **not** expose a master enable toggle.
+
+The entire sound-settings section is currently hidden when desktop/browser notifications are reported as unsupported, even though runtime message and voice sounds do not inherently require notification support. Treat that coupling as a known UI limitation, not proof that sounds are unavailable.
+
+Additional controller details that matter during refactors:
+
+- One-shot sounds can overlap; `SoundController` does not globally stop the previous one-shot.
+- Incoming call audio uses a dedicated looping node. Disabling master sounds prevents new playback but does not stop an already-playing ringtone, so every dismissal path must call `stopIncomingCall()` explicitly.
+- Runtime `setVolume()` affects newly created audio nodes; it does not retroactively adjust an already-playing one-shot or ringtone.
+- A successful build only proves an audio file was bundled. Several fallback assets are silent placeholders, so verify the emitted audio itself.
 
 ## Incoming Call System
 
@@ -181,6 +200,8 @@ The fork rings only when all conditions are met:
 - Answering calls `voice.connect(call.channel)` and navigates to `call.channel.path`.
 - Rejecting only dismisses and records cooldown.
 
+There is currently no separate OS-level incoming-call notification path. Incoming calls use the in-app popup and looping ringtone. Do not resurrect the removed standalone `VoiceNotifications.ts` implementation to add one; integrate any future notification through the current `VoiceContext`/`SoundController` architecture.
+
 ### Call Message
 
 For DM/group calls, `Voice.connect()` sends:
@@ -189,13 +210,13 @@ For DM/group calls, `Voice.connect()` sends:
 > *Started a call*
 ```
 
-This only happens when starting a new call and is throttled per channel for 60 seconds using `#lastCallMessageSent`.
+The actual "new call" test is a participant-count heuristic: the message is attempted when `channel.voiceParticipants.size <= 1` at `RoomEvent.Connected`. It is throttled per channel for 60 seconds using `#lastCallMessageSent`. A reconnect after the throttle expires, stale participant state, or changed event ordering can therefore send it again. The timestamp is recorded before `sendMessage()` succeeds, and send failures are swallowed.
 
 ## Push-to-Talk Desktop Integration
 
 ### Source of Truth
 
-Push-to-talk is desktop-authoritative.
+Push-to-talk timing and resolved active state are desktop-authoritative. The desktop main process owns global key capture, hold/toggle behavior, release delay, and the final active/inactive state sent to web.
 
 The web client reads and reacts to the desktop bridge:
 
@@ -220,7 +241,8 @@ Config fields:
 - `keybind`
 - `mode`: `"hold" | "toggle"`
 - `releaseDelay`
-- `notificationSounds`
+
+The web type declarations and settings UI also include `notificationSounds`, but the paired desktop implementation currently does **not** persist, return, or apply that field. The desktop silently ignores it. `pushToTalkNotificationSounds` still works because the web settings page writes it to `state.voice` locally and the RTC runtime reads that local field.
 
 Persistent store names in `state.voice`:
 
@@ -230,7 +252,7 @@ Persistent store names in `state.voice`:
 - `pushToTalkReleaseDelay`
 - `pushToTalkNotificationSounds`
 
-`Voice.setPushToTalkConfig(...)` maps desktop config into these persistent store fields.
+`Voice.setPushToTalkConfig(...)` maps bridge config into these persistent store fields. Do not describe all five as desktop-authoritative until the paired desktop repository adds `notificationSounds` to its schema, native IPC payload, preload config shape, and type declarations.
 
 ### Multi-Keybind Encoding
 
@@ -243,14 +265,17 @@ Persistent store names in `state.voice`:
 
 Do not change this field into an array without a migration plan, because persisted data and desktop config expect a string.
 
+The client duplicate check is case-insensitive but compares full accelerator strings, so `V` and `Shift+V` are allowed together. Test same-base-key combinations in both desktop input paths: native main-process handling and preload DOM interception do not currently select matching bindings in exactly the same way.
+
 ### Runtime Behavior
 
 PTT state changes are handled in `VoiceContext`:
 
 - Desktop active state `true` means mic should be enabled/unmuted.
 - Desktop active state `false` means mic should be disabled/muted.
-- If a voice room exists, `voice.setMute(active)` is called.
-- If no room exists, the event is ignored after logging.
+- The client routes events through `voice.setPushToTalkActive(active)`, which caches the latest desktop state even when no room exists or PTT is disabled.
+- If PTT is enabled, `setPushToTalkActive()` applies the cached state through `voice.setMute(active)`.
+- Desktop config changes call `voice.reconcilePushToTalk(enabled)`: enabling applies the cached PTT state; disabling restores the normal preference with `!deafen && micOn`.
 
 On voice connect, if PTT is enabled, initial mic state is derived from `window.pushToTalk.getCurrentState().active`.
 
@@ -258,9 +283,13 @@ When PTT changes mic state, `state.voice.micOn` is not persisted. This is intent
 
 `setMute()` is serialized through `#mutePromise` to avoid races from rapid PTT events.
 
-`setMute()` refuses to unmute while deafened.
+`setMute()` currently refuses **all** microphone changes while deafened, not only attempts to unmute.
 
 Mute/unmute sounds are suppressed while PTT is enabled unless `pushToTalkNotificationSounds` is true.
+
+`getCurrentState()`/`getConfig()` are read before listener registration, while the desktop bridge's `onStateChange()` and `onConfigChange()` immediately invoke new listeners. Initial state and config are therefore processed twice. Preserve correctness if this is deduplicated; do not remove the immediate bridge callbacks without coordinating the desktop preload.
+
+The PTT settings page is visible in a normal browser even when `window.pushToTalk` is unavailable. There is no complete browser-side PTT key engine. Enabling PTT without the desktop bridge can make calls start muted with no desktop event capable of unmuting them.
 
 ## Mute and Deafen Behavior
 
@@ -306,8 +335,15 @@ Deafen behavior:
 - When deafening, stores whether the mic was on in `#micWasOnBeforeDeafen`.
 - When deafening, mutes the mic without persisting `micOn`.
 - When undeafening, restores the mic only if it was previously on.
-- If PTT is enabled, undeafen restore only happens when desktop PTT state is currently active.
+- If PTT is enabled, undeafen restores according to cached `#pushToTalkActive` rather than the normal `#micWasOnBeforeDeafen` preference.
 - Plays `deafen` or `undeafen` after applying the state change. The undeafen sound still plays when PTT is inactive and microphone restoration is skipped.
+
+Actual remote-audio deafen behavior is also implemented outside `toggleDeafen()`:
+
+- `packages/client/components/rtc/components/RoomAudioManager.tsx` passes `muted={userMute || voice.deafen()}` to remote audio tracks.
+- The forked `packages/solid-livekit-components/src/components/participant/AudioTrack.tsx` converts that state into `RemoteTrackPublication.setEnabled(!muted)`.
+
+This intentionally stops/enables the remote LiveKit publication rather than merely muting a local HTML audio element. Preserve both sides together during upstream LiveKit component refactors.
 
 ## Auto-Reconnect
 
@@ -326,6 +362,8 @@ Runtime:
 - `packages/client/components/rtc/state.tsx`
 - `RoomEvent.Disconnected` checks `state.voice.autoReconnect`.
 
+LiveKit's built-in reconnect events still run regardless of this setting. `autoReconnect` controls the fork's additional **fresh-token reconnect after terminal `RoomEvent.Disconnected`**, not LiveKit's normal signal reconnect policy.
+
 If disabled:
 
 - Set voice state to `DISCONNECTED`.
@@ -338,6 +376,7 @@ If enabled:
 - Attempt `room.connect(auth.url, auth.token, { autoSubscribe: false })` on the same room.
 - Use exponential backoff capped at 10 seconds.
 - Max attempts: 5.
+- Retry delays after attempts 1–4 are 2, 4, 8, and 10 seconds; the first attempt is immediate.
 - On success, reset attempt counter and set state to `CONNECTED`.
 - On final failure, set `DISCONNECTED` and play disconnect sound if `soundDisconnect` allows it.
 
@@ -346,6 +385,12 @@ Manual disconnect path:
 - `disconnect(manual = true)` removes listeners before `room.disconnect()`.
 - Manual disconnect plays `selfLeaveVoice`.
 - Internal channel-switch disconnects call `disconnect(false)` and must not play self leave.
+
+Current reconnect caveats:
+
+- Retry timers are not retained or cancelled. A delayed retry can run after a manual disconnect or channel switch and interact with newer room/channel state.
+- `#isManualDisconnect` is assigned but currently not read; manual behavior depends on removing room listeners and passing `disconnect(false)` for internal paths.
+- Terminal failure/disabled reconnect sets runtime state to `DISCONNECTED` but does not fully clear room/channel state. This can affect later incoming-call suppression.
 
 ## Noise Gate
 
@@ -417,10 +462,14 @@ The UI:
 
 - Adds a `Noise Gate` toggle under voice processing.
 - Shows a draggable threshold meter when enabled.
-- Uses the active processor's `onLevel` callback while in a call.
+- Uses the active processor's `onLevel` callback when that processor already exists and the UI successfully attaches to it.
 - Starts a preview mic stream for metering when not in a call.
 - Restarts preview monitoring when the preferred input device changes.
 - Updates the active processor live through a `VoiceContext` effect that calls `voice.updateNoiseGateThreshold(...)`.
+
+The active `#noiseGateProcessor` is a plain class field rather than a Solid signal. The UI is not guaranteed to react when a processor is created, replaced, or destroyed after the settings component mounts. Preview metering also does not exactly reproduce the call pipeline: it omits enhanced RNNoise and some active-capture constraints. Do not assume the preview meter proves the complete in-call processor chain is active.
+
+`#microphoneCaptureOptions()` and serialized `updateVoiceProcessing()` behavior allow suppression, echo cancellation, automatic gain control, and gate-enable changes to restart and reconfigure an active microphone track.
 
 ## Ghost Voice Participant Cleanup
 
@@ -465,6 +514,8 @@ Important persistence behavior:
 - Direct setters like `state.voice.autoReconnect = false` persist automatically because store setters call `this.set(...)`.
 - `sounds.toggle(...)` and `sounds.setVolume(...)` persist automatically.
 - `clean(...)` methods are important for migrating legacy values and validating persisted data.
+- `voice` and `sounds` are local-only stores. They are not part of server settings synchronization; currently only `ordering`, `notifications`, and `release-notes` are synchronized.
+- Normal store writes are delayed by `DISK_WRITE_WAIT_MS = 1200`; auth bypasses the delay. There is no explicit unload flush, so do not assume the last in-memory change was persisted if the page exits immediately.
 
 ## Legacy Sound Fields in `state.voice`
 
@@ -506,16 +557,45 @@ Settings include:
 
 The advanced voice page currently exposes auto-reconnect under a connection section.
 
+These are internal settings page IDs, not standalone URL routes:
+
+- `voice` → regular voice settings
+- `push_to_talk` → fork PTT settings
+- `voice_advanced` → fork advanced voice settings
+
+Regular `VoiceSettings.tsx` contains input options, processing options, and screenshare options when video is enabled. PTT and auto-reconnect remain separate entries under the hardcoded "Stoat Plus Settings" category.
+
+### Layout and Modal Integration
+
+Preserve these merge-repair changes around the settings and responsive shell:
+
+- `packages/client/src/Interface.tsx`: `AppRoot` is a full-height flex column, the main layout is positioned relative, and the primary sidebar defaults closed on phones.
+- `packages/client/src/interface/Sidebar.tsx`: `SidebarBase` remains `display: flex` and emits `data-open`.
+- `packages/client/components/ui/styles.css`: the phone `.main_bar` is an absolute full-screen overlay and is hidden unless `data-open="true"`.
+- `packages/client/components/modal/modals/Settings.tsx`: the settings overlay uses the high z-index and pointer-event behavior needed to remain interactive above the app shell.
+
+These can look like ordinary upstream layout changes, but past merges broke settings interaction and mobile/sidebar presentation when only one side of the coordinated layout was retained.
+
+### Ongoing Call UI
+
+Fork call visibility is also integrated through:
+
+- `packages/client/src/interface/channels/text/TextChannel.tsx`: ongoing DM/group call banner.
+- `packages/client/src/interface/navigation/channels/HomeSidebar.tsx`: call indicator for active voice participants.
+- `packages/client/src/interface/navigation/channels/SidebarVoicePanel.tsx`: fork active-call sidebar panel.
+- `packages/client/components/ui/components/features/voice/callCard/VoiceCallCardPreview.tsx`: clickable join/switch preview.
+- `packages/client/src/interface/channels/ChannelHeader.tsx`: join button behavior coordinated with `voice.showCard(channel)`.
+
 ## Desktop Bridge Typing
 
-`packages/client/types/types.d.ts` declares `window.pushToTalk`.
+`packages/client/types/types.d.ts` declares `window.pushToTalk`. Keep these typings aligned with the runtime bridge in the paired desktop repository.
 
-Keep these typings aligned with desktop bridge behavior. Runtime code and settings currently use `notificationSounds`, so it must remain part of:
+The client currently types and sends `notificationSounds`, but desktop does not implement that field. There are two valid future directions, and choosing between them requires coordination with the owner:
 
-- `updateSettings(...)`
-- `getConfig()`
-- `onConfigChange(...)`
-- `offConfigChange(...)`
+1. Keep notification-sound preference client-local and stop claiming the desktop returns it.
+2. Make it desktop-authoritative by updating desktop persistence, native IPC, preload config, desktop typings, client typings, and both config-mapping paths together.
+
+Do not "fix" only `types.d.ts`; a type-only change cannot alter the actual Electron bridge contract.
 
 ## Fork Submodules
 
@@ -527,6 +607,79 @@ The fork uses forked submodule URLs for at least:
 `packages/client/assets` points to the internal brand assets repository and has `update = none`.
 
 During upstream merges, ensure fork-specific submodule URLs in `.gitmodules` are preserved where intended. Do not blindly take upstream `.gitmodules` if it reverts fork SDK/livekit submodules back to upstream remotes.
+
+The forked submodules are behaviorally significant:
+
+- `packages/stoat.js` preserves fork voice-status behavior while also merging upstream SDK changes such as user limits.
+- `packages/solid-livekit-components` provides gain, output-device, and `RemoteTrackPublication.setEnabled()` behavior used by mute/deafen integration.
+- `packages/client/assets` provides branded sounds and may be intentionally unavailable to Renovate/public automation.
+
+Review both `.gitmodules` URLs and gitlink commit pointers. A clean parent-repository merge can still silently regress behavior by advancing a submodule to an incompatible upstream commit.
+
+## Material Conflict Escalation and User Approval
+
+When upstream and the fork both make important changes to the same subsystem, do not resolve the conflict solely by selecting `ours`, selecting `theirs`, or mechanically combining lines. A syntactically valid result can still remove fork behavior, reject an important upstream improvement, or create an integration whose product behavior was never approved.
+
+### When to stop and ask
+
+Pause before editing a conflict area when the decision could materially change functionality, architecture, persistence, UI behavior, accessibility, security, performance, packaging, compatibility, or maintenance strategy. This includes:
+
+- Upstream replaces or substantially redesigns voice state, LiveKit integration, sound playback, settings stores, providers, preload/desktop bridge APIs, device handling, responsive layout, or a forked submodule API.
+- Preserving the fork would discard an important upstream feature, bug fix, security fix, migration, or architectural change.
+- Adopting upstream would remove, weaken, or substantially rewrite PTT, mute/deafen semantics, reconnect, incoming calls, noise gate, sound behavior, call UI, persistence, or responsive/settings repairs documented here.
+- Both implementations are valid but require a product choice, such as which process owns a setting, when sounds play, whether a reconnect counts as a new call, or how deafen affects remote publications.
+- Integration requires a data migration, new dependency, compatibility layer, major refactor, submodule replacement, or coordinated change in `Trifall/stoat-for-desktop`.
+- Existing tests and documentation do not establish the intended behavior well enough to choose safely.
+
+Routine, behavior-preserving conflicts may be resolved without interruption when the outcome is unambiguous, such as combining non-overlapping imports, regenerating catalogs/lockfiles after an approved dependency merge, preserving documented fork submodule URLs, or accepting upstream tooling versions while retaining fork tasks.
+
+### Required analysis for each decision area
+
+Investigate both sides before asking. For every material subsystem, present:
+
+1. **Conflict area:** exact files, components, stores, methods, and submodules involved.
+2. **Fork behavior:** what currently happens, why it exists, and which web/desktop code depends on it.
+3. **Upstream behavior:** what changed upstream, the problem it solves, and whether it replaces or overlaps the fork.
+4. **Compatibility and risk:** what can coexist, what cannot, and implications for runtime state, persisted data, IPC, UI, accessibility, platforms, and submodules.
+5. **Recommended integration:** the preferred approach and why it best preserves the fork while incorporating upstream improvements.
+6. **Alternatives:** concise viable choices and the behavior/risk of each.
+7. **Validation plan:** type checks, builds, focused manual checks, and any paired-desktop verification required.
+
+The default recommendation should usually be to **integrate both behaviors by adapting the fork to the new upstream architecture**, not to reject upstream or freeze the old implementation. Recommend removing fork behavior only when it is obsolete, duplicated by upstream, unsafe, or explicitly no longer desired.
+
+### Ask separately and wait for the answer
+
+Ask for a separate decision for each materially different area. Do not bundle PTT, reconnect, sounds, noise processing, settings layout, and submodule changes into one generic approval request merely because they occur in the same merge.
+
+Use this format:
+
+```text
+Conflict area: PTT-aware mute/deafen handling in rtc/state.tsx
+
+Fork behavior: ...
+Upstream change: ...
+Compatibility/risk: ...
+
+Recommended: Integrate upstream's microphone fix into the fork's PTT-aware
+state machine because ...
+
+Options:
+1. Integrate both (Recommended): ...
+2. Prefer upstream: ...
+3. Preserve the current fork behavior: ...
+
+Which approach should I apply for this area?
+```
+
+Put the recommended option first, label it clearly, and allow a custom answer. General permission to perform the merge does not authorize removal of documented fork behavior.
+
+### Repository state while waiting
+
+- Keep the current merge and worktree state intact. Do not abort, reset, clean, update submodules, commit, or push while a material decision is pending unless the owner explicitly asks.
+- Independent routine conflicts may be resolved while waiting, but do not edit the disputed area in a way that prejudges the decision.
+- Record and apply each answer only to its corresponding area.
+- If implementation reveals a materially different tradeoff from what was presented, stop and ask again.
+- Before committing, summarize every material area, the owner's decision, and how the resulting code implements it.
 
 ## Reusable Upstream Merge Process
 
@@ -542,16 +695,18 @@ During upstream merges, ensure fork-specific submodule URLs in `.gitmodules` are
 
 2. Inspect `git status --short --branch` and `git submodule status` before changing anything. A lowercase `m` in status means a submodule working tree is locally modified. Do not stage, reset, update, or clean that submodule unless the owner explicitly asks.
 3. Confirm the pull request head is the same upstream history being merged. The PR is useful for reviewing the missing commits, but resolve the merge locally when GitHub reports conflicts.
-4. Merge the upstream branch directly:
+4. Review incoming commits against every feature area in this document. Identify likely material conflicts before starting and ask early when the upstream design clearly requires a product decision.
+5. Merge the upstream branch directly without committing immediately:
 
    ```sh
-   git merge --no-ff upstream/main
+   git merge --no-ff --no-commit upstream/main
    ```
 
    Do not cherry-pick, squash, rebase, or recreate upstream commits. The upstream tip must remain an ancestor of fork `main`.
 
 ### Resolving Conflicts
 
+- Classify every conflict as routine or material. Follow the approval process above for each material area before editing it.
 - Resolve coordinated refactors as a group. If upstream changes a provider, context, or component API across several files, mixing old and new versions file-by-file can compile incorrectly or leave inconsistent runtime behavior.
 - Use `fork-changes.md` to identify fork-owned behavior, then compare all three conflict stages when intent is unclear:
 
@@ -581,11 +736,13 @@ During upstream merges, ensure fork-specific submodule URLs in `.gitmodules` are
 1. Run the type check and the real project build path:
 
    ```sh
-   pnpm --filter client exec tsc --noEmit
+   mise install:frozen
+   mise build:deps
+   mise build:check
    mise build
    ```
 
-   `mise build` is preferable to invoking Vite alone for final verification because it runs the asset setup and Lingui compilation dependencies used by normal project builds.
+   `mise build` configures assets and compiles Lingui, but it assumes workspace dependencies are already installed and built. `mise install:frozen` and `mise build:deps` are therefore part of a clean verification path. These tasks may update generated catalogs, Panda output, and the `public/assets` symlink; inspect the worktree afterward and do not stage unrelated generated changes.
 
 2. Run `git diff --check` and confirm `git diff --name-only --diff-filter=U` is empty.
 3. Re-run the preservation checklist below and inspect `.gitmodules` explicitly.
@@ -637,18 +794,22 @@ When merging upstream, verify these before finalizing:
 - Reconnect churn does not trigger false join/leave sounds.
 - Incoming calls still ring only for DM/group calls and respect Busy/Focus status.
 - Incoming ringtone stops on dismiss, reject, answer, timeout, and caller leave.
-- `window.pushToTalk` config remains desktop-authoritative.
-- PTT active/inactive events call `voice.setMute(active)`.
+- Desktop remains authoritative for PTT enabled/keybind/mode/release delay and resolved active state; notification-sound preference remains explicitly client-local unless both repositories are migrated together.
+- PTT active/inactive events still cache state through `setPushToTalkActive()` and apply enabled PTT through serialized `voice.setMute(active)`.
+- Enabling/disabling PTT still calls `reconcilePushToTalk()` so cached PTT state or normal `micOn` preference is restored correctly.
 - PTT mute changes do not persist `state.voice.micOn`.
 - `setMute()` remains serialized through `#mutePromise`.
 - `toggleMute()` and `toggleDeafen()` remain PTT-aware.
+- Remote deafen still flows through `RoomAudioManager` and the forked LiveKit `AudioTrack` publication enable/disable behavior.
 - Deafen and undeafen state changes still call their corresponding `SoundController` sounds, including undeafen while PTT prevents microphone restoration.
 - Auto-reconnect remains enabled by default and fetches fresh voice tokens.
 - Disconnect sound remains gated by `state.voice.soundDisconnect`.
 - Noise gate still chains after RNNoise when both are enabled.
-- Noise gate processor is destroyed when mic disables or voice disconnects.
-- `types.d.ts` includes `notificationSounds` in the PTT bridge.
+- Noise gate processors are retained across mute/PTT cycles and destroyed when voice disconnects or processing is reconfigured.
+- Client bridge typings match the paired desktop runtime; any `notificationSounds` authority change is coordinated across both repositories rather than being type-only.
 - `.gitmodules` keeps fork remotes for forked submodules.
+- Gitlink pointers for `stoat.js` and `solid-livekit-components` preserve the fork behavior described above.
+- Responsive `Interface.tsx`/`Sidebar.tsx`/`styles.css` behavior and settings overlay pointer/z-index fixes remain coordinated.
 - Standard sounds resolve through `public/assets/sounds`; only genuinely fork-only sounds use `scripts/assets_fallback/sounds`.
 - Built sound artifacts are not silent placeholders.
 
@@ -657,7 +818,9 @@ When merging upstream, verify these before finalizing:
 Run at least:
 
 ```sh
-pnpm --filter client exec tsc --noEmit
+mise install:frozen
+mise build:deps
+mise build:check
 mise build
 ```
 
