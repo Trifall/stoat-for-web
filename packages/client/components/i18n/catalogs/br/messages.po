@@ -1607,6 +1607,10 @@ msgstr ""
 msgid "Group Name"
 msgstr "Anv ar strollad"
 
+#: components/app/interface/settings/UserSettings.tsx
+msgid "Guidelines"
+msgstr ""
+
 #: components/modal/modals/ReportContent.tsx
 msgid "Harassment or cyberbullying"
 msgstr ""
@@ -2415,6 +2419,10 @@ msgstr ""
 msgid "Powered by RNNoise"
 msgstr ""
 
+#: components/app/interface/settings/UserSettings.tsx
+msgid "Privacy"
+msgstr ""
+
 #: components/auth/src/AuthPage.tsx
 msgid "Privacy Policy"
 msgstr "Buhez Prevez"
@@ -3091,6 +3099,10 @@ msgstr ""
 
 #: components/app/interface/settings/channel/permissions/ChannelPermissionsEditor.tsx
 msgid "Temporarily prevent lower-ranking members from interacting"
+msgstr ""
+
+#: components/app/interface/settings/UserSettings.tsx
+msgid "Terms"
 msgstr ""
 
 #: components/auth/src/AuthPage.tsx

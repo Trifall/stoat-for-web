@@ -1607,6 +1607,10 @@ msgstr "Grants {0} permissions and denies {1} permissions"
 msgid "Group Name"
 msgstr "Group Name"
 
+#: components/app/interface/settings/UserSettings.tsx
+msgid "Guidelines"
+msgstr "Guidelines"
+
 #: components/modal/modals/ReportContent.tsx
 msgid "Harassment or cyberbullying"
 msgstr "Harassment or cyberbullying"
@@ -2415,6 +2419,10 @@ msgstr "Please select a reason"
 msgid "Powered by RNNoise"
 msgstr "Powered by RNNoise"
 
+#: components/app/interface/settings/UserSettings.tsx
+msgid "Privacy"
+msgstr "Privacy"
+
 #: components/auth/src/AuthPage.tsx
 msgid "Privacy Policy"
 msgstr "Privacy Policy"
@@ -3092,6 +3100,10 @@ msgstr "Tell us what's wrong with this user"
 #: components/app/interface/settings/channel/permissions/ChannelPermissionsEditor.tsx
 msgid "Temporarily prevent lower-ranking members from interacting"
 msgstr "Temporarily prevent lower-ranking members from interacting"
+
+#: components/app/interface/settings/UserSettings.tsx
+msgid "Terms"
+msgstr "Terms"
 
 #: components/auth/src/AuthPage.tsx
 msgid "Terms of Service"

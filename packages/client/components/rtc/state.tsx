@@ -394,6 +394,41 @@ class Voice {
     return track;
   }
 
+  async #selectLiveKitNode(): Promise<string> {
+    const nodes = this.getClient().configuration?.features.livekit.nodes ?? [];
+    if (!nodes.length) return "worldwide";
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 3000);
+
+    try {
+      return await Promise.any(
+        nodes.map(async (node) => {
+          const url = new URL(node.public_url);
+          if (url.protocol === "wss:") url.protocol = "https:";
+          if (url.protocol === "ws:") url.protocol = "http:";
+
+          const response = await fetch(url, { signal: controller.signal });
+          if (!response.ok) {
+            throw new Error(`${node.name} returned HTTP ${response.status}`);
+          }
+
+          return node.name;
+        }),
+      );
+    } catch (error) {
+      debugLog(
+        "PTT-WEB",
+        "LiveKit node selection failed, using worldwide:",
+        error,
+      );
+      return "worldwide";
+    } finally {
+      clearTimeout(timeout);
+      controller.abort();
+    }
+  }
+
   async connect(channel: Channel, auth?: { url: string; token: string }) {
     debugLog("PTT-WEB", "Voice.connect() called for channel:", channel.id);
 
@@ -586,7 +621,7 @@ class Voice {
     });
 
     if (!auth) {
-      auth = await channel.joinCall("worldwide");
+      auth = await channel.joinCall(await this.#selectLiveKitNode());
     }
 
     debugLog("PTT-WEB", "Connecting to room...");
@@ -622,7 +657,7 @@ class Voice {
 
     try {
       // Fetch a fresh token for reconnection
-      const auth = await channel.joinCall("worldwide");
+      const auth = await channel.joinCall(await this.#selectLiveKitNode());
       const room = this.room();
 
       if (!room) {
