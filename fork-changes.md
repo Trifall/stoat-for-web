@@ -372,13 +372,26 @@ If disabled:
 If enabled:
 
 - Call `#handleReconnect()`.
-- Fetch a fresh token with `channel.joinCall("worldwide")`.
+- Select a LiveKit node with `#selectLiveKitNode()` and fetch a fresh token with `channel.joinCall(selectedNode)`.
 - Attempt `room.connect(auth.url, auth.token, { autoSubscribe: false })` on the same room.
 - Use exponential backoff capped at 10 seconds.
 - Max attempts: 5.
 - Retry delays after attempts 1–4 are 2, 4, 8, and 10 seconds; the first attempt is immediate.
 - On success, reset attempt counter and set state to `CONNECTED`.
 - On final failure, set `DISCONNECTED` and play disconnect sound if `soundDisconnect` allows it.
+
+### LiveKit Node Selection
+
+Upstream added latency-based LiveKit node selection for initial connections. The fork integrates that behavior with its additional fresh-token reconnect lifecycle:
+
+- `#selectLiveKitNode()` probes every configured `features.livekit.nodes` entry concurrently and returns the first successful node.
+- `wss:` probe URLs are converted to `https:` and `ws:` URLs to `http:` with `URL`, not string replacement.
+- Only successful HTTP responses select a node.
+- Probes share a 3-second abort timeout. An empty node list, timeout, malformed URL, rejected request, or all failed responses falls back to `"worldwide"`.
+- Initial `connect(channel, auth)` only probes when it must request auth. Supplied auth bypasses selection.
+- Every fork fresh-token reconnect re-probes so a terminal disconnect can fail over to a different healthy node.
+
+Do not restore upstream's raw `Promise.race(...)` implementation without preserving these safeguards. It can hang on an empty list, reject on the first failed request, lacks a timeout/fallback, and does not cover the fork reconnect path.
 
 Manual disconnect path:
 
@@ -616,6 +629,28 @@ The forked submodules are behaviorally significant:
 
 Review both `.gitmodules` URLs and gitlink commit pointers. A clean parent-repository merge can still silently regress behavior by advancing a submodule to an incompatible upstream commit.
 
+### Updating a Forked Submodule Safely
+
+When the owner says a forked submodule has already merged its upstream, update the parent gitlink deliberately rather than running `git submodule update --remote` across the workspace:
+
+1. Record parent and submodule status first. A lowercase `m` is local submodule content and must remain untouched unless explicitly included in the task.
+2. Inside the requested submodule, fetch both remotes and verify the fork remote is current:
+
+   ```sh
+   git fetch --all --prune
+   git rev-list --left-right --count origin/main...upstream/main
+   git merge-base --is-ancestor upstream/main origin/main
+   git merge-base --is-ancestor HEAD origin/main
+   ```
+
+   The second `rev-list` number must be `0`. The ancestry checks prove the new fork tip contains both current upstream and the previously recorded fork behavior.
+3. Fast-forward the submodule working tree with `git merge --ff-only origin/main`. Do not create a new submodule merge in the parent task when the owner already pushed that merge to the submodule fork.
+4. In the parent, review `git diff --submodule=log`, confirm `.gitmodules` still points at the fork, and stage only the requested gitlink.
+5. A submodule `package.json` change can make the **parent workspace** `pnpm-lock.yaml` stale. Run `mise install:frozen`; if it reports an outdated lockfile, regenerate the parent lock with `pnpm install --no-frozen-lockfile`, inspect the lock diff, then rerun the frozen install.
+6. If pnpm's `minimumReleaseAge` blocks an explicitly approved new Stoat package, do not silently disable the policy or edit global config. Ask the owner whether to add the package name to `minimumReleaseAgeExclude`, then verify again with an ordinary frozen install.
+7. Rebuild the submodule and type-check the parent. Generated API packages may remove or consolidate exported types even when the submodule itself builds. Adapt obsolete parent type references only after confirming the replacement in the installed declarations.
+8. Commit the parent gitlink, lockfile, and any required compatibility edits together. Push the submodule fork first if it was changed locally; a parent gitlink must never reference an unpushed commit.
+
 ## Material Conflict Escalation and User Approval
 
 When upstream and the fork both make important changes to the same subsystem, do not resolve the conflict solely by selecting `ours`, selecting `theirs`, or mechanically combining lines. A syntactically valid result can still remove fork behavior, reject an important upstream improvement, or create an integration whose product behavior was never approved.
@@ -707,6 +742,7 @@ Put the recommended option first, label it clearly, and allow a custom answer. G
 ### Resolving Conflicts
 
 - Classify every conflict as routine or material. Follow the approval process above for each material area before editing it.
+- Audit files in material subsystems even when Git reports a clean automatic merge. A line-level merge can be syntactically valid while applying upstream behavior only to the initial path and leaving a fork lifecycle path inconsistent. Compare the pre-merge fork file, upstream file, and merged result for voice, PTT, reconnect, sounds, processing, settings, responsive layout, and submodule pointers.
 - Resolve coordinated refactors as a group. If upstream changes a provider, context, or component API across several files, mixing old and new versions file-by-file can compile incorrectly or leave inconsistent runtime behavior.
 - Use `fork-changes.md` to identify fork-owned behavior, then compare all three conflict stages when intent is unclear:
 
@@ -728,6 +764,8 @@ Put the recommended option first, label it clearly, and allow a custom answer. G
   ```sh
   pnpm --filter client exec lingui extract
   ```
+
+  Stage the regenerated catalogs before checking for unmerged paths. `mise lingui:check` is designed for a clean worktree and intentionally fails while catalog changes are staged, so extraction/compilation plus `git diff --check` are the useful merge-time validations.
 
 - Run the formatter on manually combined source files. Formatting also catches malformed JSX and import ordering that can be hard to see in a large conflict resolution.
 
@@ -803,6 +841,7 @@ When merging upstream, verify these before finalizing:
 - Remote deafen still flows through `RoomAudioManager` and the forked LiveKit `AudioTrack` publication enable/disable behavior.
 - Deafen and undeafen state changes still call their corresponding `SoundController` sounds, including undeafen while PTT prevents microphone restoration.
 - Auto-reconnect remains enabled by default and fetches fresh voice tokens.
+- Initial joins and every fresh-token reconnect use resilient `#selectLiveKitNode()` probing with a 3-second timeout and `"worldwide"` fallback; supplied auth bypasses probing.
 - Disconnect sound remains gated by `state.voice.soundDisconnect`.
 - Noise gate still chains after RNNoise when both are enabled.
 - Noise gate processors are retained across mute/PTT cycles and destroyed when voice disconnects or processing is reconfigured.
@@ -836,3 +875,7 @@ Manual smoke checks to consider:
 - Deafen while mic is on, undeafen, and confirm restore behavior including PTT-active rules.
 - Enable noise gate, watch the level meter, and confirm threshold changes apply live.
 - Receive a DM/group call while not in voice and confirm popup/ringtone timing and dismissal.
+
+---
+
+*Last updated: after merging upstream 0.12.1, integrating resilient LiveKit node selection, and updating the forked Stoat SDK through upstream PR #171.*
