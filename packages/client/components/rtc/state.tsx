@@ -448,6 +448,15 @@ class Voice {
   async connect(channel: Channel, auth?: { url: string; token: string }) {
     debugLog("PTT-WEB", "Voice.connect() called for channel:", channel.id);
 
+    // Explicitly request microphone permissions during this trusted UI gesture
+    // so that subsequent background IPC events (PTT) are not blocked by the browser.
+    try {
+      const stream = await navigator.mediaDevices?.getUserMedia({ audio: true });
+      stream?.getTracks().forEach((t) => t.stop());
+    } catch (e) {
+      debugLog("PTT-WEB", "Failed to eagerly request mic permissions:", e);
+    }
+
     // Reset reconnect state on new connection attempt
     this.#isManualDisconnect = false;
     this.#reconnectAttempts = 0;
@@ -753,13 +762,11 @@ class Voice {
 
   setPushToTalkActive(active: boolean) {
     this.#pushToTalkActive = active;
-    if (!active) {
-      const audioTrack = this.room()?.localParticipant.getTrackPublication(
-        Track.Source.Microphone,
-      )?.audioTrack;
-      if (audioTrack) {
-        audioTrack.mediaStreamTrack.enabled = false;
-      }
+    const audioTrack = this.room()?.localParticipant.getTrackPublication(
+      Track.Source.Microphone,
+    )?.audioTrack;
+    if (audioTrack) {
+      audioTrack.mediaStreamTrack.enabled = active;
     }
     if (this.#settings.pushToTalkEnabled) {
       void this.setMute(active);
