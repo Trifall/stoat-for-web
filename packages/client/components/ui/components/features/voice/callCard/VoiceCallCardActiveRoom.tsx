@@ -22,6 +22,7 @@ export function VoiceCallCardActiveRoom() {
       <Participants />
       <VoiceCallControls>
         <VoiceCallControlHolder right>
+          <VoiceCallMaximize />
           <VoiceCallFullscreen />
         </VoiceCallControlHolder>
         <VoiceCallCardActions size="sm" />
@@ -35,14 +36,46 @@ export function VoiceCallCardActiveRoom() {
 
 function VoiceCallFullscreen() {
   const voice = useVoice();
+  const { t } = useLingui();
   return (
     <IconButton
       size="sm"
       variant={"standard"}
       onPress={() => voice.toggleFullscreen()}
+      use:floating={{
+        tooltip: {
+          placement: "top",
+          content: voice.fullscreen() ? t`Exit fullscreen` : t`Fullscreen`,
+        },
+      }}
     >
       <Show when={voice.fullscreen()} fallback={<Symbol>fullscreen</Symbol>}>
         <Symbol>fullscreen_exit</Symbol>
+      </Show>
+    </IconButton>
+  );
+}
+
+function VoiceCallMaximize() {
+  const voice = useVoice();
+  const { t } = useLingui();
+
+  return (
+    <IconButton
+      size="sm"
+      variant={voice.maximized() ? "tonal" : "standard"}
+      onPress={() => voice.toggleMaximized()}
+      use:floating={{
+        tooltip: {
+          placement: "top",
+          content: voice.maximized()
+            ? t`Restore call view`
+            : t`Maximize call view`,
+        },
+      }}
+    >
+      <Show when={voice.maximized()} fallback={<Symbol>open_in_full</Symbol>}>
+        <Symbol>close_fullscreen</Symbol>
       </Show>
     </IconButton>
   );
@@ -63,9 +96,14 @@ function Participants() {
 
   let callRef: HTMLDivElement | undefined;
 
+  const secondaryTracks = () =>
+    voice.visibleTracks().filter((t) => !voice.isFocus(t));
+  const hasSecondaryTracks = () =>
+    secondaryTracks().length + testTrackCount > 0;
+
   const tileWidth = () => {
     const vidWidth = Math.round(
-      100 / (voice.vidTracks().length + testTrackCount),
+      100 / (voice.visibleTracks().length + testTrackCount),
     );
     return `max(${TILE_MIN_WIDTH}, ${vidWidth}% - var(--gap-md))`;
   };
@@ -73,6 +111,13 @@ function Participants() {
   // Clear out any focus when the track that was focused is no longer available.
   createEffect(() => {
     if (!voice.focusTrack()) voice.toggleFocus();
+  });
+
+  // Do not leave filtering enabled after the final video track disappears.
+  createEffect(() => {
+    if (voice.hideNonVideoParticipants() && !voice.hasActiveVideoTracks()) {
+      voice.toggleHideNonVideoParticipants(false);
+    }
   });
 
   onMount(() => {
@@ -88,7 +133,7 @@ function Participants() {
     <Call ref={callRef} class={voice.focusId() ? "" : scrollableStyles()}>
       <InRoom>
         <FocusedParticipant />
-        <Show when={voice.focusId()}>
+        <Show when={voice.focusId() && hasSecondaryTracks()}>
           <ShowBarButtonHolder>
             <div style={{ "margin-bottom": "10px" }}>
               <IconButton
@@ -114,13 +159,11 @@ function Participants() {
         </Show>
         <Grid
           focus={!!voice.focusId()}
-          show={voice.showBar()}
+          show={voice.showBar() && hasSecondaryTracks()}
           class={voice.focusId() ? scrollableStyles({ direction: "x" }) : ""}
           style={{ "--vc-tile-width": tileWidth() }}
         >
-          <TrackLoop
-            tracks={() => voice.vidTracks().filter((t) => !voice.isFocus(t))}
-          >
+          <TrackLoop tracks={secondaryTracks}>
             {() => <ParticipantTile />}
           </TrackLoop>
           <For each={Array(testTrackCount)}>

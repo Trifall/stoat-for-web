@@ -107,6 +107,7 @@ export function VoiceCallCardContext(props: { children: JSX.Element }) {
 
     //Set mode based on state
     if (inf?.pos && (!inf.drawer || inf.drawer === SlideState.SHOWN)) {
+      sty.setProperty("--vc-y", `${inf.pos.y}px`);
       sty.transform = `translate(${inf.pos.x}px, ${inf.pos.y}px)`;
       sty.width = `${inf.pos.width}px`;
       setMode();
@@ -249,7 +250,11 @@ function VoiceCallCard(props: { channel: Channel }) {
   return (
     <Show when={voice.showCard(props.channel)}>
       <Base>
-        <Card ref={viewRef} active={inCall()}>
+        <Card
+          ref={viewRef}
+          active={inCall()}
+          maximized={inCall() && voice.maximized() && !voice.fullscreen()}
+        >
           <Show
             when={inCall()}
             fallback={<VoiceCallCardPreview channel={props.channel} />}
@@ -301,6 +306,12 @@ const Card = styled("div", {
         width: "360px",
         height: "120px",
         cursor: "pointer",
+      },
+    },
+    maximized: {
+      true: {
+        height:
+          "calc(100vh - var(--vc-y) - var(--gap-md) - var(--gap-md) - var(--gap-md))",
       },
     },
   },

@@ -14,6 +14,7 @@ import {
 import {
   RoomContext,
   TrackReferenceOrPlaceholder,
+  isTrackReference,
   useTracks,
 } from "solid-livekit-components";
 
@@ -117,6 +118,12 @@ class Voice {
   fullscreen: Accessor<boolean>;
   #setFullscreen: Setter<boolean>;
 
+  maximized: Accessor<boolean>;
+  #setMaximized: Setter<boolean>;
+
+  hideNonVideoParticipants: Accessor<boolean>;
+  #setHideNonVideoParticipants: Setter<boolean>;
+
   focusId: Accessor<string | undefined>;
   #setFocus: Setter<string | undefined>;
 
@@ -170,6 +177,15 @@ class Voice {
     const [fullscreen, setFullscreen] = createSignal(false);
     this.fullscreen = fullscreen;
     this.#setFullscreen = setFullscreen;
+
+    const [maximized, setMaximized] = createSignal(false);
+    this.maximized = maximized;
+    this.#setMaximized = setMaximized;
+
+    const [hideNonVideoParticipants, setHideNonVideoParticipants] =
+      createSignal(false);
+    this.hideNonVideoParticipants = hideNonVideoParticipants;
+    this.#setHideNonVideoParticipants = setHideNonVideoParticipants;
 
     const [focus, setFocus] = createSignal<string>();
     this.focusId = focus;
@@ -800,6 +816,8 @@ class Voice {
         this.#setChannel();
         this.#setMicrophone(this.#settings.micOn);
         this.#setFullscreen(false);
+        this.#setMaximized(false);
+        this.#setHideNonVideoParticipants(false);
         this.vidTracks = () => [];
       });
     } catch (e) {
@@ -1191,6 +1209,32 @@ class Voice {
     this.#setFullscreen(fullscreen);
   }
 
+  toggleMaximized(maximized: boolean = !this.maximized()) {
+    this.#setMaximized(maximized);
+  }
+
+  toggleHideNonVideoParticipants(
+    hide: boolean = !this.hideNonVideoParticipants(),
+  ) {
+    this.#setHideNonVideoParticipants(hide);
+  }
+
+  isActiveVideoTrack(t: TrackReferenceOrPlaceholder) {
+    return isTrackReference(t) && !t.publication.isMuted;
+  }
+
+  hasActiveVideoTracks() {
+    return this.vidTracks().some((t) => this.isActiveVideoTrack(t));
+  }
+
+  visibleTracks() {
+    const tracks = this.vidTracks();
+    if (!this.hideNonVideoParticipants()) return tracks;
+
+    const videoTracks = tracks.filter((t) => this.isActiveVideoTrack(t));
+    return videoTracks.length ? videoTracks : tracks;
+  }
+
   trackId(t: TrackReferenceOrPlaceholder) {
     return `${t.source}_${t.participant.sid}`;
   }
@@ -1198,7 +1242,7 @@ class Voice {
   toggleFocus(t?: TrackReferenceOrPlaceholder) {
     const id = t ? this.trackId(t) : undefined;
     this.#setFocus(
-      this.focusId() === id || this.vidTracks().length < 2 ? undefined : id,
+      this.focusId() === id || this.visibleTracks().length < 2 ? undefined : id,
     );
   }
 
@@ -1209,7 +1253,7 @@ class Voice {
   focusTrack() {
     const id = this.focusId();
     return id
-      ? this.vidTracks().find((t) => this.trackId(t) === id)
+      ? this.visibleTracks().find((t) => this.trackId(t) === id)
       : undefined;
   }
 

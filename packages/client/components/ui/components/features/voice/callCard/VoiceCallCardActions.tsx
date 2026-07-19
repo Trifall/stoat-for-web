@@ -4,6 +4,7 @@ import { Show } from "solid-js";
 import { useLingui } from "@lingui-solid/solid/macro";
 import { styled } from "styled-system/jsx";
 
+import { ContextMenu, ContextMenuButton } from "@revolt/app/menus/ContextMenu";
 import { CONFIGURATION } from "@revolt/common";
 import { useVoice } from "@revolt/rtc";
 import { useState } from "@revolt/state";
@@ -126,6 +127,48 @@ export function VoiceCallCardActions(props: { size: "xs" | "sm" }) {
           <Symbol>screen_share</Symbol>
         </Show>
       </IconButton>
+      <Show when={props.size === "sm"}>
+        <IconButton
+          size={props.size}
+          variant={voice.hideNonVideoParticipants() ? "filled" : "tonal"}
+          use:floating={{
+            contextMenu: () => (
+              <ContextMenu>
+                <ContextMenuButton
+                  _titleCase={false}
+                  selected={voice.hideNonVideoParticipants()}
+                  aria-disabled={!voice.hasActiveVideoTracks()}
+                  style={{
+                    opacity: voice.hasActiveVideoTracks() ? 1 : 0.38,
+                    cursor: voice.hasActiveVideoTracks()
+                      ? "pointer"
+                      : "not-allowed",
+                  }}
+                  actionIcon={
+                    <Show when={voice.hideNonVideoParticipants()}>
+                      <Symbol size={20}>check</Symbol>
+                    </Show>
+                  }
+                  onClick={() => {
+                    if (voice.hasActiveVideoTracks()) {
+                      voice.toggleHideNonVideoParticipants();
+                    }
+                  }}
+                >
+                  {t`Hide non-video participants`}
+                </ContextMenuButton>
+              </ContextMenu>
+            ),
+            contextMenuHandler: "click",
+            tooltip: {
+              placement: "top",
+              content: t`Call view settings`,
+            },
+          }}
+        >
+          <Symbol>tune</Symbol>
+        </IconButton>
+      </Show>
       <Button
         size={props.size}
         variant="_error"
