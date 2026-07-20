@@ -279,6 +279,8 @@ PTT state changes are handled in `VoiceContext`:
 
 On voice connect, if PTT is enabled, initial mic state is derived from `window.pushToTalk.getCurrentState().active`.
 
+Desktop PTT connections start a non-blocking microphone permission request during the trusted join action. The request prefers the configured input with browser fallback semantics and stops its temporary track when permission resolves; room connection does not wait for the permission prompt.
+
 When PTT changes mic state, `state.voice.micOn` is not persisted. This is intentional. PTT should not overwrite the user's normal mic preference.
 
 `setMute()` is serialized through `#mutePromise` to avoid races from rapid PTT events.
@@ -321,9 +323,12 @@ Direct mute behavior for PTT:
 
 - Serializes concurrent calls through `#mutePromise`.
 - Requires an active room.
-- Does nothing while deafened.
+- Refuses activation while deafened and keeps the underlying track disabled.
+- Disables the publication-facing track immediately on PTT release before serialized LiveKit cleanup completes.
 - Re-reads current mic state inside the mutex.
 - Calls `#setMicrophoneEnabled(enabled, { persistPreference: false })`.
+- Rechecks deafen after asynchronous device acquisition and mutes a newly created track if deafen won the race.
+- Resynchronizes raw or processor-output track state after LiveKit activation so the next PTT press transmits normally.
 - Does not persist `micOn`.
 - Plays sounds only if PTT is disabled or PTT notification sounds are enabled.
 

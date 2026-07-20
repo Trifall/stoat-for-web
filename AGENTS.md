@@ -67,8 +67,8 @@ This is a behaviorally significant fork of upstream Stoat for Web. Read `fork-ch
 
 - Preserve push-to-talk-aware `toggleMute()`, `setMute()`, and `toggleDeafen()` semantics.
 - Keep direct PTT microphone changes serialized through `#mutePromise`.
-- Treat LiveKit publication mute state and the browser `MediaStreamTrack.enabled` flag as separate controls. If PTT changes the underlying flag for immediate response, mirror both activation and deactivation so a later unmute cannot leave the track disabled.
-- Establish microphone permission during a trusted user-initiated voice action before relying on desktop IPC or another background event to activate capture. Stop any temporary permission stream immediately and handle denial without leaking tracks.
+- Treat LiveKit publication mute state, raw capture tracks, and processor output `MediaStreamTrack.enabled` flags as separate controls. Keep immediate PTT release muting, then resynchronize the publication-facing track after asynchronous LiveKit activation.
+- Establish microphone permission during a trusted user-initiated voice action before relying on desktop IPC or another background event to activate capture. Start the request synchronously but do not await it before connecting, use the configured input with graceful fallback constraints, stop temporary tracks, and handle denial without leaking tracks.
 - Keep self join/leave sounds separate from remote participant join/leave sounds.
 - Play self leave only for real user-initiated `disconnect(true)` calls; channel switches and internal cleanup use `disconnect(false)`.
 - Gate initial participant notifications so joining an existing room does not produce join-sound spam.
@@ -83,8 +83,9 @@ This is a behaviorally significant fork of upstream Stoat for Web. Read `fork-ch
 ### Do Not
 
 - Do not collapse self and remote voice events into a single sound path.
-- Do not assume that unmuting a LiveKit publication re-enables a `MediaStreamTrack` that application code disabled directly.
+- Do not assume that unmuting a LiveKit publication re-enables a publication-facing or processor output `MediaStreamTrack` that application code disabled directly.
 - Do not defer the first microphone permission request exclusively to PTT or desktop IPC events that Chromium may not treat as trusted user gestures.
+- Do not block room connection on a permission prompt; `getUserMedia()` is allowed to remain pending indefinitely when the user ignores it.
 - Do not play manual leave sounds for reconnect cleanup or internal channel changes.
 - Do not assume LiveKit's built-in reconnect behavior replaces the fork's terminal-disconnect fresh-token reconnect.
 - Do not replace resilient node selection with a raw `Promise.race()` that can reject early, hang, or omit fallback behavior.
