@@ -217,6 +217,30 @@ class Voice {
     };
   }
 
+  #primeMicrophonePermission() {
+    const mediaDevices = navigator.mediaDevices;
+    if (!mediaDevices) return;
+
+    const preferredDevice = this.#settings.preferredAudioInputDevice;
+    void mediaDevices
+      .getUserMedia({
+        audio: {
+          ...this.#microphoneCaptureOptions(),
+          deviceId: preferredDevice ? { ideal: preferredDevice } : undefined,
+        },
+      })
+      .then((stream) => {
+        stream.getTracks().forEach((track) => track.stop());
+      })
+      .catch((error) => {
+        debugLog(
+          "PTT-WEB",
+          "Failed to eagerly request mic permissions:",
+          error,
+        );
+      });
+  }
+
   #createMicrophoneProcessor() {
     if (this.#settings.noiseGateEnabled) {
       const upstream =
@@ -382,18 +406,25 @@ class Voice {
       await this.#switchToDefaultMicrophone(room);
       track = await this.#setLiveKitMicrophoneEnabled(room, true);
     }
+
+    if (enabled && this.deafen()) {
+      enabled = false;
+      if (track?.audioTrack) {
+        track.audioTrack.mediaStreamTrack.enabled = false;
+      }
+      await this.#setLiveKitMicrophoneEnabled(room, false);
+    }
+
     const isEnabled = enabled && typeof track !== "undefined";
 
     this.#setMicrophone(isEnabled);
 
-    if (
-      isEnabled &&
-      this.#settings.pushToTalkEnabled &&
-      !this.#pushToTalkActive
-    ) {
+    if (isEnabled) {
       const audioTrack = track?.audioTrack;
       if (audioTrack) {
-        audioTrack.mediaStreamTrack.enabled = false;
+        audioTrack.mediaStreamTrack.enabled =
+          !this.#settings.pushToTalkEnabled ||
+          (this.#pushToTalkActive && !this.deafen());
       }
     }
 
@@ -448,13 +479,14 @@ class Voice {
   async connect(channel: Channel, auth?: { url: string; token: string }) {
     debugLog("PTT-WEB", "Voice.connect() called for channel:", channel.id);
 
-    // Explicitly request microphone permissions during this trusted UI gesture
-    // so that subsequent background IPC events (PTT) are not blocked by the browser.
-    try {
-      const stream = await navigator.mediaDevices?.getUserMedia({ audio: true });
-      stream?.getTracks().forEach((t) => t.stop());
-    } catch (e) {
-      debugLog("PTT-WEB", "Failed to eagerly request mic permissions:", e);
+    // Start capture during this trusted UI gesture without making connection
+    // progress depend on the user answering the permission prompt.
+    if (
+      window.pushToTalk &&
+      this.#settings.pushToTalkEnabled &&
+      channel.havePermission("Speak")
+    ) {
+      this.#primeMicrophonePermission();
     }
 
     // Reset reconnect state on new connection attempt
@@ -762,13 +794,16 @@ class Voice {
 
   setPushToTalkActive(active: boolean) {
     this.#pushToTalkActive = active;
-    const audioTrack = this.room()?.localParticipant.getTrackPublication(
-      Track.Source.Microphone,
-    )?.audioTrack;
-    if (audioTrack) {
-      audioTrack.mediaStreamTrack.enabled = active;
-    }
+
     if (this.#settings.pushToTalkEnabled) {
+      if (!active) {
+        const audioTrack = this.room()?.localParticipant.getTrackPublication(
+          Track.Source.Microphone,
+        )?.audioTrack;
+        if (audioTrack) {
+          audioTrack.mediaStreamTrack.enabled = false;
+        }
+      }
       void this.setMute(active);
     }
   }
@@ -924,8 +959,15 @@ class Voice {
         enabled = false;
       }
 
+      const audioTrack = room.localParticipant.getTrackPublication(
+        Track.Source.Microphone,
+      )?.audioTrack;
+
       // if user is deafened, don't allow them to unmute
       if (this.deafen()) {
+        if (audioTrack) {
+          audioTrack.mediaStreamTrack.enabled = false;
+        }
         debugLog("PTT-WEB", "Cannot unmute while deafened");
         return;
       }
@@ -933,8 +975,11 @@ class Voice {
       // Re-read state inside the mutex - it may have changed while we waited.
       const currentState = room.localParticipant.isMicrophoneEnabled;
       const microphoneTrackEnded =
-        room.localParticipant.getTrackPublication(Track.Source.Microphone)
-          ?.audioTrack?.mediaStreamTrack.readyState === "ended";
+        audioTrack?.mediaStreamTrack.readyState === "ended";
+
+      if (audioTrack && currentState === enabled) {
+        audioTrack.mediaStreamTrack.enabled = enabled;
+      }
       debugLog(
         "PTT-WEB",
         "setMute() - current mic state:",
