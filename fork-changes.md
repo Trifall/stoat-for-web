@@ -277,9 +277,9 @@ PTT state changes are handled in `VoiceContext`:
 - If PTT is enabled, `setPushToTalkActive()` applies the cached state through `voice.setMute(active)`.
 - Desktop config changes call `voice.reconcilePushToTalk(enabled)`: enabling applies the cached PTT state; disabling restores the normal preference with `!deafen && micOn`.
 
-On voice connect, if PTT is enabled, initial mic state is derived from `window.pushToTalk.getCurrentState().active`.
+On voice connect, if PTT is enabled, initial mic state is derived from `window.pushToTalk.getCurrentState().active` and applied through the same serialized `setMute()` path as later desktop events.
 
-Desktop PTT connections start a non-blocking microphone permission request during the trusted join action. The request prefers the configured input with browser fallback semantics and stops its temporary track when permission resolves; room connection does not wait for the permission prompt.
+Desktop PTT connections start a non-blocking microphone permission request during the trusted join action. The request prefers the configured input with browser fallback semantics and stops its temporary track when permission resolves; room connection does not wait for the permission prompt, but the first LiveKit microphone capture waits for an in-flight preflight to prevent overlapping device requests.
 
 When PTT changes mic state, `state.voice.micOn` is not persisted. This is intentional. PTT should not overwrite the user's normal mic preference.
 
@@ -328,7 +328,8 @@ Direct mute behavior for PTT:
 - Re-reads current mic state inside the mutex.
 - Calls `#setMicrophoneEnabled(enabled, { persistPreference: false })`.
 - Rechecks deafen after asynchronous device acquisition and mutes a newly created track if deafen won the race.
-- Resynchronizes raw or processor-output track state after LiveKit activation so the next PTT press transmits normally.
+- Rechecks retained PTT state after asynchronous device acquisition and mutes a newly created publication if a release won the race.
+- Resynchronizes raw or processor-output track state after processor setup so the next PTT press transmits normally.
 - Does not persist `micOn`.
 - Plays sounds only if PTT is disabled or PTT notification sounds are enabled.
 
@@ -582,6 +583,8 @@ These are internal settings page IDs, not standalone URL routes:
 - `voice_advanced` → fork advanced voice settings
 
 Regular `VoiceSettings.tsx` contains input options, processing options, and screenshare options when video is enabled. PTT and auto-reconnect remain separate entries under the hardcoded "Stoat Plus Settings" category.
+
+The Stoat Plus advanced voice page exposes `screenShareBitrateKbps` and `screenShareFrameRate`. Bitrate defaults to `2500`, is clamped to `250-8000` in 250 kbps increments during hydration and writes, and is converted to bits per second when a new screen-share track is published. Frame rate defaults to `15` and is clamped to `5-30` in 5 FPS increments; it caps both capture and publish encoding while allowing a quality preset such as source/text mode to use a lower value. These settings intentionally affect newly started shares rather than reconfiguring an active sender. The backend currently exposes only `video_resolution`, so the 30 FPS ceiling follows the highest client screen-share preset rather than a separate server entitlement.
 
 ### Layout and Modal Integration
 

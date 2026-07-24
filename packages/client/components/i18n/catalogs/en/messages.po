@@ -442,6 +442,11 @@ msgstr "An internal error occurred. ({0})"
 msgid "Appearance"
 msgstr "Appearance"
 
+#. js-lingui-explicit-id
+#: components/app/interface/settings/user/voice/AdvancedSettings.tsx
+msgid "plus.advanced.screenShareBitrateDescription"
+msgstr "Applies to newly started screen shares. Network conditions may reduce the actual bitrate."
+
 #: components/modal/modals/SignOutSessions.tsx
 msgid "Are you sure you want to clear your sessions?"
 msgstr "Are you sure you want to clear your sessions?"
@@ -654,6 +659,11 @@ msgstr "Cannot delete account until servers are deleted or transferred"
 #: components/i18n/errors.tsx
 msgid "Cannot edit this message."
 msgstr "Cannot edit this message."
+
+#. js-lingui-explicit-id
+#: components/app/interface/settings/user/voice/AdvancedSettings.tsx
+msgid "plus.advanced.screenShareFrameRateDescription"
+msgstr "Caps frames per second for newly started screen shares. Quality presets may use a lower rate."
 
 #: components/modal/modals/EditUsername.tsx
 #: components/modal/modals/EditPassword.tsx
@@ -1522,6 +1532,11 @@ msgstr "For 3 hours"
 msgid "For 8 hours"
 msgstr "For 8 hours"
 
+#. js-lingui-explicit-id
+#: components/app/interface/settings/user/voice/AdvancedSettings.tsx
+msgid "plus.advanced.fps"
+msgstr "FPS"
+
 #: src/interface/Friends.tsx
 #: src/interface/navigation/channels/HomeSidebar.tsx
 msgid "Friends"
@@ -1802,6 +1817,11 @@ msgstr "Jump to present"
 msgid "Jump to the beginning"
 msgstr "Jump to the beginning"
 
+#. js-lingui-explicit-id
+#: components/app/interface/settings/user/voice/AdvancedSettings.tsx
+msgid "plus.advanced.kbps"
+msgstr "kbps"
+
 #: components/modal/modals/ChannelToggleMature.tsx
 msgid "Keep as is"
 msgstr "Keep as is"
@@ -1995,6 +2015,18 @@ msgstr "Master Volume"
 #: components/ui/components/features/voice/callCard/VoiceCallCardActiveRoom.tsx
 msgid "Maximize call view"
 msgstr "Maximize call view"
+
+#. js-lingui-explicit-id
+#: components/app/interface/settings/user/voice/AdvancedSettings.tsx
+#: components/app/interface/settings/user/voice/AdvancedSettings.tsx
+msgid "plus.advanced.screenShareBitrate"
+msgstr "Maximum bitrate"
+
+#. js-lingui-explicit-id
+#: components/app/interface/settings/user/voice/AdvancedSettings.tsx
+#: components/app/interface/settings/user/voice/AdvancedSettings.tsx
+msgid "plus.advanced.screenShareFrameRate"
+msgstr "Maximum frame rate"
 
 #: components/app/interface/settings/ServerSettings.tsx
 #: components/app/interface/settings/channel/permissions/ChannelPermissionsEditor.tsx
@@ -2742,6 +2774,11 @@ msgstr "Saved Notes"
 #: components/modal/modals/ReportContent.tsx
 msgid "Scams or fraud"
 msgstr "Scams or fraud"
+
+#. js-lingui-explicit-id
+#: components/app/interface/settings/user/voice/AdvancedSettings.tsx
+msgid "plus.advanced.screenShare"
+msgstr "Screen Share"
 
 #: components/modal/modals/ScreenShareSettings.tsx
 #: components/app/interface/settings/user/voice/ScreenShareOptions.tsx

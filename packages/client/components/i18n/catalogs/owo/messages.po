@@ -442,6 +442,11 @@ msgstr ""
 msgid "Appearance"
 msgstr "Appeawance"
 
+#. js-lingui-explicit-id
+#: components/app/interface/settings/user/voice/AdvancedSettings.tsx
+msgid "plus.advanced.screenShareBitrateDescription"
+msgstr ""
+
 #: components/modal/modals/SignOutSessions.tsx
 msgid "Are you sure you want to clear your sessions?"
 msgstr ""
@@ -653,6 +658,11 @@ msgstr "Cannyot dewete accownt untyil sewvews awe deweted oww twansfewwwd"
 
 #: components/i18n/errors.tsx
 msgid "Cannot edit this message."
+msgstr ""
+
+#. js-lingui-explicit-id
+#: components/app/interface/settings/user/voice/AdvancedSettings.tsx
+msgid "plus.advanced.screenShareFrameRateDescription"
 msgstr ""
 
 #: components/modal/modals/EditUsername.tsx
@@ -1522,6 +1532,11 @@ msgstr ""
 msgid "For 8 hours"
 msgstr ""
 
+#. js-lingui-explicit-id
+#: components/app/interface/settings/user/voice/AdvancedSettings.tsx
+msgid "plus.advanced.fps"
+msgstr ""
+
 #: src/interface/Friends.tsx
 #: src/interface/navigation/channels/HomeSidebar.tsx
 msgid "Friends"
@@ -1802,6 +1817,11 @@ msgstr "Juwp to pwesent"
 msgid "Jump to the beginning"
 msgstr "Jump tu the beginnying"
 
+#. js-lingui-explicit-id
+#: components/app/interface/settings/user/voice/AdvancedSettings.tsx
+msgid "plus.advanced.kbps"
+msgstr ""
+
 #: components/modal/modals/ChannelToggleMature.tsx
 msgid "Keep as is"
 msgstr ""
@@ -1994,6 +2014,18 @@ msgstr ""
 
 #: components/ui/components/features/voice/callCard/VoiceCallCardActiveRoom.tsx
 msgid "Maximize call view"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: components/app/interface/settings/user/voice/AdvancedSettings.tsx
+#: components/app/interface/settings/user/voice/AdvancedSettings.tsx
+msgid "plus.advanced.screenShareBitrate"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: components/app/interface/settings/user/voice/AdvancedSettings.tsx
+#: components/app/interface/settings/user/voice/AdvancedSettings.tsx
+msgid "plus.advanced.screenShareFrameRate"
 msgstr ""
 
 #: components/app/interface/settings/ServerSettings.tsx
@@ -2741,6 +2773,11 @@ msgstr "Sawved nowotes"
 
 #: components/modal/modals/ReportContent.tsx
 msgid "Scams or fraud"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: components/app/interface/settings/user/voice/AdvancedSettings.tsx
+msgid "plus.advanced.screenShare"
 msgstr ""
 
 #: components/modal/modals/ScreenShareSettings.tsx

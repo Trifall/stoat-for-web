@@ -33,7 +33,7 @@ export function ScreenShareSettingsModal(
       voice.screenShareAudio = group.controls.audio.value;
     }
 
-    props.callback(
+    await props.callback(
       group.controls.qualityName.value,
       group.controls.audio.value && props.audio,
     );

@@ -101,7 +101,6 @@ class Voice {
   screenshare: Accessor<boolean>;
   #setScreenshare: Setter<boolean>;
 
-  #isManualDisconnect = false;
   #reconnectAttempts = 0;
   #maxReconnectAttempts = 5;
   #micWasOnBeforeDeafen = false;
@@ -109,6 +108,7 @@ class Voice {
   #noiseGateProcessor?: NoiseGateProcessor;
   #pushToTalkActive = false;
   #mutePromise: Promise<void> = Promise.resolve();
+  #microphonePermissionPromise?: Promise<void>;
   #voiceProcessingPromise: Promise<void> = Promise.resolve();
   #mediaDevicesChangeHandler?: () => void;
   #pendingLeaveNotifications = new Map<string, ReturnType<typeof setTimeout>>();
@@ -219,10 +219,10 @@ class Voice {
 
   #primeMicrophonePermission() {
     const mediaDevices = navigator.mediaDevices;
-    if (!mediaDevices) return;
+    if (!mediaDevices || this.#microphonePermissionPromise) return;
 
     const preferredDevice = this.#settings.preferredAudioInputDevice;
-    void mediaDevices
+    this.#microphonePermissionPromise = mediaDevices
       .getUserMedia({
         audio: {
           ...this.#microphoneCaptureOptions(),
@@ -238,6 +238,9 @@ class Voice {
           "Failed to eagerly request mic permissions:",
           error,
         );
+      })
+      .finally(() => {
+        this.#microphonePermissionPromise = undefined;
       });
   }
 
@@ -299,6 +302,10 @@ class Voice {
   }
 
   async #setLiveKitMicrophoneEnabled(room: Room, enabled: boolean) {
+    if (enabled && this.#microphonePermissionPromise) {
+      await this.#microphonePermissionPromise;
+    }
+
     const audioTrack = room.localParticipant.getTrackPublication(
       Track.Source.Microphone,
     )?.audioTrack;
@@ -407,7 +414,11 @@ class Voice {
       track = await this.#setLiveKitMicrophoneEnabled(room, true);
     }
 
-    if (enabled && this.deafen()) {
+    if (
+      enabled &&
+      (this.deafen() ||
+        (this.#settings.pushToTalkEnabled && !this.#pushToTalkActive))
+    ) {
       enabled = false;
       if (track?.audioTrack) {
         track.audioTrack.mediaStreamTrack.enabled = false;
@@ -419,15 +430,6 @@ class Voice {
 
     this.#setMicrophone(isEnabled);
 
-    if (isEnabled) {
-      const audioTrack = track?.audioTrack;
-      if (audioTrack) {
-        audioTrack.mediaStreamTrack.enabled =
-          !this.#settings.pushToTalkEnabled ||
-          (this.#pushToTalkActive && !this.deafen());
-      }
-    }
-
     if (options.persistPreference ?? true) {
       this.#settings.micOn = isEnabled;
     }
@@ -436,6 +438,13 @@ class Voice {
       await this.#configureMicrophoneTrack(
         track as MicrophonePublication | undefined,
       );
+
+      const audioTrack = track?.audioTrack;
+      if (audioTrack) {
+        audioTrack.mediaStreamTrack.enabled =
+          !this.deafen() &&
+          (!this.#settings.pushToTalkEnabled || this.#pushToTalkActive);
+      }
     }
 
     return track;
@@ -490,7 +499,6 @@ class Voice {
     }
 
     // Reset reconnect state on new connection attempt
-    this.#isManualDisconnect = false;
     this.#reconnectAttempts = 0;
 
     this.disconnect(false);
@@ -547,25 +555,25 @@ class Voice {
         }
       }
       if (this.speakingPermission) {
-        const pttActive =
-          this.#settings.pushToTalkEnabled &&
-          !!window.pushToTalk?.getCurrentState().active;
-        const targetMicEnabled =
-          !this.#settings.deafen &&
-          (this.#settings.pushToTalkEnabled ? pttActive : this.#settings.micOn);
-
-        this.#setMicrophoneEnabled(targetMicEnabled, {
-          persistPreference:
-            !this.#settings.pushToTalkEnabled && !this.#settings.deafen,
-        })
-          .then((track) => {
-            if (targetMicEnabled && !track?.audioTrack) {
-              console.warn(
-                "[Voice] Microphone enabled but no audio track was returned.",
-              );
-            }
+        if (this.#settings.pushToTalkEnabled) {
+          this.setPushToTalkActive(
+            !!window.pushToTalk?.getCurrentState().active,
+          );
+        } else {
+          const targetMicEnabled =
+            !this.#settings.deafen && this.#settings.micOn;
+          this.#setMicrophoneEnabled(targetMicEnabled, {
+            persistPreference: !this.#settings.deafen,
           })
-          .catch((error) => this.#handleMicrophoneError(error));
+            .then((track) => {
+              if (targetMicEnabled && !track?.audioTrack) {
+                console.warn(
+                  "[Voice] Microphone enabled but no audio track was returned.",
+                );
+              }
+            })
+            .catch((error) => this.#handleMicrophoneError(error));
+        }
       }
 
       // Send "started a call" message only when starting a new call (no existing participants)
@@ -829,7 +837,6 @@ class Voice {
       if (!room) return;
 
       // Internal disconnects during channel switches should not disable reconnects.
-      this.#isManualDisconnect = manual;
       this.#reconnectAttempts = 0;
 
       // Clean up noise gate processor
@@ -1053,7 +1060,7 @@ class Voice {
       low: {
         name: "low",
         resolution: ScreenSharePresets.h720fps30.resolution,
-        fullName: `720p 30FPS`,
+        fullName: `720p ${Math.min(30, this.#settings.screenShareFrameRate)}FPS`,
         contentHint: "motion",
       },
     };
@@ -1073,7 +1080,7 @@ class Voice {
           qualities.high = {
             name: "high",
             resolution: ScreenSharePresets.h1080fps30.resolution,
-            fullName: `1080p 30FPS`,
+            fullName: `1080p ${Math.min(30, this.#settings.screenShareFrameRate)}FPS`,
             contentHint: "motion",
           };
           const originalResolution = ScreenSharePresets.original.resolution;
@@ -1100,13 +1107,23 @@ class Voice {
           qualities.text = {
             name: "text",
             resolution: originalResolution,
-            fullName: `Source 5FPS`,
+            fullName: `Source ${Math.min(5, this.#settings.screenShareFrameRate)}FPS`,
             contentHint: "text",
           };
         }
       }
     }
     return qualities;
+  }
+
+  #screenShareResolution(quality: ScreenShareQuality): VideoResolution {
+    return {
+      ...quality.resolution,
+      frameRate: Math.min(
+        quality.resolution.frameRate ?? this.#settings.screenShareFrameRate,
+        this.#settings.screenShareFrameRate,
+      ),
+    };
   }
 
   async toggleScreenshare() {
@@ -1121,6 +1138,9 @@ class Voice {
       this.sound.playSound("streamEnd");
     } else {
       const qualities = this.getEnabledScreenShareQualities();
+      const initialQuality =
+        qualities[this.#settings.screenShareQuality || "low"] || qualities.low!;
+      const initialResolution = this.#screenShareResolution(initialQuality);
       let screenPickerQualityName: ScreenShareQualityName | undefined;
       let screenPickerAudio: boolean | undefined;
 
@@ -1154,11 +1174,15 @@ class Voice {
         const localTrack = await room.localParticipant.setScreenShareEnabled(
           true,
           {
-            resolution:
-              this.getEnabledScreenShareQualities()[
-                this.#settings.screenShareQuality || "low"
-              ]?.resolution,
+            resolution: initialResolution,
             audio: true,
+          },
+          {
+            screenShareEncoding: {
+              ...ScreenSharePresets.h1080fps15.encoding,
+              maxBitrate: this.#settings.screenShareBitrateKbps * 1000,
+              maxFramerate: this.#settings.screenShareFrameRate,
+            },
           },
         );
 
@@ -1187,18 +1211,19 @@ class Voice {
             audio: boolean,
           ) => {
             const quality = qualities[qualityName] || qualities.low!;
+            const resolution = this.#screenShareResolution(quality);
 
             if (localTrack.videoTrack) {
               await localTrack.videoTrack.mediaStreamTrack.applyConstraints({
-                frameRate: { max: quality.resolution.frameRate },
+                frameRate: { max: resolution.frameRate },
                 width:
-                  quality.resolution.width === 0
+                  resolution.width === 0
                     ? undefined
-                    : { max: quality.resolution.width },
+                    : { max: resolution.width },
                 height:
-                  quality.resolution.height === 0
+                  resolution.height === 0
                     ? undefined
-                    : { max: quality.resolution.height },
+                    : { max: resolution.height },
               });
               localTrack.videoTrack.mediaStreamTrack.contentHint =
                 quality.contentHint;
@@ -1209,7 +1234,7 @@ class Voice {
           };
 
           if (screenPickerQualityName) {
-            callback(
+            await callback(
               screenPickerQualityName || "low",
               screenPickerAudio || false,
             );
@@ -1236,19 +1261,35 @@ class Voice {
                 }),
                 audio: !!screenAudioTrack,
                 callback: async (qualityName, audio) => {
-                  callback(qualityName, audio);
-                  localTrack.resumeUpstream();
-                  if (audio) {
-                    screenAudioTrack?.resumeUpstream();
+                  try {
+                    await callback(qualityName, audio);
+                  } catch (error) {
+                    this.onErr(error);
+                  } finally {
+                    try {
+                      await Promise.all([
+                        localTrack.resumeUpstream(),
+                        audio
+                          ? screenAudioTrack?.resumeUpstream()
+                          : Promise.resolve(),
+                      ]);
+                    } catch (error) {
+                      this.onErr(error);
+                    }
                   }
                 },
               });
             } else {
-              callback(
+              await callback(
                 this.#settings.screenShareQuality || "low",
                 this.#settings.screenShareAudio,
               );
             }
+          } else {
+            await callback(
+              this.#settings.screenShareQuality || "low",
+              this.#settings.screenShareAudio,
+            );
           }
         }
       } catch (e) {

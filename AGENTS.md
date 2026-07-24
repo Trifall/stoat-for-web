@@ -66,9 +66,9 @@ This is a behaviorally significant fork of upstream Stoat for Web. Read `fork-ch
 ### Do
 
 - Preserve push-to-talk-aware `toggleMute()`, `setMute()`, and `toggleDeafen()` semantics.
-- Keep direct PTT microphone changes serialized through `#mutePromise`.
+- Keep all PTT microphone changes serialized through `#mutePromise`, including initial state application from `RoomEvent.Connected`.
 - Treat LiveKit publication mute state, raw capture tracks, and processor output `MediaStreamTrack.enabled` flags as separate controls. Keep immediate PTT release muting, then resynchronize the publication-facing track after asynchronous LiveKit activation.
-- Establish microphone permission during a trusted user-initiated voice action before relying on desktop IPC or another background event to activate capture. Start the request synchronously but do not await it before connecting, use the configured input with graceful fallback constraints, stop temporary tracks, and handle denial without leaking tracks.
+- Establish microphone permission during a trusted user-initiated voice action before relying on desktop IPC or another background event to activate capture. Start the request synchronously but do not await it before connecting, use the configured input with graceful fallback constraints, stop temporary tracks, and make the first LiveKit capture wait for any in-flight preflight so the requests cannot overlap.
 - Keep self join/leave sounds separate from remote participant join/leave sounds.
 - Play self leave only for real user-initiated `disconnect(true)` calls; channel switches and internal cleanup use `disconnect(false)`.
 - Gate initial participant notifications so joining an existing room does not produce join-sound spam.
@@ -86,6 +86,7 @@ This is a behaviorally significant fork of upstream Stoat for Web. Read `fork-ch
 - Do not assume that unmuting a LiveKit publication re-enables a publication-facing or processor output `MediaStreamTrack` that application code disabled directly.
 - Do not defer the first microphone permission request exclusively to PTT or desktop IPC events that Chromium may not treat as trusted user gestures.
 - Do not block room connection on a permission prompt; `getUserMedia()` is allowed to remain pending indefinitely when the user ignores it.
+- Do not initialize the PTT microphone directly from `RoomEvent.Connected`; bypassing `#mutePromise` can lose a toggle transition while the first publication is pending.
 - Do not play manual leave sounds for reconnect cleanup or internal channel changes.
 - Do not assume LiveKit's built-in reconnect behavior replaces the fork's terminal-disconnect fresh-token reconnect.
 - Do not replace resilient node selection with a raw `Promise.race()` that can reject early, hang, or omit fallback behavior.
@@ -149,6 +150,9 @@ Relevant files include:
 - Clear or replace focus when filtering makes the focused track unavailable.
 - Fall back to showing participants when a video-only filter would otherwise produce an empty call pane.
 - Disable or clear video-only filtering when the final active video publication disappears.
+- Keep `screenShareBitrateKbps` persisted and validated in kilobits per second, then convert it to bits per second only at the LiveKit publish boundary. Preserve the 250-8000 kbps bounds and 250 kbps increments unless intentionally redesigning the setting.
+- Keep `screenShareFrameRate` persisted and validated between 5 and 30 FPS in 5 FPS increments. Apply it to both capture constraints and LiveKit's publish encoding, while allowing quality presets such as text mode to impose a lower frame rate.
+- Treat screen-share bitrate changes as applying to newly published shares; changing the persisted value does not reconfigure an active `RTCRtpSender`.
 - Compute secondary focused-view tracks once and use that result for the show/hide control, strip sizing, and `TrackLoop`.
 - Keep in-pane maximize constrained to the channel content width so it does not cover the left navigation or become browser/application fullscreen.
 
@@ -156,6 +160,8 @@ Relevant files include:
 
 - Do not query for `<video>` elements or depend on `lk-participant-media-video` attributes to decide which participants have video.
 - Do not equate every camera placeholder with active video.
+- Do not pass the persisted kbps value directly to LiveKit's `maxBitrate`, which expects bits per second.
+- Do not claim the backend exposes a frame-rate entitlement; the current 30 FPS cap follows the highest client quality preset because only `video_resolution` is provided.
 - Do not leave `Hide Others` or `Show Others` visible when filtering leaves no non-focused tracks to show.
 - Do not hide every participant when no camera or screen-share publication is active.
 - Do not make a focused, filtered, or maximized view break the existing true-fullscreen flow.

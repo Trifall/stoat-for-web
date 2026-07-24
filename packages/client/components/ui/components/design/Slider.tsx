@@ -6,6 +6,7 @@ type Props = Omit<
   JSX.HTMLAttributes<HTMLInputElement>,
   "onChange" | "onInput"
 > & {
+  accessibleLabel?: string;
   disabled?: boolean;
   min?: number;
   max?: number;
@@ -17,6 +18,11 @@ type Props = Omit<
   onInput?: (event: { currentTarget: { value: number } }) => void;
 };
 
+type SliderElement = HTMLElement & {
+  labelFormatter?: (value: number) => string;
+  updateComplete?: Promise<unknown>;
+};
+
 /**
  * Sliders let users make selections from a range of values
  *
@@ -24,11 +30,12 @@ type Props = Omit<
  * @specification https://m3.material.io/components/sliders
  */
 export function Slider(props: Props) {
-  const [ref, setRef] = createSignal<{
-    labelFormatter?: (value: number) => string;
-  }>();
+  const [ref, setRef] = createSignal<SliderElement>();
 
-  const [local, rest] = splitProps(props, ["labelFormatter"]);
+  const [local, rest] = splitProps(props, [
+    "accessibleLabel",
+    "labelFormatter",
+  ]);
 
   createEffect(
     on(ref, (ref) => {
@@ -38,5 +45,25 @@ export function Slider(props: Props) {
     }),
   );
 
-  return <mdui-slider ref={setRef} {...rest} />;
+  createEffect(() => {
+    const element = ref();
+    const label = local.accessibleLabel;
+    if (!element || !label) return;
+
+    const applyLabel = () => {
+      element.shadowRoot
+        ?.querySelector('input[type="range"]')
+        ?.setAttribute("aria-label", label);
+    };
+
+    if (element.updateComplete) {
+      void element.updateComplete.then(applyLabel);
+    } else {
+      queueMicrotask(applyLabel);
+    }
+  });
+
+  return (
+    <mdui-slider ref={setRef} aria-label={local.accessibleLabel} {...rest} />
+  );
 }

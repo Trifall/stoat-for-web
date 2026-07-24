@@ -325,7 +325,10 @@ export type Modals =
       trackReference: TrackReference;
       qualities: { name: string; fullName: string }[];
       audio: boolean;
-      callback: (qualityName: ScreenShareQualityName, audio: boolean) => void;
+      callback: (
+        qualityName: ScreenShareQualityName,
+        audio: boolean,
+      ) => Promise<void>;
       onCancel: () => void;
     }
   | {

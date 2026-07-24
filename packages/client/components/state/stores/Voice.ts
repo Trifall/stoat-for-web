@@ -27,6 +27,39 @@ export const ScreenShareQualityNames: ScreenShareQualityName[] = [
   "text",
 ];
 
+export const DEFAULT_SCREEN_SHARE_BITRATE_KBPS = 2500;
+export const MIN_SCREEN_SHARE_BITRATE_KBPS = 250;
+export const MAX_SCREEN_SHARE_BITRATE_KBPS = 8000;
+export const SCREEN_SHARE_BITRATE_STEP_KBPS = 250;
+export const DEFAULT_SCREEN_SHARE_FRAME_RATE = 15;
+export const MIN_SCREEN_SHARE_FRAME_RATE = 5;
+export const MAX_SCREEN_SHARE_FRAME_RATE = 30;
+export const SCREEN_SHARE_FRAME_RATE_STEP = 5;
+
+export function clampScreenShareBitrateKbps(value: number) {
+  if (!Number.isFinite(value)) return DEFAULT_SCREEN_SHARE_BITRATE_KBPS;
+  const clamped = Math.min(
+    MAX_SCREEN_SHARE_BITRATE_KBPS,
+    Math.max(MIN_SCREEN_SHARE_BITRATE_KBPS, value),
+  );
+  return (
+    Math.round(clamped / SCREEN_SHARE_BITRATE_STEP_KBPS) *
+    SCREEN_SHARE_BITRATE_STEP_KBPS
+  );
+}
+
+export function clampScreenShareFrameRate(value: number) {
+  if (!Number.isFinite(value)) return DEFAULT_SCREEN_SHARE_FRAME_RATE;
+  const clamped = Math.min(
+    MAX_SCREEN_SHARE_FRAME_RATE,
+    Math.max(MIN_SCREEN_SHARE_FRAME_RATE, value),
+  );
+  return (
+    Math.round(clamped / SCREEN_SHARE_FRAME_RATE_STEP) *
+    SCREEN_SHARE_FRAME_RATE_STEP
+  );
+}
+
 export interface TypeVoice {
   preferredAudioInputDevice?: string;
   preferredAudioOutputDevice?: string;
@@ -39,6 +72,8 @@ export interface TypeVoice {
   screenShareQuality: ScreenShareQualityName;
   screenShareQualityAsk: boolean;
   screenShareAudio: boolean;
+  screenShareBitrateKbps: number;
+  screenShareFrameRate: number;
 
   inputVolume: number;
   outputVolume: number;
@@ -106,6 +141,8 @@ export class Voice extends AbstractStore<"voice", TypeVoice> {
       screenShareQuality: "low",
       screenShareQualityAsk: true,
       screenShareAudio: false,
+      screenShareBitrateKbps: DEFAULT_SCREEN_SHARE_BITRATE_KBPS,
+      screenShareFrameRate: DEFAULT_SCREEN_SHARE_FRAME_RATE,
       inputVolume: 1.0,
       outputVolume: 1.0,
       deafen: false,
@@ -187,6 +224,18 @@ export class Voice extends AbstractStore<"voice", TypeVoice> {
 
     if (typeof input.screenShareAudio === "boolean") {
       data.screenShareAudio = input.screenShareAudio;
+    }
+
+    if (typeof input.screenShareBitrateKbps === "number") {
+      data.screenShareBitrateKbps = clampScreenShareBitrateKbps(
+        input.screenShareBitrateKbps,
+      );
+    }
+
+    if (typeof input.screenShareFrameRate === "number") {
+      data.screenShareFrameRate = clampScreenShareFrameRate(
+        input.screenShareFrameRate,
+      );
     }
 
     if (typeof input.inputVolume === "number") {
@@ -456,6 +505,20 @@ export class Voice extends AbstractStore<"voice", TypeVoice> {
   }
 
   /**
+   * Set screen share bitrate in kilobits per second
+   */
+  set screenShareBitrateKbps(value: number) {
+    this.set("screenShareBitrateKbps", clampScreenShareBitrateKbps(value));
+  }
+
+  /**
+   * Set screen share frame rate
+   */
+  set screenShareFrameRate(value: number) {
+    this.set("screenShareFrameRate", clampScreenShareFrameRate(value));
+  }
+
+  /**
    * Set input volume
    */
   set inputVolume(value: number) {
@@ -544,6 +607,20 @@ export class Voice extends AbstractStore<"voice", TypeVoice> {
    */
   get screenShareAudio(): boolean {
     return this.get().screenShareAudio;
+  }
+
+  /**
+   * Get screen share bitrate in kilobits per second
+   */
+  get screenShareBitrateKbps(): number {
+    return this.get().screenShareBitrateKbps;
+  }
+
+  /**
+   * Get screen share frame rate
+   */
+  get screenShareFrameRate(): number {
+    return this.get().screenShareFrameRate;
   }
 
   /**
