@@ -17,14 +17,14 @@ import {
 import MdVolumeUp from "@material-design-icons/svg/outlined/volume_up.svg?component-solid";
 
 export default function Sounds() {
-  const { settings, sounds } = useState();
+  const { sounds } = useState();
   const soundController = useSound();
   const { t } = useLingui();
 
   const playSoundString = t`Play sound`;
 
   return (
-    <Show when={settings.desktopNotificationsState !== "unsupported"}>
+    <>
       <Column>
         <Text class="title">
           <Trans>Sounds</Trans>
@@ -223,18 +223,14 @@ export default function Sounds() {
             </Content>
           </CategoryButton>
           <CategoryButton
-            action={
-              <Checkbox checked={sounds.enabled("selfJoinVoice")} />
-            }
+            action={<Checkbox checked={sounds.enabled("selfJoinVoice")} />}
             onClick={() => sounds.toggle("selfJoinVoice")}
             icon="blank"
           >
             <Content>
               <Trans>Join Call (Self)</Trans>
               <IconButton
-                onPress={() =>
-                  soundController.playSound("selfJoinVoice", true)
-                }
+                onPress={() => soundController.playSound("selfJoinVoice", true)}
                 use:floating={{
                   tooltip: {
                     placement: "top",
@@ -247,9 +243,7 @@ export default function Sounds() {
             </Content>
           </CategoryButton>
           <CategoryButton
-            action={
-              <Checkbox checked={sounds.enabled("selfLeaveVoice")} />
-            }
+            action={<Checkbox checked={sounds.enabled("selfLeaveVoice")} />}
             onClick={() => sounds.toggle("selfLeaveVoice")}
             icon="blank"
           >
@@ -271,18 +265,14 @@ export default function Sounds() {
             </Content>
           </CategoryButton>
           <CategoryButton
-            action={
-              <Checkbox checked={sounds.enabled("incomingCall")} />
-            }
+            action={<Checkbox checked={sounds.enabled("incomingCall")} />}
             onClick={() => sounds.toggle("incomingCall")}
             icon="blank"
           >
             <Content>
               <Trans>Incoming Call</Trans>
               <IconButton
-                onPress={() =>
-                  soundController.playSound("incomingCall", true)
-                }
+                onPress={() => soundController.playSound("incomingCall", true)}
                 use:floating={{
                   tooltip: {
                     placement: "top",
@@ -295,18 +285,14 @@ export default function Sounds() {
             </Content>
           </CategoryButton>
           <CategoryButton
-            action={
-              <Checkbox checked={sounds.enabled("disconnect")} />
-            }
+            action={<Checkbox checked={sounds.enabled("disconnect")} />}
             onClick={() => sounds.toggle("disconnect")}
             icon="blank"
           >
             <Content>
               <Trans>Disconnected</Trans>
               <IconButton
-                onPress={() =>
-                  soundController.playSound("disconnect", true)
-                }
+                onPress={() => soundController.playSound("disconnect", true)}
                 use:floating={{
                   tooltip: {
                     placement: "top",
@@ -336,7 +322,7 @@ export default function Sounds() {
           labelFormatter={(value) => `${value}%`}
         />
       </Column>
-    </Show>
+    </>
   );
 }
 
