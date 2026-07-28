@@ -2532,7 +2532,6 @@ msgstr "Profile Bio"
 msgid "Promotes harm"
 msgstr "Promotes harm"
 
-#: components/ui/components/features/profiles/ProfilePronouns.tsx
 #: components/modal/modals/ServerIdentity.tsx
 #: components/app/interface/settings/user/profile/UserProfileEditor.tsx
 msgid "Pronouns"
