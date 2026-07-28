@@ -5,6 +5,10 @@ import type { Placement } from "@floating-ui/dom";
 import type { Channel, Client, ServerMember, ServerRole, User } from "stoat.js";
 
 declare global {
+  interface ImportMetaEnv {
+    readonly VITE_RELEASE_TAG?: string;
+  }
+
   interface Window {
     __TAURI__: object;
     pushToTalk?: {
