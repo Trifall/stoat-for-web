@@ -129,7 +129,8 @@ function ManageCurrentSession(props: { otherSessions: Accessor<Session[]> }) {
  * List other logged in sessions
  */
 function ListOtherSessions(props: { otherSessions: Accessor<Session[]> }) {
-  const { openModal } = useModals();
+  const { openModal, mfaFlow, showError } = useModals();
+  const client = useClient();
 
   return (
     <Show when={props.otherSessions().length}>
@@ -161,7 +162,17 @@ function ListOtherSessions(props: { otherSessions: Accessor<Session[]> }) {
                 <CategoryButton
                   icon="blank"
                   action="chevron"
-                  onClick={() => session.delete()}
+                  onClick={() => {
+                    void (async () => {
+                      try {
+                        const mfa = await client().account.mfa();
+                        const ticket = await mfaFlow(mfa as never);
+                        if (ticket) await session.delete(ticket);
+                      } catch (error) {
+                        showError(error);
+                      }
+                    })();
+                  }}
                 >
                   <Trans>Log Out</Trans>
                 </CategoryButton>

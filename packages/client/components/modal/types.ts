@@ -128,6 +128,10 @@ export type Modals =
       message: Message;
     }
   | {
+      type: "pin_message";
+      message: Message;
+    }
+  | {
       type: "delete_server";
       server: Server;
     }
@@ -346,4 +350,8 @@ export type Modals =
         image?: string;
       }[];
       onCancel: () => void;
+    }
+  | {
+      type: "edit_bot_username";
+      bot: Bot;
     };

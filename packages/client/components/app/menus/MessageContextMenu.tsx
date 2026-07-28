@@ -95,11 +95,29 @@ export function MessageContextMenu(props: {
   }
 
   /**
+   * Pin/unpin the message
+   */
+  function pinMessage(ev: MouseEvent) {
+    if (ev.shiftKey) {
+      if (props.message!.pinned) {
+        props.message!.unpin().catch(showError);
+      } else {
+        props.message!.pin().catch(showError);
+      }
+    } else {
+      openModal({
+        type: "pin_message",
+        message: props.message!,
+      });
+    }
+  }
+
+  /**
    * Open message in Stoat Admin Panel
    */
   function openAdminPanel() {
     window.open(
-      `https://old-admin.stoatinternal.com/panel/inspect/message/${props.message!.id}`,
+      `https://admin.stoatinternal.com/panel/inspect/message/${props.message!.id}`,
       "_blank",
     );
   }
@@ -126,14 +144,14 @@ export function MessageContextMenu(props: {
    * Opens the file preview in a new tab
    */
   function openFile() {
-    window.open(props.file?.originalUrl, "_blank");
+    window.open(props.file?.previewUrl, "_blank");
   }
 
   /**
    * Copies the link to the original url of the file
    */
   function copyFileLink() {
-    navigator.clipboard.writeText(props.file?.originalUrl ?? "");
+    navigator.clipboard.writeText(props.file?.previewUrl ?? "");
   }
 
   function copyLink() {
@@ -215,16 +233,7 @@ export function MessageContextMenu(props: {
             props.message!.channel?.havePermission("ManageMessages")
           }
         >
-          <ContextMenuButton
-            icon={MdPin}
-            onClick={() => {
-              if (props.message!.pinned) {
-                props.message!.unpin().catch(showError);
-              } else {
-                props.message!.pin().catch(showError);
-              }
-            }}
-          >
+          <ContextMenuButton icon={MdPin} onClick={pinMessage}>
             <Switch fallback={<Trans>Pin message</Trans>}>
               <Match when={props.message!.pinned}>
                 <Trans>Unpin message</Trans>

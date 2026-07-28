@@ -864,11 +864,16 @@ class Voice {
         this.#setRoom();
         this.#setChannel();
         this.#setMicrophone(this.#settings.micOn);
+        this.#setVideo(false);
+        this.#setScreenshare(false);
         this.#setFullscreen(false);
         this.#setMaximized(false);
         this.#setHideNonVideoParticipants(false);
+        this.#setFocus();
+        this.#setShowBar(true);
         this.vidTracks = () => [];
       });
+      this.screenShareTracks = new Set();
     } catch (e) {
       this.onErr(e);
     }
@@ -1175,7 +1180,13 @@ class Voice {
           true,
           {
             resolution: initialResolution,
-            audio: true,
+            audio: {
+              autoGainControl: false,
+              echoCancellation: false,
+              noiseSuppression: false,
+              voiceIsolation: false,
+              restrictOwnAudio: true,
+            },
           },
           {
             screenShareEncoding: {
@@ -1363,7 +1374,7 @@ class Voice {
       channel.isVoice &&
       (this.channel()?.id === channel.id ||
         channel.type === "TextChannel" ||
-        channel.voiceParticipants.size)
+        !!channel.voiceParticipants.size)
     );
   }
 

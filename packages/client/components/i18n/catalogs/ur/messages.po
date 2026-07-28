@@ -459,10 +459,22 @@ msgstr ""
 msgid "Are you sure you want to go to "
 msgstr ""
 
+#: components/modal/modals/LinkWarning.tsx
+#~ msgid "Are you sure you want to go to <0>{0}</0>?"
+#~ msgstr ""
+
+#: components/modal/modals/PinMessage.tsx
+msgid "Are you sure you want to pin this message?"
+msgstr ""
+
 #. placeholder {0}: props.user?.displayName ?? props.user.username
 #. placeholder {1}: props.group.name
 #: components/modal/modals/RemoveMember.tsx
 msgid "Are you sure you want to remove {0} from {1}?"
+msgstr ""
+
+#: components/modal/modals/PinMessage.tsx
+msgid "Are you sure you want to unpin this message?"
 msgstr ""
 
 #: components/app/interface/settings/channel/permissions/ChannelPermissionsEditor.tsx
@@ -623,6 +635,7 @@ msgstr ""
 #: components/modal/modals/ReportContent.tsx
 #: components/modal/modals/RenameSession.tsx
 #: components/modal/modals/RemoveMember.tsx
+#: components/modal/modals/PinMessage.tsx
 #: components/modal/modals/Onboarding.tsx
 #: components/modal/modals/MFAFlow.tsx
 #: components/modal/modals/MFAFlow.tsx
@@ -667,11 +680,16 @@ msgstr ""
 
 #: components/modal/modals/EditUsername.tsx
 #: components/modal/modals/EditPassword.tsx
+#: components/modal/modals/EditBotUsername.tsx
 msgid "Change"
 msgstr ""
 
 #: components/app/interface/settings/channel/permissions/ChannelPermissionsEditor.tsx
 msgid "Change Avatar"
+msgstr ""
+
+#: components/modal/modals/EditBotUsername.tsx
+msgid "Change bot username"
 msgstr ""
 
 #. placeholder {0}: props.member.server!.name
@@ -703,8 +721,16 @@ msgstr ""
 msgid "Change own nickname"
 msgstr ""
 
+#: components/app/interface/settings/user/bots/ViewBot.tsx
+msgid "Change this bot's username"
+msgstr ""
+
 #: components/modal/modals/EditUsername.tsx
 msgid "Change username"
+msgstr ""
+
+#: components/app/interface/settings/user/bots/ViewBot.tsx
+msgid "Change Username"
 msgstr ""
 
 #: components/app/interface/settings/user/profile/EditProfile.tsx
@@ -788,6 +814,7 @@ msgstr ""
 #: components/modal/modals/EditUsername.tsx
 #: components/modal/modals/EditPassword.tsx
 #: components/modal/modals/EditEmail.tsx
+#: components/modal/modals/EditBotUsername.tsx
 #: components/modal/modals/DeleteChannel.tsx
 #: components/modal/modals/CustomStatus.tsx
 #: components/modal/modals/CreateWebhook.tsx
@@ -1541,6 +1568,10 @@ msgstr ""
 #: src/interface/navigation/channels/HomeSidebar.tsx
 msgid "Friends"
 msgstr "دوستو"
+
+#: components/ui/components/features/messaging/composition/picker/EmojiPicker.tsx
+msgid "from "
+msgstr ""
 
 #: components/app/interface/settings/user/appearance/AppearanceMenu.tsx
 msgid "Fruit Salad"
@@ -2417,6 +2448,11 @@ msgstr ""
 msgid "Pick a username that you want people to be able to find you by. This can be changed later in your user settings."
 msgstr ""
 
+#: components/modal/modals/PinMessage.tsx
+msgid "Pin"
+msgstr ""
+
+#: components/modal/modals/PinMessage.tsx
 #: components/app/menus/MessageContextMenu.tsx
 msgid "Pin message"
 msgstr ""
@@ -2494,6 +2530,12 @@ msgstr ""
 
 #: components/modal/modals/ReportContent.tsx
 msgid "Promotes harm"
+msgstr ""
+
+#: components/ui/components/features/profiles/ProfilePronouns.tsx
+#: components/modal/modals/ServerIdentity.tsx
+#: components/app/interface/settings/user/profile/UserProfileEditor.tsx
+msgid "Pronouns"
 msgstr ""
 
 #: components/i18n/errors.tsx
@@ -3334,6 +3376,8 @@ msgstr ""
 msgid "Unknown"
 msgstr ""
 
+#: components/ui/components/features/messaging/composition/picker/EmojiPicker.tsx
+#: components/ui/components/features/messaging/composition/picker/EmojiPicker.tsx
 #: components/markdown/plugins/anchors.tsx
 msgid "Unknown Server"
 msgstr ""
@@ -3363,6 +3407,11 @@ msgstr ""
 msgid "Unmute Server"
 msgstr ""
 
+#: components/modal/modals/PinMessage.tsx
+msgid "Unpin"
+msgstr ""
+
+#: components/modal/modals/PinMessage.tsx
 #: components/app/menus/MessageContextMenu.tsx
 msgid "Unpin message"
 msgstr ""
@@ -3444,6 +3493,7 @@ msgstr ""
 
 #: components/modal/modals/Onboarding.tsx
 #: components/modal/modals/EditUsername.tsx
+#: components/modal/modals/EditBotUsername.tsx
 #: components/modal/modals/CreateBot.tsx
 #: components/modal/modals/AddFriend.tsx
 #: components/auth/src/flows/Form.tsx

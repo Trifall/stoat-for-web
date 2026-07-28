@@ -92,6 +92,7 @@ class Lifecycle {
   #connectionFailures = 0;
   #permanentError: string | undefined;
   #retryTimeout: number | undefined;
+  #configPromise?: Promise<void>;
 
   constructor(controller: ClientController) {
     this.#controller = controller;
@@ -135,32 +136,7 @@ class Lifecycle {
         this.#controller.state.notifications.isChannelMuted(channel),
     });
 
-    this.client.configuration = {
-      revolt: String(),
-      app: String(),
-      build: {} as never,
-      features: {
-        autumn: {
-          enabled: true,
-          url: CONFIGURATION.DEFAULT_MEDIA_URL,
-        },
-        january: {
-          enabled: true,
-          url: CONFIGURATION.DEFAULT_PROXY_URL,
-        },
-        captcha: {} as never,
-        email: true,
-        invite_only: false,
-        livekit: {
-          enabled: false,
-          nodes: [],
-        },
-        legal_links: {} as never,
-        limits: {} as never,
-      },
-      vapid: String(),
-      ws: CONFIGURATION.DEFAULT_WS_URL,
-    };
+    this.#configPromise = undefined;
 
     this.client.events.on("state", this.onState);
     this.client.on("error", (error) => {
@@ -193,14 +169,14 @@ class Lifecycle {
               type: TransitionType.NoUser,
             });
           } else {
-            this.client.connect();
+            this.connect();
           }
         });
 
         break;
       case State.Connecting:
       case State.Reconnecting:
-        this.client.connect();
+        this.connect();
         break;
       case State.Connected:
         this.#controller.state.auth.markValid();
@@ -241,6 +217,31 @@ class Lifecycle {
         }
         break;
     }
+  }
+
+  private connect() {
+    const client = this.client;
+    this.#configPromise ??= client.initConfig();
+
+    void this.#configPromise
+      .then(() => {
+        if (
+          this.client === client &&
+          [State.LoggingIn, State.Connecting, State.Reconnecting].includes(
+            this.state(),
+          )
+        ) {
+          client.connect();
+        }
+      })
+      .catch((error) => {
+        if (this.client === client) {
+          this.transition({
+            type: TransitionType.PermanentFailure,
+            error: error instanceof Error ? error.message : String(error),
+          });
+        }
+      });
   }
 
   transition(transition: Transition) {

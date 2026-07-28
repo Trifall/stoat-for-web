@@ -34,8 +34,8 @@ import { Symbol } from "@revolt/ui/components/utils/Symbol";
 import { ChannelHeader } from "../ChannelHeader";
 import { ChannelPageProps } from "../ChannelPage";
 
-import { Channel } from "stoat.js";
 import { VoiceChannelCallCardMount } from "@revolt/ui/components/features/voice/callCard/VoiceCallCard";
+import { Channel } from "stoat.js";
 import { MessageComposition } from "./Composition";
 import { MemberSidebar } from "./MemberSidebar";
 import { TextSearchSidebar } from "./TextSearchSidebar";
@@ -60,6 +60,21 @@ export function canIHasSidebar(ch: Channel) {
 }
 
 /**
+ * Servers to not fetch all members for
+ */
+const LARGE_SERVERS = [
+  "01F7ZSBSFHQ8TA81725KQCSDDP",
+  "01G3PKD1YJ2H484MDX6KP9WRBN",
+  // top servers on discover
+  "01K313D0VP0HPNG30DNZ4Q672H",
+  "01J31CCMTYKFPGCM13VRP3B289",
+  "01H2Y4Y97PW6584PHN1TAVN5WR",
+  "01HVKQBBQ3DQVVNK3M8DHXV30D",
+  "01GDS83RMZW89AV0BZG24NEXYC",
+  "01J5W0XERBBGK77BMDVPZJ20JW",
+];
+
+/**
  * Compact voice card showing participants in a DM/Group voice call (when not connected)
  */
 function VoiceCallBanner(props: { channel: Channel }) {
@@ -69,7 +84,8 @@ function VoiceCallBanner(props: { channel: Channel }) {
   const participants = () => [...props.channel.voiceParticipants.keys()];
 
   const showBanner = () =>
-    (props.channel.type === "DirectMessage" || props.channel.type === "Group") &&
+    (props.channel.type === "DirectMessage" ||
+      props.channel.type === "Group") &&
     props.channel.voiceParticipants.size > 0 &&
     voice.channel()?.id !== props.channel.id;
 
@@ -87,8 +103,14 @@ function VoiceCallBanner(props: { channel: Channel }) {
               return (
                 <Show when={user()}>
                   <ParticipantTile>
-                    <Avatar size={40} src={user()!.avatarURL} fallback={user()!.displayName ?? user()!.username} />
-                    <ParticipantName>{user()!.displayName ?? user()!.username}</ParticipantName>
+                    <Avatar
+                      size={40}
+                      src={user()!.avatarURL}
+                      fallback={user()!.displayName ?? user()!.username}
+                    />
+                    <ParticipantName>
+                      {user()!.displayName ?? user()!.username}
+                    </ParticipantName>
                   </ParticipantTile>
                 </Show>
               );
@@ -99,7 +121,6 @@ function VoiceCallBanner(props: { channel: Channel }) {
     </Show>
   );
 }
-
 
 export function TextChannel(props: ChannelPageProps) {
   const state = useState();
@@ -203,6 +224,20 @@ export function TextChannel(props: ChannelPageProps) {
     ),
   );
 
+  // If this is a server text channel, sync the members
+  // todo: useQuery
+  createEffect(
+    on(
+      () => props.channel.serverId,
+      (serverId) =>
+        props.channel.type === "TextChannel" &&
+        props.channel.server?.syncMembers(
+          LARGE_SERVERS.includes(serverId) ? true : false,
+          200,
+        ),
+    ),
+  );
+
   return (
     <>
       <Header placement="primary">
@@ -285,6 +320,7 @@ export function TextChannel(props: ChannelPageProps) {
                 <MemberSidebar
                   channel={props.channel}
                   scrollTargetElement={sidebarScrollTargetElement}
+                  isLargeServer={LARGE_SERVERS.includes(props.channel.serverId)}
                 />
               }
             >

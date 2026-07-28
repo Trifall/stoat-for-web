@@ -10,9 +10,10 @@ import solidPlugin from "vite-plugin-solid";
 import solidSvg from "vite-plugin-solid-svg";
 
 import codegenPlugin from "./codegen.plugin";
+import { addFontPreload } from "./fontpreload.plugin";
 
 const base = process.env.BASE_PATH ?? "/";
-const pwaScope = process.env.PWA_SCOPE ?? base;
+const pwaScope = process.env.PWA_SCOPE || base;
 
 export default defineConfig({
   base,
@@ -26,16 +27,15 @@ export default defineConfig({
     solidSvg({
       defaultAsComponent: false,
     }),
+    addFontPreload(),
     VitePWA({
       srcDir: "src",
       registerType: "autoUpdate",
       filename: "serviceWorker.ts",
       strategies: "injectManifest",
       injectManifest: {
-        maximumFileSizeToCacheInBytes: 5000000,
-      },
-      devOptions: {
-        enabled: true,
+        maximumFileSizeToCacheInBytes: 8000000,
+        globPatterns: ["**/*.{js,css,html}", "**/material-symbols-*.woff2"],
       },
       devOptions: {
         enabled: true,

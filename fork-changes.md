@@ -160,8 +160,6 @@ Important fork voice assets include:
 
 The store and controller support a master sound enable flag (`state.sounds.enabled`), and `VoiceContext` syncs it into `SoundController`, but the current settings UI exposes only event-specific toggles and master volume. It does **not** expose a master enable toggle.
 
-The entire sound-settings section is currently hidden when desktop/browser notifications are reported as unsupported, even though runtime message and voice sounds do not inherently require notification support. Treat that coupling as a known UI limitation, not proof that sounds are unavailable.
-
 Additional controller details that matter during refactors:
 
 - One-shot sounds can overlap; `SoundController` does not globally stop the previous one-shot.
@@ -414,7 +412,6 @@ Manual disconnect path:
 Current reconnect caveats:
 
 - Retry timers are not retained or cancelled. A delayed retry can run after a manual disconnect or channel switch and interact with newer room/channel state.
-- `#isManualDisconnect` is assigned but currently not read; manual behavior depends on removing room listeners and passing `disconnect(false)` for internal paths.
 - Terminal failure/disabled reconnect sets runtime state to `DISCONNECTED` but does not fully clear room/channel state. This can affect later incoming-call suppression.
 
 ## Noise Gate
@@ -892,4 +889,4 @@ Manual smoke checks to consider:
 
 ---
 
-*Last updated: after merging upstream 0.12.1, integrating resilient LiveKit node selection, and updating the forked Stoat SDK through upstream PR #171.*
+*Last updated: after integrating upstream 0.13.1, updating both forked client submodules, and preserving the fork voice, sound, fullscreen, and responsive behavior.*

@@ -1,6 +1,6 @@
 msgid ""
 msgstr ""
-"POT-Creation-Date: 2026-02-24 21:53+0000\n"
+"POT-Creation-Date: 2025-09-29 18:29-0500\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -76,7 +76,7 @@ msgstr ""
 #. placeholder {0}: rejectedFiles.length
 #: src/interface/channels/text/Composition.tsx
 msgid "{0} files exceed the maximum size limit of {maxSizeFormatted} and were not uploaded."
-msgstr ""
+msgstr "{0} filer overstiger maksstørrelsen på {maxSizeFormatted} og ble ikke lastet opp."
 
 #. placeholder {0}: users()[0]!.username
 #: components/ui/components/features/messaging/composition/TypingIndicator.tsx
@@ -459,10 +459,18 @@ msgstr ""
 msgid "Are you sure you want to go to "
 msgstr ""
 
+#: components/modal/modals/PinMessage.tsx
+msgid "Are you sure you want to pin this message?"
+msgstr ""
+
 #. placeholder {0}: props.user?.displayName ?? props.user.username
 #. placeholder {1}: props.group.name
 #: components/modal/modals/RemoveMember.tsx
 msgid "Are you sure you want to remove {0} from {1}?"
+msgstr ""
+
+#: components/modal/modals/PinMessage.tsx
+msgid "Are you sure you want to unpin this message?"
 msgstr ""
 
 #: components/app/interface/settings/channel/permissions/ChannelPermissionsEditor.tsx
@@ -578,7 +586,11 @@ msgstr ""
 
 #: components/app/interface/settings/user/voice/VoiceProcessingOptions.tsx
 msgid "Browser Echo Cancellation"
-msgstr ""
+msgstr "Ekkokansellering i nettleser"
+
+#: components/app/interface/settings/user/voice/VoiceProcessingOptions.tsx
+#~ msgid "Browser Noise Supression"
+#~ msgstr "Støyfjerning i nettleser"
 
 #: components/app/interface/settings/user/Feedback.tsx
 msgid "Bug Tracker"
@@ -592,11 +604,11 @@ msgstr ""
 
 #: components/modal/modals/CreateBot.tsx
 msgid "By creating this bot, you agree to the <0>Acceptable Use Policy</0>."
-msgstr ""
+msgstr "Ved å opprette denne boten godtar du <0>retningslinjene for akseptabel bruk</0>."
 
 #: components/modal/modals/CreateServer.tsx
 msgid "By creating this server, you agree to the <0>Acceptable Use Policy</0>."
-msgstr ""
+msgstr "Ved å opprette denne serveren godtar du <0>retningslinjene for akseptabel bruk</0>."
 
 #: components/app/interface/settings/channel/permissions/ChannelPermissionsEditor.tsx
 msgid "Bypass Slowmode"
@@ -623,6 +635,7 @@ msgstr ""
 #: components/modal/modals/ReportContent.tsx
 #: components/modal/modals/RenameSession.tsx
 #: components/modal/modals/RemoveMember.tsx
+#: components/modal/modals/PinMessage.tsx
 #: components/modal/modals/Onboarding.tsx
 #: components/modal/modals/MFAFlow.tsx
 #: components/modal/modals/MFAFlow.tsx
@@ -667,11 +680,16 @@ msgstr ""
 
 #: components/modal/modals/EditUsername.tsx
 #: components/modal/modals/EditPassword.tsx
+#: components/modal/modals/EditBotUsername.tsx
 msgid "Change"
 msgstr ""
 
 #: components/app/interface/settings/channel/permissions/ChannelPermissionsEditor.tsx
 msgid "Change Avatar"
+msgstr ""
+
+#: components/modal/modals/EditBotUsername.tsx
+msgid "Change bot username"
 msgstr ""
 
 #. placeholder {0}: props.member.server!.name
@@ -703,13 +721,25 @@ msgstr ""
 msgid "Change own nickname"
 msgstr ""
 
+#: components/app/interface/settings/user/bots/ViewBot.tsx
+msgid "Change this bot's username"
+msgstr ""
+
 #: components/modal/modals/EditUsername.tsx
 msgid "Change username"
 msgstr ""
 
+#: components/app/interface/settings/user/bots/ViewBot.tsx
+msgid "Change Username"
+msgstr ""
+
 #: components/app/interface/settings/user/profile/EditProfile.tsx
 msgid "Change your profile per-server"
-msgstr ""
+msgstr "Endre profilen din for hver server"
+
+#: components/modal/modals/Changelog.tsx
+#~ msgid "Changelog"
+#~ msgstr "Endringslogg"
 
 #: components/app/interface/settings/channel/Overview.tsx
 msgid "Channel Description"
@@ -788,6 +818,7 @@ msgstr ""
 #: components/modal/modals/EditUsername.tsx
 #: components/modal/modals/EditPassword.tsx
 #: components/modal/modals/EditEmail.tsx
+#: components/modal/modals/EditBotUsername.tsx
 #: components/modal/modals/DeleteChannel.tsx
 #: components/modal/modals/CustomStatus.tsx
 #: components/modal/modals/CreateWebhook.tsx
@@ -824,7 +855,7 @@ msgstr ""
 
 #: components/app/interface/settings/user/Account.tsx
 msgid "Configure a way to get back into your account in case your 2FA is lost"
-msgstr ""
+msgstr "Konfigurer en måte å få tilgang til kontoen din igjen i tilfelle du mister 2FA"
 
 #: components/app/interface/settings/user/Account.tsx
 msgid "Configure one-time password authentication"
@@ -1402,7 +1433,7 @@ msgstr ""
 
 #: components/app/interface/settings/user/appearance/AppearanceMenu.tsx
 msgid "Enable transparency glass/blur effects (slow on older machines)"
-msgstr ""
+msgstr "Aktiver gjennomsiktighet glass- og uskarphetseffekter (treig på gamle maskiner)"
 
 #: components/ui/components/features/voice/callCard/VoiceCallCardActions.tsx
 msgid "End call"
@@ -1540,6 +1571,10 @@ msgstr ""
 #: src/interface/Friends.tsx
 #: src/interface/navigation/channels/HomeSidebar.tsx
 msgid "Friends"
+msgstr ""
+
+#: components/ui/components/features/messaging/composition/picker/EmojiPicker.tsx
+msgid "from "
 msgstr ""
 
 #: components/app/interface/settings/user/appearance/AppearanceMenu.tsx
@@ -1710,7 +1745,7 @@ msgstr ""
 
 #: components/auth/src/AuthPage.tsx
 #~ msgid "Image by @fakurian"
-#~ msgstr ""
+#~ msgstr "Bilde av @fakurian"
 
 #: components/modal/modals/ReportContent.tsx
 msgid "Impersonation"
@@ -2417,6 +2452,11 @@ msgstr ""
 msgid "Pick a username that you want people to be able to find you by. This can be changed later in your user settings."
 msgstr ""
 
+#: components/modal/modals/PinMessage.tsx
+msgid "Pin"
+msgstr ""
+
+#: components/modal/modals/PinMessage.tsx
 #: components/app/menus/MessageContextMenu.tsx
 msgid "Pin message"
 msgstr ""
@@ -2496,6 +2536,12 @@ msgstr ""
 msgid "Promotes harm"
 msgstr ""
 
+#: components/ui/components/features/profiles/ProfilePronouns.tsx
+#: components/modal/modals/ServerIdentity.tsx
+#: components/app/interface/settings/user/profile/UserProfileEditor.tsx
+msgid "Pronouns"
+msgstr ""
+
 #: components/i18n/errors.tsx
 msgid "Provided email or password is wrong."
 msgstr ""
@@ -2525,7 +2571,11 @@ msgstr ""
 
 #: components/app/interface/settings/channel/permissions/ChannelPermissionsEditor.tsx
 msgid "Read Message History"
-msgstr ""
+msgstr "Les meldingshistorikk"
+
+#: components/modal/modals/Changelog.tsx
+#~ msgid "Read More"
+#~ msgstr "Les mer"
 
 #: components/app/interface/settings/channel/permissions/ChannelPermissionsEditor.tsx
 msgid "Read past messages sent in channel"
@@ -3072,7 +3122,7 @@ msgstr ""
 
 #: components/auth/src/flows/FlowHome.tsx
 msgid "Stoat is one of the best ways to stay connected with your friends and community, anywhere, anytime."
-msgstr ""
+msgstr "Stoat er en av de beste måtene å holde seg tilkoblet med vennene dine og samfunnet ditt, hvor som helst, når som helst."
 
 #: components/app/interface/settings/user/Native.tsx
 msgid "Stoat will start in the system tray."
@@ -3181,7 +3231,7 @@ msgstr ""
 #. placeholder {0}: file.name
 #: src/interface/channels/text/Composition.tsx
 msgid "The file \"{0}\" ({fileSize}) exceeds the maximum size limit of {maxSizeFormatted}."
-msgstr ""
+msgstr "Filen \"{0}\" ({fileSize}) overskrider den maksimale størrelsegrensen på {maxSizeFormatted}."
 
 #: components/i18n/errors.tsx
 msgid "The password is too short."
@@ -3193,7 +3243,7 @@ msgstr ""
 
 #: components/i18n/errors.tsx
 msgid "This account is not activated! Please check your account's inbox and try again."
-msgstr ""
+msgstr "Denne brukeren er ikke aktivert enda! Vennligst sjekk brukeren din sin inboks og prøv på nytt."
 
 #: components/i18n/errors.tsx
 msgid "This bot is private and can only be added by the creator."
@@ -3209,7 +3259,7 @@ msgstr ""
 
 #: src/interface/channels/AgeGate.tsx
 msgid "This channel is not available in your region while we review options on legal compliance."
-msgstr ""
+msgstr "Denne kanalen er ikke tilgjengelig i ditt område mens vi gjennomgår alternativer for juridisk samsvar."
 
 #: src/interface/channels/AgeGate.tsx
 msgid "This content is not available in your region."
@@ -3254,7 +3304,7 @@ msgstr ""
 
 #: components/i18n/errors.tsx
 msgid "This password has previously appeared in security leaks, please use another password."
-msgstr ""
+msgstr "Dette passordet har allerede dukket opp i sikkerhetslekasjer, vennligst bruk et annet passord."
 
 #: components/app/interface/settings/server/Overview.tsx
 msgid "This server is about..."
@@ -3270,7 +3320,7 @@ msgstr ""
 
 #: components/modal/modals/BanNonMember.tsx
 msgid "This user is not part of the server and may already be banned"
-msgstr ""
+msgstr "Denne brukeren er ikke en del av denne sørveren og er muligens allerede utestengt"
 
 #: components/i18n/errors.tsx
 msgid "This username is already taken."
@@ -3282,7 +3332,7 @@ msgstr ""
 
 #: components/modal/modals/ResetBotToken.tsx
 msgid "This will invalidate the current token and stop any existing instances of the bot from running."
-msgstr ""
+msgstr "Dette vil invalidere den nåverende Tokenen og stoppe allerede eksisterende forekomster av boten fra å kjøre."
 
 #: components/app/interface/settings/user/Language.tsx
 msgid "Time format"
@@ -3334,6 +3384,8 @@ msgstr ""
 msgid "Unknown"
 msgstr ""
 
+#: components/ui/components/features/messaging/composition/picker/EmojiPicker.tsx
+#: components/ui/components/features/messaging/composition/picker/EmojiPicker.tsx
 #: components/markdown/plugins/anchors.tsx
 msgid "Unknown Server"
 msgstr ""
@@ -3363,6 +3415,11 @@ msgstr ""
 msgid "Unmute Server"
 msgstr ""
 
+#: components/modal/modals/PinMessage.tsx
+msgid "Unpin"
+msgstr ""
+
+#: components/modal/modals/PinMessage.tsx
 #: components/app/menus/MessageContextMenu.tsx
 msgid "Unpin message"
 msgstr ""
@@ -3444,6 +3501,7 @@ msgstr ""
 
 #: components/modal/modals/Onboarding.tsx
 #: components/modal/modals/EditUsername.tsx
+#: components/modal/modals/EditBotUsername.tsx
 #: components/modal/modals/CreateBot.tsx
 #: components/modal/modals/AddFriend.tsx
 #: components/auth/src/flows/Form.tsx
@@ -3461,11 +3519,19 @@ msgstr ""
 
 #: components/app/interface/settings/channel/Overview.tsx
 msgid "Users will be asked to confirm their age before opening this channel."
-msgstr ""
+msgstr "Brukere vil bli spurt om å bekrefte alderen sin før de åpner denne kanalen."
 
 #: components/modal/modals/ChannelToggleMature.tsx
 msgid "Users will no longer be asked to confirm their age before joining this channel.<0/> Please ensure the content is appropriate for all ages."
-msgstr ""
+msgstr "Brukere vil ikke bli spurt om å bekrefte alderen sin før de blir med i denne kanalen.<0/> Vennligst sørg for at innholdet er passende for alle aldre."
+
+#: components/app/interface/settings/user/voice/VoiceInputOptions.tsx
+#~ msgid "Using default microphone"
+#~ msgstr "Bruker standardmikrofon"
+
+#: components/app/interface/settings/user/voice/VoiceInputOptions.tsx
+#~ msgid "Using default speaker"
+#~ msgstr "Bruker standardhøytaler"
 
 #: src/interface/navigation/channels/ServerSidebar.tsx
 msgid "Verified"
@@ -3593,7 +3659,7 @@ msgstr ""
 
 #: components/app/interface/settings/user/bots/MyBots.tsx
 msgid "You agree that your bot is subject to the Acceptable Usage Policy."
-msgstr ""
+msgstr "Du er enig om at din bot er pliktet til å følge Retningslinjene for akseptabelt bruk."
 
 #. placeholder {0}: props.user?.username
 #. placeholder {0}: props.member.user?.username
@@ -3633,7 +3699,7 @@ msgstr ""
 #. placeholder {0}: err.max
 #: components/i18n/errors.tsx
 msgid "You can't be in more than {0} servers, please leave one and try again."
-msgstr ""
+msgstr "Du kan ikke være i mer enn {0} sørvere, vennligst forlat en og prøv igjen."
 
 #. placeholder {0}: err.max
 #: components/i18n/errors.tsx
@@ -3684,7 +3750,7 @@ msgstr ""
 
 #: components/i18n/errors.tsx
 msgid "You have been locked out for entering a wrong password multiple times. Please wait a couple minutes and try again."
-msgstr ""
+msgstr "Du har blitt utelåst for å ha skrevet feil passord flere ganger. Vennligst vent noen minutter og prøv igjen."
 
 #: components/i18n/errors.tsx
 msgid "You have this user blocked."
@@ -3730,7 +3796,7 @@ msgstr ""
 
 #: components/modal/modals/Invite.tsx
 msgid "You've been invited to join this server.<0/>Would you like to join?"
-msgstr ""
+msgstr "Du har blitt invitert til å bli med i denne sørveren.<0/>Har du lyst til å bli med?"
 
 #: components/modal/modals/SignedOut.tsx
 msgid "You've been signed out of Stoat!"
@@ -3747,7 +3813,7 @@ msgstr ""
 
 #: components/app/interface/settings/user/Account.tsx
 msgid "Your account and all of your data (including your messages and friends list) will be queued for deletion. A confirmation email will be sent - you can cancel this within 7 days by contacting support."
-msgstr ""
+msgstr "Kontoen din og alle dataene dine (inkludert meldingene og vennelisten din) vil bli satt for sletting. En bekreftelsese-post har blitt sendt - du kan kanselere dette innen 7 dager ved å kontakte støtte."
 
 #: components/auth/src/flows/FlowVerify.tsx
 msgid "Your account has been verified!"
@@ -3771,4 +3837,4 @@ msgstr ""
 
 #: components/i18n/errors.tsx
 msgid "Your user has already been created? Try logging in again or refreshing the app."
-msgstr ""
+msgstr "Brukeren din har allerede blitt lagd? Prøv å logg inn på nytt eller oppdater appen."

@@ -2,8 +2,8 @@ import { createFormControl, createFormGroup } from "solid-forms";
 import { Show, createEffect, createSignal, on } from "solid-js";
 
 import { Trans, useLingui } from "@lingui-solid/solid/macro";
-import { useQuery, useQueryClient } from "@tanstack/solid-query";
-import { API, User } from "stoat.js";
+import { useQueryClient } from "@tanstack/solid-query";
+import { API, User, UserProfile } from "stoat.js";
 
 import { useClient } from "@revolt/client";
 import { CONFIGURATION } from "@revolt/common";
@@ -22,20 +22,13 @@ import { useSettingsNavigation } from "../../Settings";
 
 interface Props {
   user: User;
+  profile?: UserProfile;
 }
 
 export function UserProfileEditor(props: Props) {
   const { t } = useLingui();
   const client = useClient();
   const queryClient = useQueryClient();
-
-  const profile = useQuery(() => ({
-    queryKey: ["profile", props.user.id],
-    queryFn: () => props.user.fetchProfile(),
-    refetchOnReconnect: false,
-    refetchOnWindowFocus: false,
-  }));
-
   const { navigate } = useSettingsNavigation();
 
   /* eslint-disable solid/reactivity */
@@ -45,21 +38,18 @@ export function UserProfileEditor(props: Props) {
     avatar: createFormControl<string | File[] | null>(
       props.user.animatedAvatarURL,
     ),
+    pronouns: createFormControl<string>(props.user.pronouns),
     banner: createFormControl<string | File[] | null>(null),
     bio: createFormControl(""),
   });
   /* eslint-enable solid/reactivity */
-
-  // unlike the other forms, this one does not react to
-  // further changes outside of our control because it's
-  // unlikely that the user is going to be doing this
 
   const [initialBio, setInitialBio] = createSignal<readonly [string]>();
 
   // once profile data is loaded, copy it into the form
   createEffect(
     on(
-      () => profile.data,
+      () => props.profile,
       (profileData) => {
         if (profileData) {
           editGroup.controls.banner.setValue(
@@ -76,13 +66,14 @@ export function UserProfileEditor(props: Props) {
   function onReset() {
     editGroup.controls.displayName.setValue(props.user.displayName);
     editGroup.controls.avatar.setValue(props.user.animatedAvatarURL);
+    editGroup.controls.pronouns.setValue(props.user.pronouns || "");
 
-    if (profile.data) {
+    if (props.profile) {
       editGroup.controls.banner.setValue(
-        profile.data.animatedBannerURL || null,
+        props.profile.animatedBannerURL || null,
       );
-      editGroup.controls.bio.setValue(profile.data.content || "");
-      setInitialBio([profile.data.content || ""]);
+      editGroup.controls.bio.setValue(props.profile.content || "");
+      setInitialBio([props.profile.content || ""]);
     }
   }
 
@@ -104,6 +95,14 @@ export function UserProfileEditor(props: Props) {
           editGroup.controls.avatar.value[0],
           CONFIGURATION.DEFAULT_MEDIA_URL,
         );
+      }
+    }
+
+    if (editGroup.controls.pronouns.isDirty) {
+      if (!editGroup.controls.pronouns.value) {
+        changes.remove?.push("Pronouns");
+      } else {
+        changes.pronouns = editGroup.controls.pronouns.value.trim();
       }
     }
 
@@ -137,6 +136,18 @@ export function UserProfileEditor(props: Props) {
 
     await props.user.edit(changes);
 
+    if (
+      (editGroup.controls.banner.isDirty || editGroup.controls.bio.isDirty) &&
+      props.profile
+    ) {
+      queryClient.setQueryData(["profile", props.user.id], {
+        ...props.profile,
+        animatedBannerURL: newBannerUrl,
+        bannerURL: newBannerUrl,
+        content: editGroup.controls.bio.value,
+      });
+    }
+
     await queryClient.invalidateQueries({
       queryKey: ["profile", props.user.id],
     });
@@ -168,6 +179,14 @@ export function UserProfileEditor(props: Props) {
           name="displayName"
           control={editGroup.controls.displayName}
           label={t`Display Name`}
+        />
+        <Form2.TextField
+          minlength={1}
+          maxlength={24}
+          counter
+          name="pronouns"
+          control={editGroup.controls.pronouns}
+          label={t`Pronouns`}
         />
 
         <Show when={!props.user.bot}>

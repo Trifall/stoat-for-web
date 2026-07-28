@@ -31,7 +31,6 @@ import {
   MonospaceFonts,
 } from "@revolt/ui/themes/fonts";
 
-import { t } from "@lingui/core/macro";
 import MDPalette from "@material-design-icons/svg/outlined/palette.svg?component-solid";
 
 /**
@@ -307,6 +306,7 @@ export function AppearanceMenu() {
               }
               timestamp={new Date()}
               username={user()?.displayName}
+              pronouns={user()?.pronouns}
               isLink="hide"
             >
               Sphinx of black quartz, judge my vow
@@ -441,7 +441,7 @@ const Preview = styled("div", {
     height: "126px",
     overflow: "hidden",
     borderRadius: "var(--borderRadius-lg)",
-    background: "var(--md-sys-color-surface-container-highest)",
+    background: "var(--md-sys-color-surface-container-lowest)",
   },
 });
 
