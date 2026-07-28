@@ -173,6 +173,7 @@ This repository uses Lingui macros and generated catalogs. Adding a translated s
 ### Do
 
 - Wrap every new user-visible label, tooltip, menu item, status, and error in the existing Lingui macro pattern.
+- Keep the settings version display sourced from build-time `VITE_RELEASE_TAG` when provided, with the root package version as the development and standalone-web fallback.
 - Run the repository workflow after adding or changing messages:
 
   ```sh

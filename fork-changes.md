@@ -54,6 +54,10 @@ The fork adds substantial voice, sound, push-to-talk, and settings behavior on t
 - `packages/client/types/types.d.ts`: desktop bridge typing for `window.pushToTalk`.
 - `packages/client/src/index.tsx`: context wrapping order; `SoundContext` wraps `VoiceContext`.
 
+## Release Build Identity
+
+Desktop release builds provide `VITE_RELEASE_TAG`, which replaces the upstream root package version in the settings sidebar for that build. Standalone and development builds fall back to the root `package.json` version when the variable is absent.
+
 ## Runtime Context Integration
 
 The app currently mounts contexts in this relevant order in `packages/client/src/index.tsx`:
@@ -111,6 +115,8 @@ Fork additions to `TypeSounds` include:
 - `volume`
 
 The store default keeps these enabled by default, with volume defaulting to `0.3`.
+
+The sound controls remain available even when browser desktop notifications are unsupported. Audio playback is independent of the Notification API and must not be hidden by `desktopNotificationsState`.
 
 ### Sound Assets
 
