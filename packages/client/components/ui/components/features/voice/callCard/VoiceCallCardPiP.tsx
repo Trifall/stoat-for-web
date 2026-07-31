@@ -10,7 +10,7 @@ import {
   VideoTrack,
 } from "solid-livekit-components";
 
-import { Track } from "livekit-client";
+import { type Room, Track } from "livekit-client";
 import { styled } from "styled-system/jsx";
 
 import { useUser } from "@revolt/markdown/users";
@@ -22,11 +22,13 @@ import { Symbol } from "@revolt/ui/components/utils/Symbol";
 import { VoiceCallCardActions } from "./VoiceCallCardActions";
 import { VoiceCallCardStatus } from "./VoiceCallCardStatus";
 
-export function VoiceCallCardPiP() {
+export function VoiceCallCardPiP(props: { room: Room }) {
   const voice = useVoice();
   const audTracks = useTracks(
     [{ source: Track.Source.Microphone, withPlaceholder: true }],
-    { onlySubscribed: false },
+    // The keyed parent remounts PiP for each Room instance.
+    // eslint-disable-next-line solid/reactivity
+    { room: props.room, onlySubscribed: false },
   );
 
   const hasFocusVideo = () => {

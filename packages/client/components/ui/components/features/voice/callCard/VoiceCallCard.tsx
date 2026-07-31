@@ -178,8 +178,8 @@ export function VoiceCallCardContext(props: { children: JSX.Element }) {
           fullscreen={voice.fullscreen()}
         >
           <Switch>
-            <Match when={mode()}>
-              <VoiceCallCardPiP />
+            <Match keyed when={mode() && voice.room()}>
+              {(room) => <VoiceCallCardPiP room={room} />}
             </Match>
             <Match when={channel()}>
               <VoiceCallCard

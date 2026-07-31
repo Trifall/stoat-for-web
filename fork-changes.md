@@ -610,6 +610,8 @@ Fork call visibility is also integrated through:
 - `packages/client/components/ui/components/features/voice/callCard/VoiceCallCardPreview.tsx`: clickable join/switch preview.
 - `packages/client/src/interface/channels/ChannelHeader.tsx`: join button behavior coordinated with `voice.showCard(channel)`.
 
+The floating/PiP call card must be gated on `voice.room()`, keyed by the concrete `Room` instance, and pass that room to `useTracks()`. During disconnect, room and channel state are cleared together, while floating mode is reset by a later reactive effect; relying only on room context in that interval causes `useTracks()` to throw and turns an otherwise successful manual leave into an error modal. Keying the branch also remounts PiP with the correct room when switching calls.
+
 ## Desktop Bridge Typing
 
 `packages/client/types/types.d.ts` declares `window.pushToTalk`. Keep these typings aligned with the runtime bridge in the paired desktop repository.
