@@ -921,6 +921,11 @@ class Voice {
         return;
       }
 
+      if (this.#settings.pushToTalkEnabled && window.pushToTalk) {
+        window.pushToTalk.setManualState(!this.#pushToTalkActive);
+        return;
+      }
+
       await this.#setMicrophoneEnabled(
         !room.localParticipant.isMicrophoneEnabled,
         { persistPreference: true },

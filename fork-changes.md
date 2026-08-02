@@ -317,8 +317,9 @@ Manual mute behavior:
 
 - Requires an active room.
 - Does nothing while deafened.
-- Toggles LiveKit microphone state.
-- Persists `state.voice.micOn` because this is a user/manual preference.
+- When desktop PTT is enabled, sends the inverse cached active state through `window.pushToTalk.setManualState(...)` so on-screen controls update the authoritative desktop latch.
+- Desktop PTT manual changes flow back through `setPushToTalkActive()` and `setMute()` and do not persist `state.voice.micOn`.
+- Without desktop PTT, toggles LiveKit microphone state and persists `state.voice.micOn` because this is a user/manual preference.
 - Plays mute/unmute sounds only when PTT is disabled or PTT notification sounds are enabled.
 
 ### `setMute(enabled)`
