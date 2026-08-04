@@ -1,5 +1,6 @@
 export const STOAT_HOST = "stoat.chat";
 export const STOAT_API = "https://api.stoat.chat";
+const LEGACY_STOAT_API = "https://stoat.chat/api";
 
 /** App `stoat.json` endpoint format */
 export interface AppConfig {
@@ -21,7 +22,11 @@ const DEFAULT_HOST =
 const DEFAULT_API_URL =
   getEnv("VITE_DEV_API_URL", true) || getEnv("VITE_API_URL") || STOAT_API;
 
-if (DEFAULT_API_URL !== STOAT_API && DEFAULT_HOST === STOAT_HOST)
+const isDefaultStoatApi = [STOAT_API, LEGACY_STOAT_API].includes(
+  DEFAULT_API_URL.replace(/\/+$/, ""),
+);
+
+if (!isDefaultStoatApi && DEFAULT_HOST === STOAT_HOST)
   throw "VITE_HOST required when VITE_API_URL is set!";
 
 export default {

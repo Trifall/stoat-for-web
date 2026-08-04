@@ -1,4 +1,5 @@
 import { createFormControl, createFormGroup } from "solid-forms";
+import { createEffect, onCleanup } from "solid-js";
 import { QRCodeSVG } from "solid-qr-code";
 
 import { Trans, useLingui } from "@lingui-solid/solid/macro";
@@ -44,6 +45,23 @@ export function MFAEnableTOTPModal(
   const group = createFormGroup({
     code: createFormControl("", { required: true }),
   });
+  let settled = false;
+
+  function rejectCancellation() {
+    if (settled) return false;
+    settled = true;
+    props.reject?.("MFACancelled");
+    return true;
+  }
+
+  function cancel() {
+    if (rejectCancellation()) props.onClose();
+  }
+
+  createEffect(() => {
+    if (!props.show) rejectCancellation();
+  });
+  onCleanup(rejectCancellation);
 
   /**
    * Generate OTP URI
@@ -52,11 +70,15 @@ export function MFAEnableTOTPModal(
     `otpauth://totp/Stoat:${props.identifier}?secret=${props.secret}&issuer=Stoat`;
 
   async function onSubmit() {
+    if (settled) return;
+    settled = true;
+
     try {
       const code = group.controls.code.value.trim().replace(/\s/g, "");
       await props.callback(code);
       props.onClose();
     } catch (error) {
+      settled = false;
       showError(error);
     }
   }
@@ -66,16 +88,14 @@ export function MFAEnableTOTPModal(
   return (
     <Dialog
       show={props.show}
-      onClose={() => {
-        props.callback();
-        props.onClose();
-      }}
+      onClose={cancel}
       title={<Trans>Enable authenticator app</Trans>}
       actions={[
         {
           text: <Trans>Cancel</Trans>,
           onClick() {
-            props.reject?.("MFACancelled");
+            cancel();
+            return false;
           },
         },
         {
