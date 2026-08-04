@@ -14,8 +14,8 @@ import { useModals } from "@revolt/modal";
 import { Navigate, useBeforeLeave, useLocation } from "@revolt/routing";
 import { useState } from "@revolt/state";
 import { LAYOUT_SECTIONS } from "@revolt/state/stores/Layout";
+import { LoadingScreen } from "@revolt/ui";
 
-import { LoadingScreen } from "./LoadingScreen";
 import { Sidebar } from "./interface/Sidebar";
 
 /**

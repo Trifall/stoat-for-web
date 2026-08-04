@@ -39,6 +39,7 @@ export { IconButton } from "./IconButton";
 export { KeybindInput } from "./KeybindInput";
 export { List } from "./List";
 export { CircularProgress } from "./LoadingProgress";
+export { LoadingScreen } from "./LoadingScreen";
 export { MenuItem } from "./Menu";
 export { MenuButton } from "./MenuButton";
 export { Radio2 } from "./Radio";

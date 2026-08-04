@@ -9,6 +9,7 @@ import { styled } from "styled-system/jsx";
 import { ChannelContextMenu, UserContextMenu } from "@revolt/app";
 import { useClient } from "@revolt/client";
 import { useDevice } from "@revolt/common";
+import Instance from "@revolt/instance/Instance";
 import { TextWithEmoji } from "@revolt/markdown";
 import { useModals } from "@revolt/modal";
 import { useLocation, useNavigate } from "@revolt/routing";
@@ -89,7 +90,11 @@ export const HomeSidebar = (props: Props) => {
             href="/app"
             size="normal"
             icon={<Symbol>home</Symbol>}
-            attention={location.pathname === "/app" ? "selected" : "normal"}
+            attention={
+              Instance.relPath(location.pathname) === "/app"
+                ? "selected"
+                : "normal"
+            }
           >
             <ButtonTitle>
               <Trans>Home</Trans>
@@ -102,7 +107,11 @@ export const HomeSidebar = (props: Props) => {
             href="/friends"
             size="normal"
             icon={<Symbol>group</Symbol>}
-            attention={location.pathname === "/friends" ? "selected" : "normal"}
+            attention={
+              Instance.relPath(location.pathname) === "/friends"
+                ? "selected"
+                : "normal"
+            }
           >
             <ButtonTitle>
               <Trans>Friends</Trans>

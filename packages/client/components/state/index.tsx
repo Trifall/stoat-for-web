@@ -13,6 +13,7 @@ import localforage from "localforage";
 
 import { isMobileBrowser } from "@livekit/components-core";
 import { SlideDrawer } from "@revolt/ui/components/navigation/SlideDrawer";
+
 import { AbstractStore, Store } from "./stores";
 import { Auth } from "./stores/Auth";
 import { Draft } from "./stores/Draft";
@@ -30,9 +31,9 @@ import { Sync } from "./stores/Sync";
 import { Theme } from "./stores/Theme";
 import { Voice } from "./stores/Voice";
 
-export { SyncWorker } from "./SyncWorker";
-
+export { ALLOWED_IMAGE_TYPES } from "./stores/Draft";
 export type { BooleanKeys, Sounds, TypeSounds } from "./stores/Sounds";
+export { SyncWorker } from "./SyncWorker";
 
 /**
  * Introduce some delay before writing state to disk

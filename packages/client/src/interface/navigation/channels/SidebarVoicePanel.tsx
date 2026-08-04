@@ -2,8 +2,8 @@ import { Show } from "solid-js";
 
 import { styled } from "styled-system/jsx";
 
-import { CONFIGURATION } from "@revolt/common";
 import { useClient } from "@revolt/client";
+import { useInstance } from "@revolt/instance";
 import { InRoom, useVoice } from "@revolt/rtc";
 import { Button, IconButton } from "@revolt/ui/components/design";
 import { Symbol } from "@revolt/ui/components/utils/Symbol";
@@ -37,10 +37,7 @@ export function SidebarVoicePanel() {
 
 function Controls() {
   const voice = useVoice();
-
-  function isVideoEnabled() {
-    return CONFIGURATION.ENABLE_VIDEO;
-  }
+  const { limits } = useInstance();
 
   return (
     <Actions>
@@ -69,34 +66,30 @@ function Controls() {
       </IconButton>
       <IconButton
         size="xs"
-        variant={isVideoEnabled() && voice.video() ? "filled" : "tonal"}
+        variant={limits().video && voice.video() ? "filled" : "tonal"}
         onPress={() => {
-          if (isVideoEnabled()) voice.toggleCamera();
+          if (limits().video) voice.toggleCamera();
         }}
-        isDisabled={!isVideoEnabled()}
+        isDisabled={!limits().video}
       >
         <Symbol>camera_video</Symbol>
       </IconButton>
       <IconButton
         size="xs"
-        variant={isVideoEnabled() && voice.screenshare() ? "filled" : "tonal"}
+        variant={limits().video && voice.screenshare() ? "filled" : "tonal"}
         onPress={() => {
-          if (isVideoEnabled()) voice.toggleScreenshare();
+          if (limits().video) voice.toggleScreenshare();
         }}
-        isDisabled={!isVideoEnabled()}
+        isDisabled={!limits().video}
       >
         <Show
-          when={!isVideoEnabled() || voice.screenshare()}
+          when={!limits().video || voice.screenshare()}
           fallback={<Symbol>stop_screen_share</Symbol>}
         >
           <Symbol>screen_share</Symbol>
         </Show>
       </IconButton>
-      <Button
-        size="xs"
-        variant="_error"
-        onPress={() => voice.disconnect()}
-      >
+      <Button size="xs" variant="_error" onPress={() => voice.disconnect()}>
         <Symbol>call_end</Symbol>
       </Button>
     </Actions>

@@ -5,7 +5,6 @@ import {
   Switch,
   createContext,
   createEffect,
-  createMemo,
   createSignal,
   onCleanup,
   onMount,
@@ -104,6 +103,7 @@ export function VoiceCallCardContext(props: { children: JSX.Element }) {
     const inf = info();
     if (!ref) return;
     const sty = ref.style;
+    resetEvents();
 
     //Set mode based on state
     if (voice.fullscreen()) {
@@ -115,19 +115,14 @@ export function VoiceCallCardContext(props: { children: JSX.Element }) {
       sty.transform = `translate(${inf.pos.x}px, ${inf.pos.y}px)`;
       sty.width = `${inf.pos.width}px`;
       setMode();
-    } else if (!voice.channel()) {
+    } else if (!inCall()) {
       const y = inf?.pos.y ?? ref.getBoundingClientRect().y;
       sty.transform = `translate(${innerWidth + 50}px, ${y}px)`;
       setMode();
     } else if (!mode()) setFloat("tr");
   });
 
-  const channel = createMemo(() => {
-    const inf = info();
-
-    resetEvents();
-    return inf?.channel;
-  });
+  const channel = () => info()?.channel;
 
   function setFloat(float: FloatType) {
     const sty = ref!.style,
@@ -141,13 +136,17 @@ export function VoiceCallCardContext(props: { children: JSX.Element }) {
   onCleanup(resetEvents);
 
   onMount(() => {
-    document
-      .getElementById("floating")
-      ?.addEventListener("fullscreenchange", () => {
-        if (!document.fullscreenElement) {
-          voice.toggleFullscreen(false);
-        }
-      });
+    const floating = document.getElementById("floating");
+    const handleFullscreenChange = () => {
+      if (!document.fullscreenElement) {
+        voice.toggleFullscreen(false);
+      }
+    };
+
+    floating?.addEventListener("fullscreenchange", handleFullscreenChange);
+    onCleanup(() =>
+      floating?.removeEventListener("fullscreenchange", handleFullscreenChange),
+    );
   });
 
   createEffect(() => {

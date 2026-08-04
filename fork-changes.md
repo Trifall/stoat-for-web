@@ -74,6 +74,10 @@ This order is required because `VoiceContext` calls `useSound()` and passes the 
 
 `DeviceContext` wraps the app outside `StateContext`, preserving upstream device behavior while allowing fork voice UI to use device/layout information.
 
+As of the upstream 0.14.1 merge, `InstanceContext` wraps `StateContext` and owns the configured `Client`, backend endpoints, feature configuration, and reactive user limits. Alternate `/i/:host` routes remain redirected to the default instance until multi-instance persistence and session isolation are designed. `Instance.href()` uses the current frontend origin so shared links stay on the fork, while webhook URLs use `Instance.apiUrl` because they are API endpoints.
+
+When `Instance.newClient()` replaces the SDK client, incoming-call listeners rebind to the new client and the old voice room, ringtone, timers, and retry work are cleaned up. Keep this lifecycle coordinated with `ClientContext` and `VoiceContext`; capturing the initial client for the lifetime of `VoiceContext` leaves incoming-call behavior attached to a disposed client.
+
 ## Sound System
 
 ### Architecture
@@ -412,8 +416,9 @@ Manual disconnect path:
 
 Current reconnect caveats:
 
-- Retry timers are not retained or cancelled. A delayed retry can run after a manual disconnect or channel switch and interact with newer room/channel state.
 - Terminal failure/disabled reconnect sets runtime state to `DISCONNECTED` but does not fully clear room/channel state. This can affect later incoming-call suppression.
+
+Initial joins and fresh-token reconnects use a connection generation tied to the concrete room. Disconnects, channel switches, and provider cleanup invalidate that generation, cancel retained retry timers, and prevent stale token or `room.connect()` completions from affecting a newer call. Failed initial joins clean up their room, device listener, track subscription root, and call ownership.
 
 ## Noise Gate
 
@@ -640,6 +645,8 @@ The forked submodules are behaviorally significant:
 - `packages/stoat.js` preserves fork voice-status behavior while also merging upstream SDK changes such as user limits.
 - `packages/solid-livekit-components` provides gain, output-device, and `RemoteTrackPublication.setEnabled()` behavior used by mute/deafen integration.
 - `packages/client/assets` provides branded sounds and may be intentionally unavailable to Renovate/public automation.
+
+Current SDK caveat: `User.limits` in the published fork tip multiplies `new_user_hours` by `3600_0000` rather than `3_600_000`, making the client-side new-user period ten times too long. This predates the 0.14.1 parent merge and backend enforcement remains authoritative. Fix it in the SDK fork and push that commit before advancing the parent gitlink; do not work around it with an unpushed submodule commit.
 
 Review both `.gitmodules` URLs and gitlink commit pointers. A clean parent-repository merge can still silently regress behavior by advancing a submodule to an incompatible upstream commit.
 
@@ -892,4 +899,4 @@ Manual smoke checks to consider:
 
 ---
 
-*Last updated: after integrating upstream 0.13.1, updating both forked client submodules, and preserving the fork voice, sound, fullscreen, and responsive behavior.*
+*Last updated: after integrating upstream 0.14.1 and its Instance architecture, updating the forked Stoat.js submodule, and preserving the fork voice, sound, fullscreen, and responsive behavior.*

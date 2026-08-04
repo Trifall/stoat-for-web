@@ -3,6 +3,7 @@ import { Match, Show, Switch } from "solid-js";
 import { Trans } from "@lingui-solid/solid/macro";
 import { Channel } from "stoat.js";
 
+import { useInstance } from "@revolt/instance";
 import { useModals } from "@revolt/modal";
 import { useNavigate } from "@revolt/routing";
 import { useState } from "@revolt/state";
@@ -31,6 +32,7 @@ import { NotificationContextMenu } from "./shared/NotificationContextMenu";
 export function ChannelContextMenu(props: { channel: Channel }) {
   const state = useState();
   const navigate = useNavigate();
+  const instance = useInstance();
   const { openModal } = useModals();
 
   /**
@@ -114,9 +116,11 @@ export function ChannelContextMenu(props: { channel: Channel }) {
    */
   function copyLink() {
     navigator.clipboard.writeText(
-      `${location.origin}${
-        props.channel.server ? `/server/${props.channel.server?.id}` : ""
-      }/channel/${props.channel.id}`,
+      instance.href(
+        `${
+          props.channel.server ? `/server/${props.channel.server?.id}` : ""
+        }/channel/${props.channel.id}`,
+      ),
     );
   }
 

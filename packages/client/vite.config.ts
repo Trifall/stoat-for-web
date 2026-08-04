@@ -39,6 +39,7 @@ export default defineConfig({
       },
       devOptions: {
         enabled: true,
+        type: "module",
       },
       manifest: {
         name: "Stoat",
@@ -101,20 +102,6 @@ export default defineConfig({
       },
     },
     sourcemap: true,
-    minify: "terser",
-    terserOptions: {
-      ecma: 2020,
-      module: true,
-      format: { inline_script: false, comments: false },
-      mangle: { properties: { regex: /^#/ } },
-      compress: {
-        passes: 2,
-        arguments: true,
-        keep_fargs: false,
-        keep_infinity: true,
-        drop_console: ["debug"],
-      },
-    },
   },
   optimizeDeps: {
     exclude: ["hast"],

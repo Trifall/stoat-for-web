@@ -6,6 +6,7 @@ import {
   batch,
   createContext,
   createEffect,
+  createRoot,
   createSignal,
   onCleanup,
   onMount,
@@ -33,6 +34,7 @@ import { NoiseGateProcessor } from "./NoiseGateProcessor";
 
 import { type SoundController, useClient, useSound } from "@revolt/client";
 import { CONFIGURATION } from "@revolt/common";
+import { useInstance } from "@revolt/instance";
 import { ModalController, useModals } from "@revolt/modal";
 import { useNavigate } from "@revolt/routing";
 import { useState } from "@revolt/state";
@@ -114,6 +116,10 @@ class Voice {
   #pendingLeaveNotifications = new Map<string, ReturnType<typeof setTimeout>>();
   #suppressedReconnectJoins = new Set<string>();
   #suppressedReconnectJoinsClearTimeout?: ReturnType<typeof setTimeout>;
+  #reconnectTimeout?: ReturnType<typeof setTimeout>;
+  #connectionGeneration = 0;
+  #disposeTracks?: () => void;
+  #disposed = false;
 
   fullscreen: Accessor<boolean>;
   #setFullscreen: Setter<boolean>;
@@ -132,6 +138,8 @@ class Voice {
 
   private openModal;
   private getClient;
+  private config;
+  private limits;
   private screenShareTracks: Set<string>;
 
   private sound: SoundController;
@@ -195,8 +203,10 @@ class Voice {
     this.showBar = showBar;
     this.#setShowBar = setShowBar;
 
+    const inst = useInstance();
+    this.config = inst.config;
+    this.limits = inst.limits;
     this.openModal = modals.openModal;
-
     this.getClient = useClient();
 
     this.screenShareTracks = new Set();
@@ -451,7 +461,7 @@ class Voice {
   }
 
   async #selectLiveKitNode(): Promise<string> {
-    const nodes = this.getClient().configuration?.features.livekit.nodes ?? [];
+    const nodes = this.config.features.livekit.nodes;
     if (!nodes.length) return "worldwide";
 
     const controller = new AbortController();
@@ -502,6 +512,7 @@ class Voice {
     this.#reconnectAttempts = 0;
 
     this.disconnect(false);
+    const connectionGeneration = this.#connectionGeneration;
 
     const room = new Room({
       audioCaptureDefaults: {
@@ -523,13 +534,16 @@ class Voice {
     );
     let participantNotificationsReady = false;
 
-    this.vidTracks = useTracks(
-      [
-        { source: Track.Source.Camera, withPlaceholder: true },
-        { source: Track.Source.ScreenShare, withPlaceholder: false },
-      ],
-      { room, onlySubscribed: false },
-    );
+    this.vidTracks = createRoot((dispose) => {
+      this.#disposeTracks = dispose;
+      return useTracks(
+        [
+          { source: Track.Source.Camera, withPlaceholder: true },
+          { source: Track.Source.ScreenShare, withPlaceholder: false },
+        ],
+        { room, onlySubscribed: false },
+      );
+    });
 
     batch(() => {
       this.#setRoom(room);
@@ -662,7 +676,7 @@ class Voice {
         return;
       }
 
-      this.#handleReconnect();
+      void this.#handleReconnect(connectionGeneration);
     });
 
     room.addListener("trackPublished", (pub) => {
@@ -685,24 +699,54 @@ class Voice {
       }
     });
 
-    if (!auth) {
-      auth = await channel.joinCall(await this.#selectLiveKitNode());
-    }
+    try {
+      if (!auth) {
+        auth = await channel.joinCall(await this.#selectLiveKitNode());
+      }
 
-    debugLog("PTT-WEB", "Connecting to room...");
-    await room.connect(auth.url, auth.token, {
-      autoSubscribe: false,
-    });
-    participantNotificationsReady = true;
-    debugLog(
-      "PTT-WEB",
-      "Room connected successfully, mic state:",
-      room.localParticipant.isMicrophoneEnabled,
-    );
+      if (connectionGeneration !== this.#connectionGeneration) {
+        room.removeAllListeners();
+        void room.disconnect();
+        return;
+      }
+
+      debugLog("PTT-WEB", "Connecting to room...");
+      await room.connect(auth.url, auth.token, {
+        autoSubscribe: false,
+      });
+
+      if (connectionGeneration !== this.#connectionGeneration) {
+        room.removeAllListeners();
+        void room.disconnect();
+        return;
+      }
+
+      participantNotificationsReady = true;
+      debugLog(
+        "PTT-WEB",
+        "Room connected successfully, mic state:",
+        room.localParticipant.isMicrophoneEnabled,
+      );
+    } catch (error) {
+      room.removeAllListeners();
+      void room.disconnect();
+
+      if (
+        connectionGeneration === this.#connectionGeneration &&
+        this.room() === room
+      ) {
+        this.disconnect(false);
+        this.onErr(error);
+      }
+    }
   }
 
-  async #handleReconnect() {
+  async #handleReconnect(connectionGeneration = this.#connectionGeneration) {
+    if (this.#disposed || connectionGeneration !== this.#connectionGeneration)
+      return;
+
     const channel = this.channel();
+    const room = this.room();
     if (!channel) {
       debugLog("PTT-WEB", "No channel to reconnect to");
       this.#setState("DISCONNECTED");
@@ -723,21 +767,37 @@ class Voice {
     try {
       // Fetch a fresh token for reconnection
       const auth = await channel.joinCall(await this.#selectLiveKitNode());
-      const room = this.room();
 
       if (!room) {
         throw new Error("Room no longer exists");
       }
+      if (
+        connectionGeneration !== this.#connectionGeneration ||
+        room !== this.room()
+      )
+        return;
 
       debugLog("PTT-WEB", "Attempting to reconnect with new token...");
       await room.connect(auth.url, auth.token, {
         autoSubscribe: false,
       });
 
+      if (
+        connectionGeneration !== this.#connectionGeneration ||
+        room !== this.room()
+      )
+        return;
+
       debugLog("PTT-WEB", "Reconnection successful!");
       this.#reconnectAttempts = 0;
       this.#setState("CONNECTED");
     } catch (error) {
+      if (
+        connectionGeneration !== this.#connectionGeneration ||
+        room !== this.room()
+      )
+        return;
+
       debugLog("PTT-WEB", "Reconnection failed:", error);
 
       if (this.#reconnectAttempts < this.#maxReconnectAttempts) {
@@ -748,8 +808,9 @@ class Voice {
         );
         debugLog("PTT-WEB", `Retrying in ${delay}ms...`);
 
-        setTimeout(() => {
-          this.#handleReconnect();
+        this.#reconnectTimeout = setTimeout(() => {
+          this.#reconnectTimeout = undefined;
+          void this.#handleReconnect(connectionGeneration);
         }, delay);
       } else {
         // Max attempts reached, give up
@@ -825,6 +886,13 @@ class Voice {
 
   disconnect(manual: boolean = true) {
     try {
+      this.#connectionGeneration++;
+
+      if (this.#reconnectTimeout) {
+        clearTimeout(this.#reconnectTimeout);
+        this.#reconnectTimeout = undefined;
+      }
+
       if (this.#mediaDevicesChangeHandler) {
         navigator.mediaDevices?.removeEventListener(
           "devicechange",
@@ -833,11 +901,13 @@ class Voice {
         this.#mediaDevicesChangeHandler = undefined;
       }
 
+      this.#reconnectAttempts = 0;
+      this.#disposeTracks?.();
+      this.#disposeTracks = undefined;
+      this.vidTracks = () => [];
+
       const room = this.room();
       if (!room) return;
-
-      // Internal disconnects during channel switches should not disable reconnects.
-      this.#reconnectAttempts = 0;
 
       // Clean up noise gate processor
       this.#noiseGateProcessor?.destroy();
@@ -871,12 +941,16 @@ class Voice {
         this.#setHideNonVideoParticipants(false);
         this.#setFocus();
         this.#setShowBar(true);
-        this.vidTracks = () => [];
       });
       this.screenShareTracks = new Set();
     } catch (e) {
       this.onErr(e);
     }
+  }
+
+  dispose() {
+    this.#disposed = true;
+    this.disconnect(false);
   }
 
   async toggleDeafen() {
@@ -1075,54 +1149,39 @@ class Voice {
       },
     };
 
-    if (this.getClient().configured()) {
-      // TODO: Use new user limits if the user is new - I don't think there's a way to do that now?
-      const limit =
-        this.getClient().configuration?.features.limits.default
-          .video_resolution;
+    const limit = this.limits().video_resolution;
 
-      // TODO: Add more resolutions to stream from if they're enabled. May tie into premium users in the future?
-      if (limit) {
-        if (
-          (limit[0] === 0 || limit[0] >= 1920) &&
-          (limit[1] === 0 || limit[1] >= 1080)
-        ) {
-          qualities.high = {
-            name: "high",
-            resolution: ScreenSharePresets.h1080fps30.resolution,
-            fullName: `1080p ${Math.min(30, this.#settings.screenShareFrameRate)}FPS`,
-            contentHint: "motion",
-          };
-          const originalResolution = ScreenSharePresets.original.resolution;
-          originalResolution.frameRate = 5;
-          originalResolution.aspectRatio = 0;
-          if (this.getClient().configured()) {
-            // TODO: Use new user limits if the user is new - I don't think there's a way to do that now?
-            const limit =
-              this.getClient().configuration?.features.limits.default
-                .video_resolution;
-            if (limit) {
-              originalResolution.width = limit[0];
-              originalResolution.height = limit[1];
-              // If both resolutions are limited, set aspect ratio
-              if (
-                originalResolution.height !== 0 &&
-                originalResolution.width !== 0
-              ) {
-                originalResolution.aspectRatio =
-                  originalResolution.width / originalResolution.height;
-              }
-            }
-          }
-          qualities.text = {
-            name: "text",
-            resolution: originalResolution,
-            fullName: `Source ${Math.min(5, this.#settings.screenShareFrameRate)}FPS`,
-            contentHint: "text",
-          };
-        }
+    // TODO: Add more resolutions to stream from if they're enabled. May tie into premium users in the future?
+    if (
+      (limit[0] === 0 || limit[0] >= 1920) &&
+      (limit[1] === 0 || limit[1] >= 1080)
+    ) {
+      qualities.high = {
+        name: "high",
+        resolution: ScreenSharePresets.h1080fps30.resolution,
+        fullName: `1080p ${Math.min(30, this.#settings.screenShareFrameRate)}FPS`,
+        contentHint: "motion",
+      };
+      const originalResolution = ScreenSharePresets.original.resolution;
+      originalResolution.frameRate = 5;
+      originalResolution.aspectRatio = 0;
+
+      originalResolution.width = limit[0];
+      originalResolution.height = limit[1];
+      // If both resolutions are limited, set aspect ratio
+      if (originalResolution.height !== 0 && originalResolution.width !== 0) {
+        originalResolution.aspectRatio =
+          originalResolution.width / originalResolution.height;
       }
+
+      qualities.text = {
+        name: "text",
+        resolution: originalResolution,
+        fullName: `Source ${Math.min(5, this.#settings.screenShareFrameRate)}FPS`,
+        contentHint: "text",
+      };
     }
+
     return qualities;
   }
 
@@ -1543,8 +1602,9 @@ export function VoiceContext(props: { children: JSX.Element }) {
         "✗ Desktop PTT API not available (running in browser?)",
       );
     }
+  });
 
-    // setup voice notification sounds
+  createEffect(() => {
     const currentClient = client();
     console.log(
       "[VoiceNotifications] Setting up notifications, client available:",
@@ -1649,6 +1709,8 @@ export function VoiceContext(props: { children: JSX.Element }) {
         console.log("[VoiceNotifications] Cleaning up event listeners");
         currentClient.off("voiceChannelJoin", onJoin);
         currentClient.off("voiceChannelLeave", onLeave);
+        dismissIncomingCall();
+        voice.disconnect(false);
       });
     }
   });
@@ -1663,7 +1725,12 @@ export function VoiceContext(props: { children: JSX.Element }) {
     },
     10 * 60 * 1000,
   );
-  onCleanup(() => clearInterval(voiceRefreshInterval));
+  onCleanup(() => {
+    clearInterval(voiceRefreshInterval);
+    window.stoatRefreshVoice = undefined;
+    dismissIncomingCall();
+    voice.dispose();
+  });
 
   // Manual reconnect for debugging ghost cleanup from DevTools:
   //   stoatRefreshVoice()

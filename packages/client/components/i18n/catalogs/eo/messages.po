@@ -68,7 +68,7 @@ msgstr ""
 msgid "{0} changed the channel icon"
 msgstr ""
 
-#. placeholder {0}: CONFIGURATION.MAX_EMOJI - props.server.emojis.length
+#. placeholder {0}: instance.globalLimits.server_emoji - props.server.emojis.length
 #: components/app/interface/settings/server/emojis/EmojiList.tsx
 msgid "{0} emoji slots remaining"
 msgstr ""
@@ -404,7 +404,7 @@ msgstr ""
 msgid "All Messages"
 msgstr "Ĉiuj mesaĝoj"
 
-#: src/LoadingScreen.tsx
+#: components/ui/components/design/LoadingScreen.tsx
 msgid "All Systems Operational"
 msgstr ""
 
@@ -988,6 +988,10 @@ msgstr ""
 msgid "Could not find what you requested."
 msgstr ""
 
+#: components/instance/index.tsx
+msgid "Couldn't fetch Stoat configuration from {hStr}."
+msgstr ""
+
 #: components/modal/modals/CreateWebhook.tsx
 #: components/modal/modals/CreateServer.tsx
 #: components/modal/modals/CreateRole.tsx
@@ -1159,7 +1163,7 @@ msgstr ""
 msgid "Default Permissions"
 msgstr ""
 
-#: src/LoadingScreen.tsx
+#: components/ui/components/design/LoadingScreen.tsx
 msgid "Degraded Performance"
 msgstr ""
 
@@ -1382,6 +1386,7 @@ msgstr ""
 
 #: components/ui/components/features/messaging/elements/Container.tsx
 #: components/ui/components/features/messaging/elements/Container.tsx
+#: components/ui/components/features/messaging/elements/Container.tsx
 msgid "Edited"
 msgstr ""
 
@@ -1524,6 +1529,11 @@ msgstr "Konfirmado malsukcesis!"
 #: components/app/interface/settings/user/Feedback.tsx
 msgid "Feedback"
 msgstr "Prikomentoj"
+
+#. placeholder {0}: humanFileSize(local.maxSize)
+#: components/ui/components/utils/Form2.tsx
+msgid "File must be smaller than {0}"
+msgstr ""
 
 #: src/interface/Home.tsx
 msgid "Find a community based on your hobbies or interests."
@@ -1978,7 +1988,11 @@ msgstr "Ensaluti"
 msgid "Logs you out of all sessions except this device."
 msgstr ""
 
-#: src/LoadingScreen.tsx
+#: components/app/interface/settings/server/emojis/EmojiList.tsx
+msgid "Lowercase letters, numbers and underscores only."
+msgstr ""
+
+#: components/ui/components/design/LoadingScreen.tsx
 msgid "Major Outage"
 msgstr ""
 
@@ -2143,6 +2157,11 @@ msgstr "Mesaĝo sendiĝis ĉe alia platformo"
 #: components/app/interface/settings/channel/permissions/ChannelPermissionsEditor.tsx
 msgid "Messaging"
 msgstr "Mesaĝado"
+
+#: components/app/interface/settings/user/Account.tsx
+#: components/app/interface/settings/user/Account.tsx
+msgid "MFA setup canceled."
+msgstr ""
 
 #: components/app/interface/settings/user/Native.tsx
 msgid "Minimise to Tray"
@@ -2361,7 +2380,7 @@ msgstr "Vi ne povos malfari la forigon."
 msgid "One of the first 1000 users!"
 msgstr ""
 
-#: src/LoadingScreen.tsx
+#: components/ui/components/design/LoadingScreen.tsx
 msgid "Ongoing Maintenance"
 msgstr ""
 
@@ -2375,6 +2394,10 @@ msgstr "Enreta"
 
 #: src/interface/navigation/servers/UserMenu.tsx
 msgid "Only mentions will notify you"
+msgstr ""
+
+#: components/instance/index.tsx
+msgid "Oops, something went wrong! {e}"
 msgstr ""
 
 #: components/modal/modals/Invite.tsx
@@ -2423,7 +2446,7 @@ msgstr "Superrigardo"
 msgid "Pardon User"
 msgstr ""
 
-#: src/LoadingScreen.tsx
+#: components/ui/components/design/LoadingScreen.tsx
 msgid "Partial Outage"
 msgstr ""
 
@@ -2641,6 +2664,14 @@ msgstr ""
 #: src/interface/channels/text/TextSearchSidebar.tsx
 msgid "Relevance"
 msgstr "Laŭ rilateco"
+
+#: components/markdown/plugins/anchors.tsx
+msgid "Remote Channel"
+msgstr ""
+
+#: components/markdown/plugins/anchors.tsx
+msgid "Remote Server"
+msgstr ""
 
 #: components/modal/modals/RemoveMember.tsx
 msgid "Remove"
@@ -3279,7 +3310,7 @@ msgstr ""
 msgid "This has already been sent."
 msgstr ""
 
-#: src/LoadingScreen.tsx
+#: components/ui/components/design/LoadingScreen.tsx
 msgid "This is taking longer than usual."
 msgstr ""
 
@@ -3359,7 +3390,7 @@ msgstr ""
 msgid "Trending GIFs"
 msgstr ""
 
-#: src/LoadingScreen.tsx
+#: components/ui/components/design/LoadingScreen.tsx
 msgid "Troubleshooting"
 msgstr ""
 
@@ -3377,7 +3408,7 @@ msgstr ""
 msgid "Undeafen"
 msgstr ""
 
-#: src/LoadingScreen.tsx
+#: components/ui/components/design/LoadingScreen.tsx
 msgid "Unknown"
 msgstr ""
 
@@ -3559,7 +3590,7 @@ msgstr ""
 msgid "View Recovery Codes"
 msgstr "Vidi restarigajn kodojn"
 
-#: src/LoadingScreen.tsx
+#: components/ui/components/design/LoadingScreen.tsx
 msgid "View status page"
 msgstr ""
 
@@ -3745,7 +3776,7 @@ msgstr ""
 msgid "You have this user blocked."
 msgstr ""
 
-#: src/LoadingScreen.tsx
+#: components/ui/components/design/LoadingScreen.tsx
 msgid "You may be experiencing connection issues."
 msgstr ""
 
