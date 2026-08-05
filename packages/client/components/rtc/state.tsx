@@ -46,7 +46,6 @@ import { VoiceCallCardContext } from "@revolt/ui/components/features/voice/callC
 import { ScreenSharePresets, VideoResolution } from "livekit-client";
 
 import { InRoom } from "./components/InRoom";
-import { IncomingCallPopup } from "./components/IncomingCallPopup";
 import { RoomAudioManager } from "./components/RoomAudioManager";
 
 const debugLog = (prefix: string, ...args: unknown[]) => {
@@ -106,7 +105,6 @@ class Voice {
   #reconnectAttempts = 0;
   #maxReconnectAttempts = 5;
   #micWasOnBeforeDeafen = false;
-  #lastCallMessageSent = new Map<string, number>();
   #noiseGateProcessor?: NoiseGateProcessor;
   #pushToTalkActive = false;
   #mutePromise: Promise<void> = Promise.resolve();
@@ -587,18 +585,6 @@ class Voice {
               }
             })
             .catch((error) => this.#handleMicrophoneError(error));
-        }
-      }
-
-      // Send "started a call" message only when starting a new call (no existing participants)
-      if (
-        (channel.type === "DirectMessage" || channel.type === "Group") &&
-        channel.voiceParticipants.size <= 1
-      ) {
-        const lastSent = this.#lastCallMessageSent.get(channel.id);
-        if (!lastSent || Date.now() - lastSent >= 60_000) {
-          this.#lastCallMessageSent.set(channel.id, Date.now());
-          channel.sendMessage("> *Started a call*").catch(() => {});
         }
       }
     });
@@ -1461,18 +1447,13 @@ const voiceContext = createContext<Voice>(null as unknown as Voice);
 /**
  * Mount global voice context and room audio manager
  */
-type IncomingCall = {
-  channel: Channel;
-  callerName: string;
-  callerAvatar?: string;
-};
-
 export function VoiceContext(props: { children: JSX.Element }) {
   const state = useState();
   const modals = useModals();
   const sound = useSound();
   const voice = new Voice(state.voice, modals, sound);
   const client = useClient();
+<<<<<<< HEAD
   const navigate = useNavigate();
 
   const [incomingCall, setIncomingCall] = createSignal<IncomingCall>();
@@ -1510,6 +1491,8 @@ export function VoiceContext(props: { children: JSX.Element }) {
   function rejectCall() {
     dismissIncomingCall();
   }
+=======
+>>>>>>> parent of d0d7ec77 (Add DM/Group voice call improvements)
 
   onMount(() => {
     debugLog(
@@ -1604,119 +1587,7 @@ export function VoiceContext(props: { children: JSX.Element }) {
     }
   });
 
-  createEffect(() => {
-    const currentClient = client();
-    console.log(
-      "[VoiceNotifications] Setting up notifications, client available:",
-      !!currentClient,
-    );
-
-    if (!currentClient) {
-      console.log(
-        "[VoiceNotifications] Client not available yet, skipping setup",
-      );
-    } else {
-      // console.log("[VoiceNotifications] Registering event listeners");
-
-      const onJoin = (channel: Channel, participant: { userId: string }) => {
-        // console.log("[VoiceNotifications] VoiceChannelJoin event received:", {
-        //   channelId: channel.id,
-        //   participantId: participant.userId,
-        //   currentChannelId: voice.channel()?.id,
-        //   currentUserId: currentClient.user?.id,
-        //   shouldPlay: voice.channel()?.id === channel.id && participant.userId !== currentClient.user?.id
-        // });
-        if (participant.userId === currentClient.user?.id) return;
-
-        // Incoming call: someone joined a DM/Group voice channel we're not in
-        if (
-          (channel.type === "DirectMessage" || channel.type === "Group") &&
-          !voice.channel()
-        ) {
-          // Already showing an incoming call popup — don't stack another
-          if (incomingCall()) return;
-
-          // Cooldown: don't re-trigger for a channel we just dismissed
-          const lastDismissed = recentlyDismissed.get(channel.id);
-          if (lastDismissed && Date.now() - lastDismissed < DISMISS_COOLDOWN)
-            return;
-
-          // Don't ring if user is on DND (Busy) or Focus
-          const userStatus = currentClient.user?.status?.presence;
-          if (userStatus === "Busy" || userStatus === "Focus") return;
-
-          let callerName: string;
-          let callerAvatar: string | undefined;
-
-          if (channel.type === "Group") {
-            callerName = channel.name ?? "Group Call";
-            callerAvatar = channel.iconURL;
-          } else {
-            const caller = currentClient.users.get(participant.userId);
-            callerName = caller?.displayName ?? caller?.username ?? "Unknown";
-            callerAvatar = caller?.avatarURL;
-          }
-
-          debugLog("IncomingCall", "Ringing from", callerName);
-          setIncomingCall({ channel, callerName, callerAvatar });
-          sound.playIncomingCall();
-
-          // Stop ringing after 15 seconds
-          if (incomingCallSoundTimeout) clearTimeout(incomingCallSoundTimeout);
-          incomingCallSoundTimeout = setTimeout(() => {
-            sound.stopIncomingCall();
-            incomingCallSoundTimeout = undefined;
-          }, 15_000);
-
-          // Auto-dismiss popup after 60 seconds
-          if (incomingCallTimeout) clearTimeout(incomingCallTimeout);
-          incomingCallTimeout = setTimeout(() => {
-            dismissIncomingCall();
-          }, 60_000);
-        }
-      };
-
-      const onLeave = (channel: Channel, userId: string) => {
-        // console.log("[VoiceNotifications] VoiceChannelLeave event received:", {
-        //   channelId: channel.id,
-        //   userId: userId,
-        //   currentChannelId: voice.channel()?.id,
-        //   currentUserId: currentClient.user?.id,
-        //   shouldPlay: voice.channel()?.id === channel.id && userId !== currentClient.user?.id
-        // });
-        if (userId === currentClient.user?.id) return;
-
-        // Dismiss incoming call if the caller left
-        const call = incomingCall();
-        if (call && call.channel.id === channel.id) {
-          // Check if anyone is still in the call
-          const remaining = channel.voiceParticipants;
-          const othersInCall = [...remaining.keys()].filter(
-            (id) => id !== currentClient.user?.id,
-          );
-          if (othersInCall.length === 0) {
-            debugLog("IncomingCall", "Caller left, dismissing");
-            dismissIncomingCall();
-          }
-        }
-      };
-
-      currentClient.on("voiceChannelJoin", onJoin);
-      currentClient.on("voiceChannelLeave", onLeave);
-      console.log("[VoiceNotifications] Event listeners registered");
-
-      onCleanup(() => {
-        console.log("[VoiceNotifications] Cleaning up event listeners");
-        currentClient.off("voiceChannelJoin", onJoin);
-        currentClient.off("voiceChannelLeave", onLeave);
-        dismissIncomingCall();
-        voice.disconnect(false);
-      });
-    }
-  });
-
   onCleanup(() => {
-    dismissIncomingCall();
     voice.dispose();
   });
 
@@ -1742,16 +1613,6 @@ export function VoiceContext(props: { children: JSX.Element }) {
         <InRoom>
           <RoomAudioManager />
         </InRoom>
-        <Show when={incomingCall()}>
-          {(call) => (
-            <IncomingCallPopup
-              callerName={call().callerName}
-              callerAvatar={call().callerAvatar}
-              onAnswer={answerCall}
-              onReject={rejectCall}
-            />
-          )}
-        </Show>
       </RoomContext.Provider>
     </voiceContext.Provider>
   );

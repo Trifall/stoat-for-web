@@ -141,7 +141,7 @@ export function ChannelHeader(props: Props) {
 
       <Spacer />
 
-      <Show when={props.channel.isVoice && !voice.showCard(props.channel)}>
+      <Show when={props.channel.isVoice}>
         <IconButton
           onPress={() => voice.connect(props.channel)}
           use:floating={{
@@ -151,7 +151,7 @@ export function ChannelHeader(props: Props) {
             },
           }}
         >
-          <Symbol>call</Symbol>
+          <Symbol>voice_chat</Symbol>
         </IconButton>
       </Show>
 
