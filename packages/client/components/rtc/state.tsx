@@ -1715,29 +1715,10 @@ export function VoiceContext(props: { children: JSX.Element }) {
     }
   });
 
-  // Periodically reconnect the WebSocket so the Ready event clears any ghost
-  // voice participants. Skip during active calls to avoid disrupting real-time
-  // events (messages, typing, presence).
-  const voiceRefreshInterval = setInterval(
-    () => {
-      if (voice.channel()) return;
-      client()?.events.disconnect();
-    },
-    10 * 60 * 1000,
-  );
   onCleanup(() => {
-    clearInterval(voiceRefreshInterval);
-    window.stoatRefreshVoice = undefined;
     dismissIncomingCall();
     voice.dispose();
   });
-
-  // Manual reconnect for debugging ghost cleanup from DevTools:
-  //   stoatRefreshVoice()
-  window.stoatRefreshVoice = () => {
-    console.log("[VoiceState] Manual reconnect triggered");
-    client()?.events.disconnect();
-  };
 
   // sync sound settings reactively from Sounds store
   createEffect(() => {
