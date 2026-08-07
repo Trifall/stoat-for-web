@@ -21,16 +21,17 @@ import {
 
 import {
   ConnectionState,
+  LocalTrackPublication,
   MediaDeviceFailure,
   Room,
   RoomEvent,
   Track,
   TrackInvalidError,
 } from "livekit-client";
-import { DenoiseTrackProcessor } from "livekit-rnnoise-processor";
 import { Channel } from "stoat.js";
 
 import { NoiseGateProcessor } from "./NoiseGateProcessor";
+import { VoiceProcessor } from "./VoiceProcessor";
 
 import { type SoundController, useClient, useSound } from "@revolt/client";
 import { CONFIGURATION } from "@revolt/common";
@@ -39,6 +40,7 @@ import { ModalController, useModals } from "@revolt/modal";
 import { useNavigate } from "@revolt/routing";
 import { useState } from "@revolt/state";
 import {
+  NoiseSuppresionState,
   ScreenShareQualityName,
   Voice as VoiceSettings,
 } from "@revolt/state/stores/Voice";
@@ -139,6 +141,7 @@ class Voice {
   private config;
   private limits;
   private screenShareTracks: Set<string>;
+  private voiceProcessor?: VoiceProcessor;
 
   private sound: SoundController;
 
@@ -208,6 +211,58 @@ class Voice {
     this.getClient = useClient();
 
     this.screenShareTracks = new Set();
+
+    // Setup settings listeners
+    this.settingsListeners();
+  }
+
+  // Dynamically set echo cancellation and gain control when the settings are changed
+  // These functions are needed to maintain reactivity. Don't ask me why but if you make them not functions it breaks.
+  private settingsListeners() {
+    const getSettings = () => this.#settings;
+
+    const setEchoCancellation = (echoCancellation: boolean) => {
+      const track = this.getMicrophoneTrack()?.audioTrack;
+      if (track) {
+        track.constraints.echoCancellation = echoCancellation;
+      }
+    };
+
+    const setAutoGainControl = (autoGainControl: boolean) => {
+      const track = this.getMicrophoneTrack()?.audioTrack;
+      if (track) {
+        track.constraints.autoGainControl = autoGainControl;
+      }
+    };
+
+    const setNoiseSuppression = (noiseSuppression: NoiseSuppresionState) => {
+      const track = this.getMicrophoneTrack()?.audioTrack;
+      if (track) {
+        if (noiseSuppression === "browser") {
+          track.constraints.noiseSuppression = true;
+          //@ts-expect-error voiceIsolation is not yet standard, but it supported by livekit and most chromium based browsers, including electron.
+          track.constraints.voiceIsolation = true;
+        } else {
+          track.constraints.noiseSuppression = false;
+          //@ts-expect-error voiceIsolation is not yet standard, but it supported by livekit and most chromium based browsers, including electron.
+          track.constraints.voiceIsolation = false;
+        }
+      }
+    };
+
+    const restartTrack = () => {
+      const track = this.getMicrophoneTrack()?.audioTrack;
+      if (track) {
+        track.restartTrack();
+      }
+    };
+
+    createEffect(() => {
+      setEchoCancellation(getSettings().echoCancellation ?? true);
+      setAutoGainControl(getSettings().autoGainControl ?? true);
+      setNoiseSuppression(getSettings().noiseSupression ?? "browser");
+      restartTrack();
+    });
   }
 
   #resetVoiceProcessors() {
@@ -221,6 +276,7 @@ class Voice {
       echoCancellation: this.#settings.echoCancellation,
       noiseSuppression: this.#settings.noiseSupression === "browser",
       autoGainControl: this.#settings.autoGainControl,
+      voiceIsolation: this.#settings.noiseSupression === "browser",
       channelCount: { ideal: 1 },
     };
   }
@@ -254,12 +310,7 @@ class Voice {
 
   #createMicrophoneProcessor() {
     if (this.#settings.noiseGateEnabled) {
-      const upstream =
-        this.#settings.noiseSupression === "enhanced"
-          ? new DenoiseTrackProcessor({
-              workletCDNURL: CONFIGURATION.RNNOISE_WORKLET_CDN_URL,
-            })
-          : undefined;
+      const upstream = new VoiceProcessor(this.#settings);
 
       this.#noiseGateProcessor = new NoiseGateProcessor({
         threshold: this.#settings.noiseGateThreshold,
@@ -268,11 +319,7 @@ class Voice {
       return this.#noiseGateProcessor;
     }
 
-    if (this.#settings.noiseSupression === "enhanced") {
-      return new DenoiseTrackProcessor({
-        workletCDNURL: CONFIGURATION.RNNOISE_WORKLET_CDN_URL,
-      });
-    }
+    return (this.voiceProcessor = new VoiceProcessor(this.#settings));
   }
 
   #isUnavailableMicrophoneError(error: unknown) {
@@ -557,7 +604,6 @@ class Voice {
       this.#reconnectAttempts = 0;
       console.log("[VoiceNotifications] Playing self join sound");
       this.sound.playSound("selfJoinVoice");
-
       for (const p of room.remoteParticipants.values()) {
         const screenShareTrack = p.getTrackPublication(
           Track.Source.ScreenShare,
@@ -648,6 +694,16 @@ class Voice {
       }, 0);
 
       this.#pendingLeaveNotifications.set(participant.identity, timeout);
+    });
+
+    room.addListener("localTrackPublished", (pub) => {
+      if (pub.audioTrack && pub.audioTrack.source === Track.Source.Microphone) {
+        if (!pub.audioTrack.getProcessor()) {
+          pub.audioTrack?.setProcessor(
+            (this.voiceProcessor = new VoiceProcessor(this.#settings)),
+          );
+        }
+      }
     });
 
     room.addListener(RoomEvent.Disconnected, (reason?) => {
@@ -1428,6 +1484,13 @@ class Voice {
     );
   }
 
+  getMicrophoneTrack(): LocalTrackPublication | undefined {
+    const track = this.room()?.localParticipant.getTrackPublication(
+      Track.Source.Microphone,
+    );
+    return track;
+  }
+
   get listenPermission() {
     return !!this.channel()?.havePermission("Listen");
   }
@@ -1453,46 +1516,7 @@ export function VoiceContext(props: { children: JSX.Element }) {
   const sound = useSound();
   const voice = new Voice(state.voice, modals, sound);
   const client = useClient();
-<<<<<<< HEAD
-  const navigate = useNavigate();
 
-  const [incomingCall, setIncomingCall] = createSignal<IncomingCall>();
-  let incomingCallTimeout: ReturnType<typeof setTimeout> | undefined;
-  let incomingCallSoundTimeout: ReturnType<typeof setTimeout> | undefined;
-  // Track recently dismissed channels to prevent re-trigger spam
-  const recentlyDismissed = new Map<string, number>();
-  const DISMISS_COOLDOWN = 15_000; // 15 second cooldown per channel
-
-  function dismissIncomingCall() {
-    const call = incomingCall();
-    if (call) {
-      recentlyDismissed.set(call.channel.id, Date.now());
-    }
-    sound.stopIncomingCall();
-    setIncomingCall(undefined);
-    if (incomingCallTimeout) {
-      clearTimeout(incomingCallTimeout);
-      incomingCallTimeout = undefined;
-    }
-    if (incomingCallSoundTimeout) {
-      clearTimeout(incomingCallSoundTimeout);
-      incomingCallSoundTimeout = undefined;
-    }
-  }
-
-  function answerCall() {
-    const call = incomingCall();
-    if (!call) return;
-    dismissIncomingCall();
-    voice.connect(call.channel);
-    navigate(call.channel.path);
-  }
-
-  function rejectCall() {
-    dismissIncomingCall();
-  }
-=======
->>>>>>> parent of d0d7ec77 (Add DM/Group voice call improvements)
 
   onMount(() => {
     debugLog(
