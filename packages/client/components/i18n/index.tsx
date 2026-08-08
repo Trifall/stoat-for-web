@@ -4,7 +4,6 @@ import { I18nProvider as LinguiProvider } from "@lingui-solid/solid";
 import { i18n } from "@lingui/core";
 
 import { type LocaleOptions, Language, Languages } from "./Languages";
-// @ts-expect-error compiled lingui message catalog lacks .d.ts
 import { messages as en } from "./catalogs/en/messages";
 import { initTime, loadTimeLocale } from "./dayjs";
 import { updateDurationLocale } from "./durations";
