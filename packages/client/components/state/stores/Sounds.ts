@@ -90,11 +90,6 @@ export type TypeSounds = {
   selfLeaveVoice: boolean;
 
   /**
-   * Play a looping sound when receiving an incoming DM/Group call
-   */
-  incomingCall: boolean;
-
-  /**
    * Play a sound when the room disconnects unexpectedly
    */
   disconnect: boolean;
@@ -135,7 +130,6 @@ export class Sounds extends AbstractStore<"sounds", TypeSounds> {
       userMoved: true,
       selfJoinVoice: true,
       selfLeaveVoice: true,
-      incomingCall: true,
       disconnect: true,
       enabled: true,
       volume: 0.3,
@@ -174,20 +168,16 @@ export class Sounds extends AbstractStore<"sounds", TypeSounds> {
         typeof input.userLeaveVoice === "boolean" ? input.userLeaveVoice : true,
       userMoved: typeof input.userMoved === "boolean" ? input.userMoved : true,
       selfJoinVoice:
-        typeof input.selfJoinVoice === "boolean"
-          ? input.selfJoinVoice
-          : true,
+        typeof input.selfJoinVoice === "boolean" ? input.selfJoinVoice : true,
       selfLeaveVoice:
-        typeof input.selfLeaveVoice === "boolean"
-          ? input.selfLeaveVoice
-          : true,
-      incomingCall:
-        typeof input.incomingCall === "boolean" ? input.incomingCall : true,
+        typeof input.selfLeaveVoice === "boolean" ? input.selfLeaveVoice : true,
       disconnect:
         typeof input.disconnect === "boolean" ? input.disconnect : true,
       enabled: typeof input.enabled === "boolean" ? input.enabled : true,
       volume:
-        typeof input.volume === "number" ? Math.max(0, Math.min(1, input.volume)) : 0.3,
+        typeof input.volume === "number"
+          ? Math.max(0, Math.min(1, input.volume))
+          : 0.3,
     };
   }
 

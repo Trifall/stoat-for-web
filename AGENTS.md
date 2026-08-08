@@ -26,7 +26,7 @@ This is a behaviorally significant fork of upstream Stoat for Web. Read `fork-ch
 ### Do
 
 - Preserve documented fork behavior while incorporating compatible upstream improvements.
-- Treat `packages/client/components/rtc/state.tsx` as a central integration point for voice, PTT, reconnect, incoming calls, sounds, screen-share events, noise processing, and participant cleanup.
+- Treat `packages/client/components/rtc/state.tsx` as a central integration point for voice, PTT, reconnect, sounds, screen-share events, and noise processing.
 - Keep `<SoundContext>` outside `<VoiceContext>` in `packages/client/src/index.tsx`; `VoiceContext` depends on `useSound()`.
 - Resolve coordinated refactors as a group when a provider, runtime controller, store, UI component, desktop bridge, or submodule API changes across several files.
 - Review `fork-changes.md` for behavioral invariants before simplifying code that appears redundant or legacy.
@@ -39,6 +39,27 @@ This is a behaviorally significant fork of upstream Stoat for Web. Read `fork-ch
 - Do not reorder runtime providers without tracing every hook dependency.
 - Do not assume an upstream implementation is equivalent because its public API or UI looks similar.
 - Do not remove known caveats or legacy fields merely because they appear unused without checking persisted data and runtime gates.
+
+## Instance and Runtime Contexts
+
+### Do
+
+- Preserve the effective provider order in `packages/client/src/index.tsx`: `DeviceContext` > `I18nProvider` > `SnackbarProvider` > `Router` > `InstanceContext` > `StateContext` > `KeybindContext` > `ModalContext` > `ClientContext` > `SoundContext` > `VoiceContext` > `QueryClientProvider`.
+- Keep `InstanceContext` outside `StateContext`; the draft store captures `useInstance()` during state construction. Keep `SoundContext` outside `VoiceContext` because voice calls `useSound()`.
+- Treat `Instance` as the owner of the configured Stoat.js client, API/media/proxy/Gifbox endpoints, backend feature configuration, navigation base, and reactive user limits.
+- Obtain the active SDK client through the accessor returned by `useClient()` and call that accessor inside reactive work or at the point of use. Let `ClientController` replace clients through `Instance.newClient()`.
+- Read user limits through `instance.limits()` so login-time `ready` updates remain reactive. Use `instance.config`, `instance.apiUrl`, `instance.mediaUrl`, and `instance.proxyUrl` for runtime backend data instead of removed static feature or limit fields on `CONFIGURATION`.
+- Use `Instance.href()` for frontend navigation and shared application links, and `Instance.apiUrl` for actual backend API endpoints such as webhook URLs.
+- Preserve the current redirect from `/i/:host` to the default instance until persistence and session isolation for multiple instances are deliberately implemented.
+- Preserve environment compatibility for both `https://api.stoat.chat` and the legacy `https://stoat.chat/api` default API value, including trailing-slash normalization, without requiring `VITE_HOST`.
+
+### Do Not
+
+- Do not move `StateContext` outside `InstanceContext` or reorder another provider across a context it consumes.
+- Do not destructure `client` from `useInstance()` or retain one concrete client for a provider's lifetime; both patterns lose reactivity when login, logout, or lifecycle recovery replaces the client.
+- Do not construct replacement SDK clients outside `Instance.newClient()` or bypass the coordinated `ClientContext` and `VoiceContext` cleanup paths.
+- Do not describe `/i/:host` as working multi-instance support while all alternate hosts are intentionally redirected.
+- Do not compensate in client code for the Stoat.js `new_user_hours` duration multiplier caveat; fix and push the SDK fork before advancing its parent gitlink.
 
 ## Persistent State and Desktop Boundaries
 
@@ -73,12 +94,9 @@ This is a behaviorally significant fork of upstream Stoat for Web. Read `fork-ch
 - Play self leave only for real user-initiated `disconnect(true)` calls; channel switches and internal cleanup use `disconnect(false)`.
 - Gate initial participant notifications so joining an existing room does not produce join-sound spam.
 - Suppress false leave/join sounds caused by reconnect churn.
-- Preserve incoming-call eligibility for DM/group calls, including active-call, duplicate-popup, recent-dismissal, and Busy/Focus status guards.
-- Keep incoming ringtone playback as a dedicated looping audio node and stop it on every dismissal, answer, timeout, and caller-leave path.
 - Preserve fresh-token auto-reconnect behavior and resilient LiveKit node selection, including timeout and `"worldwide"` fallback.
 - Chain enhanced RNNoise before the noise gate when both processors are enabled.
 - Preserve remote deafen behavior across `RoomAudioManager` and the forked LiveKit `AudioTrack` publication enable/disable implementation.
-- Preserve periodic ghost-participant cleanup and its guard that skips event-WebSocket refresh while a real voice call is active.
 
 ### Do Not
 
@@ -108,7 +126,6 @@ This is a behaviorally significant fork of upstream Stoat for Web. Read `fork-ch
 
 - Do not move all sound imports to fallback assets; some fallback files are intentionally silent placeholders.
 - Do not treat a successful bundle as proof that an audio asset is audible or correct.
-- Do not assume disabling master sound automatically stops an already-playing incoming ringtone.
 
 ## SolidJS and UI State
 
@@ -305,7 +322,6 @@ When touching voice, sound, PTT, processing, or call UI, test the relevant paths
 - Enable PTT; verify desktop active state controls the mic without overwriting the saved manual mic preference.
 - Deafen and undeafen with the mic on; verify remote publication behavior and PTT-aware mic restoration.
 - Enable noise gate and enhanced suppression together; verify metering and the chained in-call processor path.
-- Receive, answer, dismiss, and time out a DM/group incoming call; verify the looping ringtone stops on every path.
 
 ## Feature Completion
 

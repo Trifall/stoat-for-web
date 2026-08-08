@@ -2,7 +2,6 @@ import {
   Accessor,
   JSX,
   Setter,
-  Show,
   batch,
   createContext,
   createEffect,
@@ -21,6 +20,7 @@ import {
 
 import {
   ConnectionState,
+  LocalTrackPublication,
   MediaDeviceFailure,
   Room,
   RoomEvent,
@@ -34,16 +34,15 @@ import { NoiseGateProcessor } from "./NoiseGateProcessor";
 import { type SoundController, useClient, useSound } from "@revolt/client";
 import { useInstance } from "@revolt/instance";
 import { ModalController, useModals } from "@revolt/modal";
-import { useNavigate } from "@revolt/routing";
 import { useState } from "@revolt/state";
 import {
+  NoiseSuppresionState,
   ScreenShareQualityName,
   Voice as VoiceSettings,
 } from "@revolt/state/stores/Voice";
 import { VoiceCallCardContext } from "@revolt/ui/components/features/voice/callCard/VoiceCallCard";
 import { ScreenSharePresets, VideoResolution } from "livekit-client";
 
-import { IncomingCallPopup } from "./components/IncomingCallPopup";
 import { InRoom } from "./components/InRoom";
 import { RoomAudioManager } from "./components/RoomAudioManager";
 import { VoiceProcessor } from "./VoiceProcessor";
@@ -53,12 +52,6 @@ const debugLog = (prefix: string, ...args: unknown[]) => {
     console.log(`[${prefix}]`, ...args);
   }
 };
-
-declare global {
-  interface Window {
-    stoatRefreshVoice?: () => void;
-  }
-}
 
 type State =
   | "READY"
@@ -105,11 +98,11 @@ class Voice {
   #reconnectAttempts = 0;
   #maxReconnectAttempts = 5;
   #micWasOnBeforeDeafen = false;
-  #lastCallMessageSent = new Map<string, number>();
   #noiseGateProcessor?: NoiseGateProcessor;
   #pushToTalkActive = false;
   #mutePromise: Promise<void> = Promise.resolve();
   #microphonePermissionPromise?: Promise<void>;
+  #microphoneProcessorPromise: Promise<void> = Promise.resolve();
   #voiceProcessingPromise: Promise<void> = Promise.resolve();
   #mediaDevicesChangeHandler?: () => void;
   #pendingLeaveNotifications = new Map<string, ReturnType<typeof setTimeout>>();
@@ -140,7 +133,6 @@ class Voice {
   private config;
   private limits;
   private screenShareTracks: Set<string>;
-
   private sound: SoundController;
 
   constructor(
@@ -209,6 +201,50 @@ class Voice {
     this.getClient = useClient();
 
     this.screenShareTracks = new Set();
+
+    this.settingsListeners();
+  }
+
+  private settingsListeners() {
+    const getSettings = () => this.#settings;
+
+    const setEchoCancellation = (echoCancellation: boolean) => {
+      const track = this.getMicrophoneTrack()?.audioTrack;
+      if (track) {
+        track.constraints.echoCancellation = echoCancellation;
+      }
+    };
+
+    const setAutoGainControl = (autoGainControl: boolean) => {
+      const track = this.getMicrophoneTrack()?.audioTrack;
+      if (track) {
+        track.constraints.autoGainControl = autoGainControl;
+      }
+    };
+
+    const setNoiseSuppression = (noiseSuppression: NoiseSuppresionState) => {
+      const track = this.getMicrophoneTrack()?.audioTrack;
+      if (track) {
+        track.constraints.noiseSuppression = noiseSuppression === "browser";
+        // @ts-expect-error voiceIsolation is supported by Chromium but not yet typed.
+        track.constraints.voiceIsolation = noiseSuppression === "browser";
+      }
+    };
+
+    const restartTrack = () => {
+      const track = this.getMicrophoneTrack()?.audioTrack;
+      if (track) {
+        track.restartTrack();
+      }
+    };
+
+    createEffect(() => {
+      const settings = getSettings();
+      setEchoCancellation(settings.echoCancellation ?? true);
+      setAutoGainControl(settings.autoGainControl ?? true);
+      setNoiseSuppression(settings.noiseSupression ?? "browser");
+      restartTrack();
+    });
   }
 
   #resetVoiceProcessors() {
@@ -362,29 +398,36 @@ class Voice {
   }
 
   async #configureMicrophoneTrack(track?: MicrophonePublication) {
-    const audioTrack = track?.audioTrack;
-    if (!audioTrack) return;
-    if (audioTrack.getProcessor()) return;
+    const configure = async () => {
+      const audioTrack = track?.audioTrack;
+      if (!audioTrack || audioTrack.getProcessor()) return;
 
-    this.#resetVoiceProcessors();
+      this.#resetVoiceProcessors();
 
-    const settings = audioTrack.mediaStreamTrack.getSettings();
-    if (settings.channelCount && settings.channelCount > 1) {
-      console.warn(
-        "[Voice] Mic track is stereo (channelCount:",
-        settings.channelCount,
-        ") - remote participants may hear audio in one ear only.",
-      );
-    }
+      const settings = audioTrack.mediaStreamTrack.getSettings();
+      if (settings.channelCount && settings.channelCount > 1) {
+        console.warn(
+          "[Voice] Mic track is stereo (channelCount:",
+          settings.channelCount,
+          ") - remote participants may hear audio in one ear only.",
+        );
+      }
 
-    const processor = this.#createMicrophoneProcessor();
-    if (processor) {
-      console.info(
-        "[Voice] Applying processor to audio track:",
-        audioTrack.sid,
-      );
-      await audioTrack.setProcessor(processor as never);
-    }
+      const processor = this.#createMicrophoneProcessor();
+      if (processor) {
+        console.info(
+          "[Voice] Applying processor to audio track:",
+          audioTrack.sid,
+        );
+        await audioTrack.setProcessor(processor as never);
+      }
+    };
+
+    this.#microphoneProcessorPromise = this.#microphoneProcessorPromise.then(
+      configure,
+      configure,
+    );
+    return this.#microphoneProcessorPromise;
   }
 
   async #setMicrophoneEnabled(
@@ -580,18 +623,6 @@ class Voice {
             .catch((error) => this.#handleMicrophoneError(error));
         }
       }
-
-      // Send "started a call" message only when starting a new call (no existing participants)
-      if (
-        (channel.type === "DirectMessage" || channel.type === "Group") &&
-        channel.voiceParticipants.size <= 1
-      ) {
-        const lastSent = this.#lastCallMessageSent.get(channel.id);
-        if (!lastSent || Date.now() - lastSent >= 60_000) {
-          this.#lastCallMessageSent.set(channel.id, Date.now());
-          channel.sendMessage("> *Started a call*").catch(() => {});
-        }
-      }
     });
 
     room.addListener(RoomEvent.SignalReconnecting, () => {
@@ -653,6 +684,17 @@ class Voice {
       }, 0);
 
       this.#pendingLeaveNotifications.set(participant.identity, timeout);
+    });
+
+    room.addListener("localTrackPublished", (publication) => {
+      if (
+        publication.audioTrack?.source === Track.Source.Microphone &&
+        !publication.audioTrack.getProcessor()
+      ) {
+        void this.#configureMicrophoneTrack(
+          publication as MicrophonePublication,
+        );
+      }
     });
 
     room.addListener(RoomEvent.Disconnected, (reason?) => {
@@ -1424,6 +1466,12 @@ class Voice {
     return this.room()?.getParticipantByIdentity(userId);
   }
 
+  getMicrophoneTrack(): LocalTrackPublication | undefined {
+    return this.room()?.localParticipant.getTrackPublication(
+      Track.Source.Microphone,
+    );
+  }
+
   showCard(channel: Channel) {
     return (
       channel.isVoice &&
@@ -1452,56 +1500,11 @@ const voiceContext = createContext<Voice>(null as unknown as Voice);
 /**
  * Mount global voice context and room audio manager
  */
-type IncomingCall = {
-  channel: Channel;
-  callerName: string;
-  callerAvatar?: string;
-};
-
 export function VoiceContext(props: { children: JSX.Element }) {
   const state = useState();
   const modals = useModals();
   const sound = useSound();
   const voice = new Voice(state.voice, modals, sound);
-  const client = useClient();
-  const navigate = useNavigate();
-
-  const [incomingCall, setIncomingCall] = createSignal<IncomingCall>();
-  let incomingCallTimeout: ReturnType<typeof setTimeout> | undefined;
-  let incomingCallSoundTimeout: ReturnType<typeof setTimeout> | undefined;
-  // Track recently dismissed channels to prevent re-trigger spam
-  const recentlyDismissed = new Map<string, number>();
-  const DISMISS_COOLDOWN = 15_000; // 15 second cooldown per channel
-
-  function dismissIncomingCall() {
-    const call = incomingCall();
-    if (call) {
-      recentlyDismissed.set(call.channel.id, Date.now());
-    }
-    sound.stopIncomingCall();
-    setIncomingCall(undefined);
-    if (incomingCallTimeout) {
-      clearTimeout(incomingCallTimeout);
-      incomingCallTimeout = undefined;
-    }
-    if (incomingCallSoundTimeout) {
-      clearTimeout(incomingCallSoundTimeout);
-      incomingCallSoundTimeout = undefined;
-    }
-  }
-
-  function answerCall() {
-    const call = incomingCall();
-    if (!call) return;
-    dismissIncomingCall();
-    voice.connect(call.channel);
-    navigate(call.channel.path);
-  }
-
-  function rejectCall() {
-    dismissIncomingCall();
-  }
-
   onMount(() => {
     debugLog(
       "PTT-WEB",
@@ -1595,140 +1598,9 @@ export function VoiceContext(props: { children: JSX.Element }) {
     }
   });
 
-  createEffect(() => {
-    const currentClient = client();
-    console.log(
-      "[VoiceNotifications] Setting up notifications, client available:",
-      !!currentClient,
-    );
-
-    if (!currentClient) {
-      console.log(
-        "[VoiceNotifications] Client not available yet, skipping setup",
-      );
-    } else {
-      // console.log("[VoiceNotifications] Registering event listeners");
-
-      const onJoin = (channel: Channel, participant: { userId: string }) => {
-        // console.log("[VoiceNotifications] VoiceChannelJoin event received:", {
-        //   channelId: channel.id,
-        //   participantId: participant.userId,
-        //   currentChannelId: voice.channel()?.id,
-        //   currentUserId: currentClient.user?.id,
-        //   shouldPlay: voice.channel()?.id === channel.id && participant.userId !== currentClient.user?.id
-        // });
-        if (participant.userId === currentClient.user?.id) return;
-
-        // Incoming call: someone joined a DM/Group voice channel we're not in
-        if (
-          (channel.type === "DirectMessage" || channel.type === "Group") &&
-          !voice.channel()
-        ) {
-          // Already showing an incoming call popup — don't stack another
-          if (incomingCall()) return;
-
-          // Cooldown: don't re-trigger for a channel we just dismissed
-          const lastDismissed = recentlyDismissed.get(channel.id);
-          if (lastDismissed && Date.now() - lastDismissed < DISMISS_COOLDOWN)
-            return;
-
-          // Don't ring if user is on DND (Busy) or Focus
-          const userStatus = currentClient.user?.status?.presence;
-          if (userStatus === "Busy" || userStatus === "Focus") return;
-
-          let callerName: string;
-          let callerAvatar: string | undefined;
-
-          if (channel.type === "Group") {
-            callerName = channel.name ?? "Group Call";
-            callerAvatar = channel.iconURL;
-          } else {
-            const caller = currentClient.users.get(participant.userId);
-            callerName = caller?.displayName ?? caller?.username ?? "Unknown";
-            callerAvatar = caller?.avatarURL;
-          }
-
-          debugLog("IncomingCall", "Ringing from", callerName);
-          setIncomingCall({ channel, callerName, callerAvatar });
-          sound.playIncomingCall();
-
-          // Stop ringing after 15 seconds
-          if (incomingCallSoundTimeout) clearTimeout(incomingCallSoundTimeout);
-          incomingCallSoundTimeout = setTimeout(() => {
-            sound.stopIncomingCall();
-            incomingCallSoundTimeout = undefined;
-          }, 15_000);
-
-          // Auto-dismiss popup after 60 seconds
-          if (incomingCallTimeout) clearTimeout(incomingCallTimeout);
-          incomingCallTimeout = setTimeout(() => {
-            dismissIncomingCall();
-          }, 60_000);
-        }
-      };
-
-      const onLeave = (channel: Channel, userId: string) => {
-        // console.log("[VoiceNotifications] VoiceChannelLeave event received:", {
-        //   channelId: channel.id,
-        //   userId: userId,
-        //   currentChannelId: voice.channel()?.id,
-        //   currentUserId: currentClient.user?.id,
-        //   shouldPlay: voice.channel()?.id === channel.id && userId !== currentClient.user?.id
-        // });
-        if (userId === currentClient.user?.id) return;
-
-        // Dismiss incoming call if the caller left
-        const call = incomingCall();
-        if (call && call.channel.id === channel.id) {
-          // Check if anyone is still in the call
-          const remaining = channel.voiceParticipants;
-          const othersInCall = [...remaining.keys()].filter(
-            (id) => id !== currentClient.user?.id,
-          );
-          if (othersInCall.length === 0) {
-            debugLog("IncomingCall", "Caller left, dismissing");
-            dismissIncomingCall();
-          }
-        }
-      };
-
-      currentClient.on("voiceChannelJoin", onJoin);
-      currentClient.on("voiceChannelLeave", onLeave);
-      console.log("[VoiceNotifications] Event listeners registered");
-
-      onCleanup(() => {
-        console.log("[VoiceNotifications] Cleaning up event listeners");
-        currentClient.off("voiceChannelJoin", onJoin);
-        currentClient.off("voiceChannelLeave", onLeave);
-        dismissIncomingCall();
-        voice.disconnect(false);
-      });
-    }
-  });
-
-  // Periodically reconnect the WebSocket so the Ready event clears any ghost
-  // voice participants. Skip during active calls to avoid disrupting real-time
-  // events (messages, typing, presence).
-  const voiceRefreshInterval = setInterval(
-    () => {
-      if (voice.channel()) return;
-      client()?.events.disconnect();
-    },
-    10 * 60 * 1000,
-  );
   onCleanup(() => {
-    clearInterval(voiceRefreshInterval);
-    window.stoatRefreshVoice = undefined;
-    dismissIncomingCall();
     voice.dispose();
   });
-
-  // Manual reconnect for debugging ghost cleanup from DevTools:
-  //   stoatRefreshVoice()
-  window.stoatRefreshVoice = () => {
-    console.log("[VoiceState] Manual reconnect triggered");
-    client()?.events.disconnect();
-  };
 
   // sync sound settings reactively from Sounds store
   createEffect(() => {
@@ -1752,16 +1624,6 @@ export function VoiceContext(props: { children: JSX.Element }) {
         <InRoom>
           <RoomAudioManager />
         </InRoom>
-        <Show when={incomingCall()}>
-          {(call) => (
-            <IncomingCallPopup
-              callerName={call().callerName}
-              callerAvatar={call().callerAvatar}
-              onAnswer={answerCall}
-              onReject={rejectCall}
-            />
-          )}
-        </Show>
       </RoomContext.Provider>
     </voiceContext.Provider>
   );

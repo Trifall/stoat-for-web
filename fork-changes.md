@@ -19,8 +19,8 @@ The fork adds substantial voice, sound, push-to-talk, and settings behavior on t
 - More precisely, desktop is currently authoritative for PTT `enabled`, `keybind`, `mode`, `releaseDelay`, and resolved active state. `pushToTalkNotificationSounds` remains client-local because the current desktop bridge ignores `notificationSounds`.
 - Do not collapse self voice sounds into other-user voice sounds. Self join/leave and remote participant join/leave must remain separate.
 - Manual leave sound must only play on real user-initiated disconnects, not channel switches, reconnect cleanup, or internal disconnects.
-- Incoming call ringtone is a separate looping audio node and must be stopped explicitly.
 - `state.sounds` is the current primary sound source of truth, but `state.voice.soundDisconnect` still gates disconnect sound calls.
+- `<InstanceContext>` must wrap `<StateContext>` because application state construction consumes the active Instance.
 - `<SoundContext>` must wrap `<VoiceContext>` because `VoiceContext` calls `useSound()`.
 - Noise gate processing must stay compatible with enhanced RNNoise processing by chaining processors when both are enabled.
 - Do not replace the forked `packages/solid-livekit-components` submodule with upstream solely because the APIs appear compatible. Its audio track behavior is part of deafen, gain, and output-device handling.
@@ -28,7 +28,6 @@ The fork adds substantial voice, sound, push-to-talk, and settings behavior on t
 ## Main Fork Feature Areas
 
 - Voice sounds and notification behavior.
-- Incoming DM/group call popup and ringtone behavior.
 - Push-to-talk desktop integration.
 - Push-to-talk-aware mute/deafen behavior.
 - Voice configuration persistence.
@@ -36,12 +35,11 @@ The fork adds substantial voice, sound, push-to-talk, and settings behavior on t
 - Auto-reconnect for voice calls.
 - Voice/settings UI routes.
 - Sound settings integration.
-- Ghost voice participant cleanup.
 - Fork submodule preservation.
 
 ## Important Files
 
-- `packages/client/components/rtc/state.tsx`: central runtime integration for voice, PTT, incoming calls, auto-reconnect, voice sounds, screenshare sounds, noise gate wiring, and ghost participant cleanup.
+- `packages/client/components/rtc/state.tsx`: central runtime integration for voice, PTT, auto-reconnect, voice sounds, screenshare sounds, and noise gate wiring.
 - `packages/client/components/client/Sounds.tsx`: runtime sound controller and `SoundContext`.
 - `packages/client/components/state/stores/Sounds.ts`: persistent sound toggles, master sound enable, and master volume.
 - `packages/client/components/state/stores/Voice.ts`: persistent voice, PTT, noise gate, auto-reconnect, and legacy sound flags.
@@ -50,9 +48,12 @@ The fork adds substantial voice, sound, push-to-talk, and settings behavior on t
 - `packages/client/components/app/interface/settings/user/voice/AdvancedSettings.tsx`: auto-reconnect settings UI.
 - `packages/client/components/app/interface/settings/user/voice/VoiceProcessingOptions.tsx`: noise suppression/noise gate UI and live meter.
 - `packages/client/components/app/interface/settings/user/notifications/Sounds.tsx`: sound settings UI, including fork sound toggles.
-- `packages/client/components/rtc/components/IncomingCallPopup.tsx`: incoming call popup UI.
 - `packages/client/types/types.d.ts`: desktop bridge typing for `window.pushToTalk`.
-- `packages/client/src/index.tsx`: context wrapping order; `SoundContext` wraps `VoiceContext`.
+- `packages/client/src/index.tsx`: complete provider hierarchy and route-level Instance mounting.
+- `packages/client/components/instance/index.tsx`: Instance configuration loading, default-instance redirects, and context setup.
+- `packages/client/components/instance/Instance.ts`: configured client, endpoint, navigation, replacement-client, and reactive-limit ownership.
+- `packages/client/components/client/index.tsx`: `ClientContext`, reactive `useClient()`, and controller ownership.
+- `packages/client/components/client/Controller.ts`: login lifecycle and replacement-client coordination through `Instance.newClient()`.
 
 ## Release Build Identity
 
@@ -60,23 +61,54 @@ Desktop release builds provide `VITE_RELEASE_TAG`, which replaces the upstream r
 
 ## Runtime Context Integration
 
-The app currently mounts contexts in this relevant order in `packages/client/src/index.tsx`:
+The app currently mounts its effective provider hierarchy in this order in `packages/client/src/index.tsx`:
 
 ```tsx
-<SoundContext>
-  <VoiceContext>
-    ...
-  </VoiceContext>
-</SoundContext>
+<DeviceContext>
+  <I18nProvider>
+    <SnackbarProvider>
+      <Router>
+        <Route component={InstanceContext}>
+          <Route component={MountContext}>
+            <StateContext>
+              <KeybindContext>
+                <ModalContext>
+                  <ClientContext>
+                    <SoundContext>
+                      <VoiceContext>
+                        <QueryClientProvider>...</QueryClientProvider>
+                      </VoiceContext>
+                    </SoundContext>
+                    <SyncWorker />
+                  </ClientContext>
+                </ModalContext>
+              </KeybindContext>
+              <LoadTheme />
+            </StateContext>
+          </Route>
+        </Route>
+      </Router>
+    </SnackbarProvider>
+  </I18nProvider>
+</DeviceContext>
 ```
 
-This order is required because `VoiceContext` calls `useSound()` and passes the `SoundController` into the fork `Voice` runtime class.
+The two most important ordering constraints are:
 
-`DeviceContext` wraps the app outside `StateContext`, preserving upstream device behavior while allowing fork voice UI to use device/layout information.
+- `InstanceContext` must wrap `StateContext`. `StateContext` constructs the application stores, and `Draft` captures `useInstance()` in its constructor for endpoint and attachment-limit behavior.
+- `SoundContext` must wrap `VoiceContext`. `VoiceContext` calls `useSound()` and passes the `SoundController` into the fork `Voice` runtime class.
 
-As of the upstream 0.14.1 merge, `InstanceContext` wraps `StateContext` and owns the configured `Client`, backend endpoints, feature configuration, and reactive user limits. Alternate `/i/:host` routes remain redirected to the default instance until multi-instance persistence and session isolation are designed. `Instance.href()` uses the current frontend origin so shared links stay on the fork, while webhook URLs use `Instance.apiUrl` because they are API endpoints.
+`InstanceContext` loads the selected app configuration, creates and configures the initial Stoat.js `Client`, and only then renders the state and runtime contexts. `Instance` owns that configured client, the API/media/proxy/Gifbox endpoints, backend feature configuration, route base, and reactive user limits. Runtime consumers should use those `Instance` fields rather than removed static feature and limit fields on `CONFIGURATION`; build-time environment values remain bootstrap or development overrides.
 
-When `Instance.newClient()` replaces the SDK client, incoming-call listeners rebind to the new client and the old voice room, ringtone, timers, and retry work are cleaned up. Keep this lifecycle coordinated with `ClientContext` and `VoiceContext`; capturing the initial client for the lifetime of `VoiceContext` leaves incoming-call behavior attached to a disposed client.
+`ClientContext` obtains both `State` and `Instance` through their hooks and passes them to `ClientController`. The controller's lifecycle obtains every replacement SDK client through `Instance.newClient()`. `useClient()` deliberately returns `() => instance.client`; consumers must retain and invoke that accessor instead of destructuring `client` from `useInstance()` or capturing one concrete client indefinitely.
+
+`Instance.newClient()` reuses the configured initial client for the first lifecycle initialization. Later replacements remove listeners, disconnect the old event WebSocket, create a newly configured client for the same API endpoint, and update the Instance client signal. Keep that lifecycle coordinated with `ClientContext` and `VoiceContext`; otherwise login, logout, or recovery can leave voice behavior attached to a disposed client.
+
+`instance.limits()` is the reactive source for enforced user limits. It starts with the backend's new-user limits and updates from `client.limits` on the active client's `ready` event. Prefer it to `globalLimits`, `baseLimits`, or a one-time read from a concrete client. The current Stoat.js fork still calculates the new-user period with the known multiplier caveat documented under [Forked Submodules](#forked-submodules); do not add a separate client-side workaround.
+
+Alternate `/i/:host` routes currently redirect to the default instance before loading an alternate configuration. This is intentional until instance-specific persistence and session isolation are designed, so the route structure must not be described as completed multi-instance support. `Instance.href()` uses the current frontend `location.origin` and adds the instance route base for application links; backend links such as webhook URLs must use `Instance.apiUrl`.
+
+Environment validation treats both the canonical `https://api.stoat.chat` endpoint and the legacy `https://stoat.chat/api` endpoint as default Stoat APIs after removing trailing slashes. Preserve this compatibility: either endpoint can be supplied through `VITE_API_URL` without also requiring `VITE_HOST`; genuinely custom API endpoints still require an explicit host.
 
 ## Sound System
 
@@ -113,7 +145,6 @@ Fork additions to `TypeSounds` include:
 
 - `selfJoinVoice`
 - `selfLeaveVoice`
-- `incomingCall`
 - `disconnect`
 - `enabled`
 - `volume`
@@ -156,7 +187,6 @@ Important fork voice assets include:
 - Initial participant lists must not produce join spam. `participantNotificationsReady` gates that behavior.
 - Reconnect churn must not produce false leave/join sounds. `#pendingLeaveNotifications` and `#suppressedReconnectJoins` handle this.
 - Disconnect sound plays on failed/no-reconnect paths and is still gated by `state.voice.soundDisconnect` before calling `sound.playSound("disconnect")`.
-- Incoming call ringtone uses `SoundController.playIncomingCall()` and `SoundController.stopIncomingCall()` so the looping ringtone can be stopped independently of one-shot sounds.
 - Remote stream-start playback is tied to screenshare publication/subscription and actual video playback; remote stream-end is tied to the tracked publication ending.
 - Local screenshare end explicitly plays `streamEnd`. There is currently no equivalent explicit local `streamStart` call, so do not claim both directions are symmetric without verifying the current runtime.
 
@@ -167,58 +197,8 @@ The store and controller support a master sound enable flag (`state.sounds.enabl
 Additional controller details that matter during refactors:
 
 - One-shot sounds can overlap; `SoundController` does not globally stop the previous one-shot.
-- Incoming call audio uses a dedicated looping node. Disabling master sounds prevents new playback but does not stop an already-playing ringtone, so every dismissal path must call `stopIncomingCall()` explicitly.
-- Runtime `setVolume()` affects newly created audio nodes; it does not retroactively adjust an already-playing one-shot or ringtone.
+- Runtime `setVolume()` affects newly created audio nodes; it does not retroactively adjust an already-playing one-shot.
 - A successful build only proves an audio file was bundled. Several fallback assets are silent placeholders, so verify the emitted audio itself.
-
-## Incoming Call System
-
-Incoming call behavior lives in `VoiceContext` in `packages/client/components/rtc/state.tsx`.
-
-The old standalone voice notification files should remain removed/unused. Functionality belongs in the integrated sound/store/RTC path.
-
-### Events
-
-The client listens to:
-
-- `voiceChannelJoin`
-- `voiceChannelLeave`
-
-### Ring Conditions
-
-The fork rings only when all conditions are met:
-
-- Channel type is `DirectMessage` or `Group`.
-- Another user joins the voice channel.
-- The current user is not already in a voice channel.
-- There is not already an incoming call popup visible.
-- The channel was not dismissed within the last 15 seconds.
-- Current user status is not `Busy` or `Focus`.
-
-### Ringtone and Popup Timing
-
-- Ringtone starts with `sound.playIncomingCall()`.
-- Ringtone stops after 15 seconds.
-- Popup auto-dismisses after 60 seconds.
-- Dismiss/reject records a 15 second channel cooldown and stops the ringtone.
-- If the caller leaves and no other remote participants remain, the popup dismisses.
-
-### Answer and Reject
-
-- Answering calls `voice.connect(call.channel)` and navigates to `call.channel.path`.
-- Rejecting only dismisses and records cooldown.
-
-There is currently no separate OS-level incoming-call notification path. Incoming calls use the in-app popup and looping ringtone. Do not resurrect the removed standalone `VoiceNotifications.ts` implementation to add one; integrate any future notification through the current `VoiceContext`/`SoundController` architecture.
-
-### Call Message
-
-For DM/group calls, `Voice.connect()` sends:
-
-```md
-> *Started a call*
-```
-
-The actual "new call" test is a participant-count heuristic: the message is attempted when `channel.voiceParticipants.size <= 1` at `RoomEvent.Connected`. It is throttled per channel for 60 seconds using `#lastCallMessageSent`. A reconnect after the throttle expires, stale participant state, or changed event ordering can therefore send it again. The timestamp is recorded before `sendMessage()` succeeds, and send failures are swallowed.
 
 ## Push-to-Talk Desktop Integration
 
@@ -310,7 +290,7 @@ The fork intentionally differs from upstream here. Preserve this logic.
 Initial microphone signal is:
 
 ```ts
-voiceSettings.micOn && !voiceSettings.deafen
+voiceSettings.micOn && !voiceSettings.deafen;
 ```
 
 This keeps upstream's important microphone/deafen initialization fix while preserving fork PTT behavior.
@@ -416,7 +396,7 @@ Manual disconnect path:
 
 Current reconnect caveats:
 
-- Terminal failure/disabled reconnect sets runtime state to `DISCONNECTED` but does not fully clear room/channel state. This can affect later incoming-call suppression.
+- Terminal failure/disabled reconnect sets runtime state to `DISCONNECTED` but does not fully clear room/channel state.
 
 Initial joins and fresh-token reconnects use a connection generation tied to the concrete room. Disconnects, channel switches, and provider cleanup invalidate that generation, cancel retained retry timers, and prevent stale token or `room.connect()` completions from affecting a newer call. Failed initial joins clean up their room, device listener, track subscription root, and call ownership.
 
@@ -475,7 +455,9 @@ If only noise gate is enabled, the noise gate is applied directly.
 Voice room audio capture requests mono:
 
 ```ts
-channelCount: { ideal: 1 }
+channelCount: {
+  ideal: 1;
+}
 ```
 
 The code also warns if the browser reports a stereo mic track.
@@ -498,26 +480,6 @@ The UI:
 The active `#noiseGateProcessor` is a plain class field rather than a Solid signal. The UI is not guaranteed to react when a processor is created, replaced, or destroyed after the settings component mounts. Preview metering also does not exactly reproduce the call pipeline: it omits enhanced RNNoise and some active-capture constraints. Do not assume the preview meter proves the complete in-call processor chain is active.
 
 `#microphoneCaptureOptions()` and serialized `updateVoiceProcessing()` behavior allow suppression, echo cancellation, automatic gain control, and gate-enable changes to restart and reconfigure an active microphone track.
-
-## Ghost Voice Participant Cleanup
-
-`VoiceContext` periodically reconnects the client event WebSocket to clear ghost voice participants from stale Ready state data.
-
-Behavior:
-
-- Interval: every 10 minutes.
-- Skips while in an active voice call to avoid disrupting real-time events.
-- Calls `client()?.events.disconnect()` when safe.
-
-Debug helper:
-
-```ts
-window.stoatRefreshVoice = () => {
-  client()?.events.disconnect();
-};
-```
-
-This is fork behavior and should not be removed without replacing the ghost cleanup mechanism.
 
 ## Voice Configuration Persistence
 
@@ -559,7 +521,6 @@ Important persistence behavior:
 - `soundUnmute`
 - `soundReceiveMessage`
 - `soundDisconnect`
-- `soundIncomingCall`
 
 Most current sound behavior should use `state.sounds`. However, `soundDisconnect` is still actively used as an extra gate before disconnect sounds. Do not remove these fields casually because persisted user data may still contain them and `soundDisconnect` has runtime behavior.
 
@@ -665,6 +626,7 @@ When the owner says a forked submodule has already merged its upstream, update t
    ```
 
    The second `rev-list` number must be `0`. The ancestry checks prove the new fork tip contains both current upstream and the previously recorded fork behavior.
+
 3. Fast-forward the submodule working tree with `git merge --ff-only origin/main`. Do not create a new submodule merge in the parent task when the owner already pushed that merge to the submodule fork.
 4. In the parent, review `git diff --submodule=log`, confirm `.gitmodules` still points at the fork, and stage only the requested gitlink.
 5. A submodule `package.json` change can make the **parent workspace** `pnpm-lock.yaml` stale. Run `mise install:frozen`; if it reports an outdated lockfile, regenerate the parent lock with `pnpm install --no-frozen-lockfile`, inspect the lock diff, then rerun the frozen install.
@@ -682,7 +644,7 @@ Pause before editing a conflict area when the decision could materially change f
 
 - Upstream replaces or substantially redesigns voice state, LiveKit integration, sound playback, settings stores, providers, preload/desktop bridge APIs, device handling, responsive layout, or a forked submodule API.
 - Preserving the fork would discard an important upstream feature, bug fix, security fix, migration, or architectural change.
-- Adopting upstream would remove, weaken, or substantially rewrite PTT, mute/deafen semantics, reconnect, incoming calls, noise gate, sound behavior, call UI, persistence, or responsive/settings repairs documented here.
+- Adopting upstream would remove, weaken, or substantially rewrite PTT, mute/deafen semantics, reconnect, noise gate, sound behavior, call UI, persistence, or responsive/settings repairs documented here.
 - Both implementations are valid but require a product choice, such as which process owns a setting, when sounds play, whether a reconnect counts as a new call, or how deafen affects remote publications.
 - Integration requires a data migration, new dependency, compatibility layer, major refactor, submodule replacement, or coordinated change in `Trifall/stoat-for-desktop`.
 - Existing tests and documentation do not establish the intended behavior well enough to choose safely.
@@ -845,14 +807,11 @@ When merging upstream, verify these before finalizing:
 
 - `SoundContext` still wraps `VoiceContext`.
 - `state.sounds` still contains fork toggles and master volume/enabled fields.
-- `SoundController` still has separate one-shot sounds and looping incoming call node.
 - `VoiceContext` still syncs `state.sounds.enabled` and `state.sounds.volume` into `SoundController`.
 - Self join plays on `RoomEvent.Connected`.
 - Self leave only plays for manual `disconnect(true)`.
 - Remote join/leave sounds are not fired for initial room participant list.
 - Reconnect churn does not trigger false join/leave sounds.
-- Incoming calls still ring only for DM/group calls and respect Busy/Focus status.
-- Incoming ringtone stops on dismiss, reject, answer, timeout, and caller leave.
 - Desktop remains authoritative for PTT enabled/keybind/mode/release delay and resolved active state; notification-sound preference remains explicitly client-local unless both repositories are migrated together.
 - PTT active/inactive events still cache state through `setPushToTalkActive()` and apply enabled PTT through serialized `voice.setMute(active)`.
 - Enabling/disabling PTT still calls `reconcilePushToTalk()` so cached PTT state or normal `micOn` preference is restored correctly.
@@ -895,8 +854,7 @@ Manual smoke checks to consider:
 - Enable PTT and confirm desktop active state controls mic without changing saved `micOn`.
 - Deafen while mic is on, undeafen, and confirm restore behavior including PTT-active rules.
 - Enable noise gate, watch the level meter, and confirm threshold changes apply live.
-- Receive a DM/group call while not in voice and confirm popup/ringtone timing and dismissal.
 
 ---
 
-*Last updated: after integrating upstream 0.14.1 and its Instance architecture, updating the forked Stoat.js submodule, and preserving the fork voice, sound, fullscreen, and responsive behavior.*
+_Last updated: after integrating upstream 0.14.1 and its Instance architecture, updating the forked Stoat.js submodule, and preserving the fork voice, sound, fullscreen, and responsive behavior._

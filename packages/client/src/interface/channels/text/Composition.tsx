@@ -62,7 +62,7 @@ export function MessageComposition(props: Props) {
   const durationFormat = useDurationFormat();
 
   const currentSlowmode = (): UserSlowmodes | undefined => {
-    return client().userSlowmodes.get(props.channel.id);
+    return props.channel.userSlowmode();
   };
 
   const isSlowmodeExempt = (): boolean => {

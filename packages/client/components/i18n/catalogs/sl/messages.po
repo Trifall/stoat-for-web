@@ -1769,8 +1769,8 @@ msgid "In the meantime, install Stoat from Google Play for a faster, smoother ex
 msgstr ""
 
 #: components/app/interface/settings/user/notifications/Sounds.tsx
-msgid "Incoming Call"
-msgstr ""
+#~ msgid "Incoming Call"
+#~ msgstr ""
 
 #: components/app/interface/settings/user/voice/VoiceInputOptions.tsx
 msgid "Input Volume"
