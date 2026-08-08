@@ -254,6 +254,7 @@ Behaviorally significant submodules include `packages/stoat.js`, `packages/solid
 
 ### Do
 
+- Before starting an upstream merge or resolving its conflicts, fetch both `origin` and `upstream`, then integrate the current `origin/main` into local `main`. Do not begin from a stale fork head; this preserves concurrent fork work and avoids a second reconciliation merge after upstream conflicts are resolved.
 - Use a real upstream merge commit when synchronizing the fork; preserve upstream ancestry.
 - Classify conflicts as routine or material before resolving them.
 - Stop and ask when a decision changes architecture, persistence, ownership, IPC, accessibility, responsive behavior, packaging, security, performance, or documented fork behavior.
