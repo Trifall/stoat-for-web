@@ -11,6 +11,12 @@ allowBuilds:
   esbuild: true
 minimumReleaseAgeExclude:
   - stoat-api
+  - baseline-browser-mapping
+  - core-js-compat
+  - electron-to-chromium
+  - get-tsconfig
+  - node-releases
+  - terser
 nodeLinker: isolated
 
 # Override prettier because some of the submodules have ancient prettiers required

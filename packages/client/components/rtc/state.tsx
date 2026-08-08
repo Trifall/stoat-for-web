@@ -27,13 +27,11 @@ import {
   Track,
   TrackInvalidError,
 } from "livekit-client";
-import { DenoiseTrackProcessor } from "livekit-rnnoise-processor";
 import { Channel } from "stoat.js";
 
 import { NoiseGateProcessor } from "./NoiseGateProcessor";
 
 import { type SoundController, useClient, useSound } from "@revolt/client";
-import { CONFIGURATION } from "@revolt/common";
 import { useInstance } from "@revolt/instance";
 import { ModalController, useModals } from "@revolt/modal";
 import { useNavigate } from "@revolt/routing";
@@ -45,9 +43,10 @@ import {
 import { VoiceCallCardContext } from "@revolt/ui/components/features/voice/callCard/VoiceCallCard";
 import { ScreenSharePresets, VideoResolution } from "livekit-client";
 
-import { InRoom } from "./components/InRoom";
 import { IncomingCallPopup } from "./components/IncomingCallPopup";
+import { InRoom } from "./components/InRoom";
 import { RoomAudioManager } from "./components/RoomAudioManager";
+import { VoiceProcessor } from "./VoiceProcessor";
 
 const debugLog = (prefix: string, ...args: unknown[]) => {
   if (import.meta.env.DEV) {
@@ -222,6 +221,7 @@ class Voice {
       deviceId: this.#settings.preferredAudioInputDevice,
       echoCancellation: this.#settings.echoCancellation,
       noiseSuppression: this.#settings.noiseSupression === "browser",
+      voiceIsolation: this.#settings.noiseSupression === "browser",
       autoGainControl: this.#settings.autoGainControl,
       channelCount: { ideal: 1 },
     };
@@ -255,26 +255,17 @@ class Voice {
   }
 
   #createMicrophoneProcessor() {
-    if (this.#settings.noiseGateEnabled) {
-      const upstream =
-        this.#settings.noiseSupression === "enhanced"
-          ? new DenoiseTrackProcessor({
-              workletCDNURL: CONFIGURATION.RNNOISE_WORKLET_CDN_URL,
-            })
-          : undefined;
+    const processor = new VoiceProcessor(this.#settings);
 
+    if (this.#settings.noiseGateEnabled) {
       this.#noiseGateProcessor = new NoiseGateProcessor({
         threshold: this.#settings.noiseGateThreshold,
-        upstream,
+        upstream: processor,
       });
       return this.#noiseGateProcessor;
     }
 
-    if (this.#settings.noiseSupression === "enhanced") {
-      return new DenoiseTrackProcessor({
-        workletCDNURL: CONFIGURATION.RNNOISE_WORKLET_CDN_URL,
-      });
-    }
+    return processor;
   }
 
   #isUnavailableMicrophoneError(error: unknown) {

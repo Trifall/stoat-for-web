@@ -150,17 +150,17 @@ msgstr "{0}'s roles"
 
 #: src/interface/channels/text/Composition.tsx
 #: src/interface/channels/text/Composition.tsx
-msgid "{h} hours"
-msgstr "{h} hours"
+#~ msgid "{h} hours"
+#~ msgstr "{h} hours"
 
 #: src/interface/channels/text/Composition.tsx
 #: src/interface/channels/text/Composition.tsx
-msgid "{m} minutes"
-msgstr "{m} minutes"
+#~ msgid "{m} minutes"
+#~ msgstr "{m} minutes"
 
 #: src/interface/channels/text/Composition.tsx
-msgid "{sec} seconds"
-msgstr "{sec} seconds"
+#~ msgid "{sec} seconds"
+#~ msgstr "{sec} seconds"
 
 #: components/ui/components/features/messaging/elements/Reactions.tsx
 msgid "{unknown} reacted"
@@ -240,78 +240,78 @@ msgid "<0>Be careful!</0><1/>This is not the same as the link that was displayed
 msgstr "<0>Be careful!</0><1/>This is not the same as the link that was displayed:"
 
 #: components/modal/modals/BanMember.tsx
-msgid "1 day"
-msgstr "1 day"
+#~ msgid "1 day"
+#~ msgstr "1 day"
 
 #: src/interface/channels/text/Composition.tsx
 #: src/interface/channels/text/Composition.tsx
 #: components/modal/modals/BanMember.tsx
 #: components/app/interface/settings/channel/Overview.tsx
-msgid "1 hour"
-msgstr "1 hour"
+#~ msgid "1 hour"
+#~ msgstr "1 hour"
 
 #: src/interface/channels/text/Composition.tsx
 #: src/interface/channels/text/Composition.tsx
 #: components/app/interface/settings/channel/Overview.tsx
-msgid "1 minute"
-msgstr "1 minute"
+#~ msgid "1 minute"
+#~ msgstr "1 minute"
 
 #: components/ui/components/features/messaging/elements/Reactions.tsx
 msgid "1 person reacted"
 msgstr "1 person reacted"
 
 #: src/interface/channels/text/Composition.tsx
-msgid "1 second"
-msgstr "1 second"
+#~ msgid "1 second"
+#~ msgstr "1 second"
 
 #: components/app/interface/settings/channel/Overview.tsx
-msgid "10 minutes"
-msgstr "10 minutes"
+#~ msgid "10 minutes"
+#~ msgstr "10 minutes"
 
 #: components/app/interface/settings/channel/Overview.tsx
-msgid "10 seconds"
-msgstr "10 seconds"
+#~ msgid "10 seconds"
+#~ msgstr "10 seconds"
 
 #: components/app/interface/settings/user/Language.tsx
 msgid "12 hours"
 msgstr "12 hours"
 
 #: components/app/interface/settings/channel/Overview.tsx
-msgid "2 hours"
-msgstr "2 hours"
+#~ msgid "2 hours"
+#~ msgstr "2 hours"
 
 #: components/app/interface/settings/user/Language.tsx
 msgid "24 hours"
 msgstr "24 hours"
 
 #: components/modal/modals/BanMember.tsx
-msgid "3 days"
-msgstr "3 days"
+#~ msgid "3 days"
+#~ msgstr "3 days"
 
 #: components/app/interface/settings/channel/Overview.tsx
-msgid "30 minutes"
-msgstr "30 minutes"
+#~ msgid "30 minutes"
+#~ msgstr "30 minutes"
 
 #: components/app/interface/settings/channel/Overview.tsx
-msgid "30 seconds"
-msgstr "30 seconds"
+#~ msgid "30 seconds"
+#~ msgstr "30 seconds"
 
 #: components/app/interface/settings/channel/Overview.tsx
-msgid "5 minutes"
-msgstr "5 minutes"
+#~ msgid "5 minutes"
+#~ msgstr "5 minutes"
 
 #: components/app/interface/settings/channel/Overview.tsx
-msgid "5 seconds"
-msgstr "5 seconds"
+#~ msgid "5 seconds"
+#~ msgstr "5 seconds"
 
 #: components/modal/modals/BanMember.tsx
 #: components/app/interface/settings/channel/Overview.tsx
-msgid "6 hours"
-msgstr "6 hours"
+#~ msgid "6 hours"
+#~ msgstr "6 hours"
 
 #: components/modal/modals/BanMember.tsx
-msgid "7 days"
-msgstr "7 days"
+#~ msgid "7 days"
+#~ msgstr "7 days"
 
 #: components/app/interface/settings/channel/permissions/ChannelPermissionsEditor.tsx
 msgid "Able to access channels on this server"
@@ -1771,6 +1771,10 @@ msgstr "In the meantime, install Stoat from Google Play for a faster, smoother e
 #: components/app/interface/settings/user/notifications/Sounds.tsx
 msgid "Incoming Call"
 msgstr "Incoming Call"
+
+#: components/app/interface/settings/user/voice/VoiceInputOptions.tsx
+msgid "Input Volume"
+msgstr "Input Volume"
 
 #: components/modal/modals/TryPWA.tsx
 msgid "Install"
