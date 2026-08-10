@@ -110,6 +110,14 @@ function SelectInput(props: { kind: MediaDeviceKind }) {
 function VolumeSliders() {
   const state = useState();
 
+  const formatInputVolumeLabel = (label: number) => {
+    if (label <= 0) return "Muted";
+    const db = 20 * Math.log10(label);
+    if (Math.abs(db) < 0.05) return "0 dB";
+    const sign = db > 0 ? "+" : "";
+    return `${sign}${db.toFixed(1)} dB`;
+  };
+
   return (
     <Column>
       <Text class="label">
@@ -117,13 +125,13 @@ function VolumeSliders() {
       </Text>
       <Slider
         min={0}
-        max={3}
+        max={10}
         step={0.1}
         value={state.voice.inputVolume}
         onInput={(event) =>
           (state.voice.inputVolume = event.currentTarget.value)
         }
-        labelFormatter={(label) => (label * 100).toFixed(0) + "%"}
+        labelFormatter={formatInputVolumeLabel}
       />
       <Text class="label">
         <Trans>Output Volume</Trans>
