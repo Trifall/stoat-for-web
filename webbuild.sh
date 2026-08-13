@@ -7,8 +7,6 @@ git -c submodule."packages/client/assets".update=checkout submodule update --ini
 # build:deps
 pnpm --filter stoat.js build
 pnpm --filter solid-livekit-components build
-pnpm --filter @lingui-solid/babel-plugin-lingui-macro build
-pnpm --filter @lingui-solid/babel-plugin-extract-messages build
 
 # lingui:extract + compile
 pnpm --filter client exec lingui extract

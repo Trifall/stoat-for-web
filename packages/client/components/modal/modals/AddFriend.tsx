@@ -1,7 +1,7 @@
 import { createFormControl, createFormGroup } from "solid-forms";
 import { createSignal } from "solid-js";
 
-import { Trans, useLingui } from "@lingui-solid/solid/macro";
+import { Trans, useLingui } from "@lingui/solid/macro";
 
 import { Dialog, DialogProps, Form2 } from "@revolt/ui";
 

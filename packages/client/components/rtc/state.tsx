@@ -30,6 +30,7 @@ import {
 import { Channel } from "stoat.js";
 
 import { NoiseGateProcessor } from "./NoiseGateProcessor";
+import { isStoatSinkDevice } from "./virtualMic";
 
 import { type SoundController, useClient, useSound } from "@revolt/client";
 import { useInstance } from "@revolt/instance";
@@ -134,6 +135,7 @@ class Voice {
   private limits;
   private screenShareTracks: Set<string>;
   private sound: SoundController;
+  #microphoneDeviceOverride?: string;
 
   constructor(
     voiceSettings: VoiceSettings,
@@ -254,13 +256,38 @@ class Voice {
 
   #microphoneCaptureOptions() {
     return {
-      deviceId: this.#settings.preferredAudioInputDevice,
+      deviceId:
+        this.#microphoneDeviceOverride ??
+        this.#settings.preferredAudioInputDevice,
       echoCancellation: this.#settings.echoCancellation,
       noiseSuppression: this.#settings.noiseSupression === "browser",
       voiceIsolation: this.#settings.noiseSupression === "browser",
       autoGainControl: this.#settings.autoGainControl,
       channelCount: { ideal: 1 },
     };
+  }
+
+  async #clearReservedMicrophone() {
+    const preferredDevice = this.#settings.preferredAudioInputDevice;
+    const devices = await navigator.mediaDevices?.enumerateDevices();
+    if (!devices) return;
+
+    const selectedDevice = devices.find((device) =>
+      preferredDevice
+        ? device.deviceId === preferredDevice
+        : device.deviceId === "default",
+    );
+    if (!selectedDevice || !isStoatSinkDevice(selectedDevice)) return;
+
+    const safeDevice = devices.find(
+      (device) =>
+        device.deviceId !== "default" &&
+        device.kind === "audioinput" &&
+        !isStoatSinkDevice(device),
+    );
+    this.#settings.preferredAudioInputDevice = safeDevice?.deviceId;
+    this.#microphoneDeviceOverride =
+      safeDevice?.deviceId ?? "stoat-safe-microphone-unavailable";
   }
 
   #primeMicrophonePermission() {
@@ -317,6 +344,9 @@ class Voice {
 
   async #switchToDefaultMicrophone(room: Room) {
     this.#settings.preferredAudioInputDevice = undefined;
+    this.#microphoneDeviceOverride = undefined;
+    await this.#clearReservedMicrophone();
+    if (this.#microphoneDeviceOverride) return;
     await room.switchActiveDevice("audioinput", "default", false);
   }
 
@@ -532,6 +562,8 @@ class Voice {
   async connect(channel: Channel, auth?: { url: string; token: string }) {
     debugLog("PTT-WEB", "Voice.connect() called for channel:", channel.id);
 
+    const reservedMicrophoneCheck = this.#clearReservedMicrophone();
+
     // Start capture during this trusted UI gesture without making connection
     // progress depend on the user answering the permission prompt.
     if (
@@ -541,6 +573,8 @@ class Voice {
     ) {
       this.#primeMicrophonePermission();
     }
+
+    await reservedMicrophoneCheck;
 
     // Reset reconnect state on new connection attempt
     this.#reconnectAttempts = 0;

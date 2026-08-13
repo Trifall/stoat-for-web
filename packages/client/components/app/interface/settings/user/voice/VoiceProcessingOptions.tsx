@@ -1,6 +1,6 @@
 import { Show, createEffect, createSignal, on, onCleanup } from "solid-js";
 
-import { Trans } from "@lingui-solid/solid/macro";
+import { Trans } from "@lingui/solid/macro";
 
 import { useState } from "@revolt/state";
 import { CategoryButton, Checkbox, Column, Text } from "@revolt/ui";

@@ -139,6 +139,11 @@ declare module "solid-js" {
            * Member to display
            */
           member?: ServerMember;
+
+          /**
+           * Bot to display
+           */
+          bot?: { owner: string };
         };
         contextMenu?: Component;
         contextMenuHandler?: "click" | "contextmenu";

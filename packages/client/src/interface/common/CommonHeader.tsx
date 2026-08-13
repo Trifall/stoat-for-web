@@ -2,7 +2,7 @@ import { BiRegularChevronLeft, BiRegularChevronRight } from "solid-icons/bi";
 
 import { JSX, Match, Switch } from "solid-js";
 
-import { useLingui } from "@lingui-solid/solid/macro";
+import { useLingui } from "@lingui/solid/macro";
 import { css } from "styled-system/css";
 
 import { useDevice } from "@revolt/common";

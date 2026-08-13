@@ -59,7 +59,7 @@ This is a behaviorally significant fork of upstream Stoat for Web. Read `fork-ch
 - Do not destructure `client` from `useInstance()` or retain one concrete client for a provider's lifetime; both patterns lose reactivity when login, logout, or lifecycle recovery replaces the client.
 - Do not construct replacement SDK clients outside `Instance.newClient()` or bypass the coordinated `ClientContext` and `VoiceContext` cleanup paths.
 - Do not describe `/i/:host` as working multi-instance support while all alternate hosts are intentionally redirected.
-- Do not compensate in client code for the Stoat.js `new_user_hours` duration multiplier caveat; fix and push the SDK fork before advancing its parent gitlink.
+- Keep the Stoat.js `new_user_hours` conversion at `3_600_000` milliseconds per hour; fix limit calculations in the SDK fork rather than duplicating them in client code.
 
 ## Persistent State and Desktop Boundaries
 
@@ -127,6 +127,21 @@ This is a behaviorally significant fork of upstream Stoat for Web. Read `fork-ch
 - Do not move all sound imports to fallback assets; some fallback files are intentionally silent placeholders.
 - Do not treat a successful bundle as proof that an audio asset is audible or correct.
 
+## Wayland Screen Audio
+
+### Do
+
+- Keep the web virtual-microphone path gated on a synchronous Boolean `window.native.isWayland()` result; missing or asynchronous bridges must leave normal `getDisplayMedia()` behavior untouched.
+- Keep `stoat-virtual-source` reserved for display-capture audio and hidden from the ordinary microphone selector.
+- Stop replaced display-audio tracks and preserve normal screen sharing when audio is disabled or the reserved source is unavailable.
+- Coordinate actual PipeWire source creation, packaging, and system-audio privacy behavior with the paired desktop repository.
+
+### Do Not
+
+- Do not treat a returned Promise as proof that the app is running on Wayland.
+- Do not feed the reserved screen-audio source through ordinary PTT, microphone gain, RNNoise, or noise-gate behavior.
+- Do not claim Wayland screen audio is supported by the web client alone; it remains dormant without the paired desktop bridge and source.
+
 ## SolidJS and UI State
 
 ### Do
@@ -185,7 +200,7 @@ Relevant files include:
 
 ## Lingui and User-Visible Text
 
-This repository uses Lingui macros and generated catalogs. Adding a translated string in source without updating and compiling catalogs can produce runtime warnings such as `Uncompiled message detected!`.
+This repository uses the official Lingui 6 Solid packages and generated catalogs. Import Solid macros from `@lingui/solid/macro`; the retired `packages/js-lingui-solid` submodule must not be restored. Adding a translated string in source without updating and compiling catalogs can produce runtime warnings such as `Uncompiled message detected!`.
 
 ### Do
 

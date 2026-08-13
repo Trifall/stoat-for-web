@@ -1,6 +1,6 @@
 import { Show } from "solid-js";
 
-import { Trans } from "@lingui-solid/solid/macro";
+import { Trans } from "@lingui/solid/macro";
 import { css } from "styled-system/css";
 import { styled } from "styled-system/jsx";
 
@@ -209,14 +209,6 @@ export function PushToTalkSettings() {
     </Column>
   );
 }
-
-const pageHeading = css({
-  fontSize: "16px",
-  fontWeight: "700",
-  lineHeight: "1.3",
-  color: "var(--md-sys-color-on-surface)",
-  letterSpacing: "0.01em",
-});
 
 const sectionHeading = css({
   fontSize: "15px",

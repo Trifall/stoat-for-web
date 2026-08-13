@@ -59,6 +59,12 @@ The fork adds substantial voice, sound, push-to-talk, and settings behavior on t
 
 Desktop release builds provide `VITE_RELEASE_TAG`, which replaces the upstream root package version in the settings sidebar for that build. Standalone and development builds fall back to the root `package.json` version when the variable is absent.
 
+## Lingui 6 Integration
+
+The client uses the official Lingui 6 Solid integration through `@lingui/solid`, `@lingui/solid/macro`, and `@lingui/vite-plugin`. The former `packages/js-lingui-solid` submodule and its custom build tasks were removed. Fork-only source such as PTT, advanced voice settings, and Try PWA must use the official macro imports so a clean checkout does not depend on the retired workspace packages.
+
+Translation catalogs remain generated files. Resolve source first, run extraction across all catalogs, and compile with Lingui 6 rather than restoring the old submodule or hand-merging catalog conflicts.
+
 ## Runtime Context Integration
 
 The app currently mounts its effective provider hierarchy in this order in `packages/client/src/index.tsx`:
@@ -104,7 +110,7 @@ The two most important ordering constraints are:
 
 `Instance.newClient()` reuses the configured initial client for the first lifecycle initialization. Later replacements remove listeners, disconnect the old event WebSocket, create a newly configured client for the same API endpoint, and update the Instance client signal. Keep that lifecycle coordinated with `ClientContext` and `VoiceContext`; otherwise login, logout, or recovery can leave voice behavior attached to a disposed client.
 
-`instance.limits()` is the reactive source for enforced user limits. It starts with the backend's new-user limits and updates from `client.limits` on the active client's `ready` event. Prefer it to `globalLimits`, `baseLimits`, or a one-time read from a concrete client. The current Stoat.js fork still calculates the new-user period with the known multiplier caveat documented under [Forked Submodules](#forked-submodules); do not add a separate client-side workaround.
+`instance.limits()` is the reactive source for enforced user limits. It starts with the backend's new-user limits and updates from `client.limits` on the active client's `ready` event. Prefer it to `globalLimits`, `baseLimits`, or a one-time read from a concrete client. The Stoat.js fork calculates `new_user_hours` with `3_600_000` milliseconds per hour; keep that calculation in the SDK rather than adding a separate client-side workaround.
 
 Alternate `/i/:host` routes currently redirect to the default instance before loading an alternate configuration. This is intentional until instance-specific persistence and session isolation are designed, so the route structure must not be described as completed multi-instance support. `Instance.href()` uses the current frontend `location.origin` and adds the instance route base for application links; backend links such as webhook URLs must use `Instance.apiUrl`.
 
@@ -481,6 +487,12 @@ The active `#noiseGateProcessor` is a plain class field rather than a Solid sign
 
 `#microphoneCaptureOptions()` and serialized `updateVoiceProcessing()` behavior allow suppression, echo cancellation, automatic gain control, and gate-enable changes to restart and reconfigure an active microphone track.
 
+## Wayland Screen Audio Scaffolding
+
+Upstream 0.15.0 adds `packages/client/components/rtc/virtualMic.ts`, which conditionally replaces display-capture audio with the reserved `stoat-virtual-source` device when the desktop bridge synchronously reports Wayland. The web client installs this behavior only when `window.native.isWayland()` returns the Boolean `true`; a Promise or missing bridge leaves normal capture untouched. Replaced display-audio tracks are stopped, and the reserved source is hidden from the normal microphone selector.
+
+This web-side integration is dormant unless the paired desktop app exposes the bridge and creates the PipeWire source. Native activation, packaging, and the privacy semantics of which system audio is routed remain desktop responsibilities. Do not make the web check treat an asynchronous Promise as a truthy platform result, and do not route the virtual source through the fork's ordinary PTT/noise-gate microphone pipeline.
+
 ## Voice Configuration Persistence
 
 All persistent stores are handled by `State` in:
@@ -556,6 +568,8 @@ Regular `VoiceSettings.tsx` contains input options, processing options, and scre
 
 The Stoat Plus advanced voice page exposes `screenShareBitrateKbps` and `screenShareFrameRate`. Bitrate defaults to `2500`, is clamped to `250-8000` in 250 kbps increments during hydration and writes, and is converted to bits per second when a new screen-share track is published. Frame rate defaults to `15` and is clamped to `5-30` in 5 FPS increments; it caps both capture and publish encoding while allowing a quality preset such as source/text mode to use a lower value. These settings intentionally affect newly started shares rather than reconfiguring an active sender. The backend currently exposes only `video_resolution`, so the 30 FPS ceiling follows the highest client screen-share preset rather than a separate server entitlement.
 
+Upstream 0.15.0's role-management redesign is intentionally adopted as a coordinated unit: role ordering, role colour editing, permission overrides, floating create actions, and the shared save/reset surface belong to the new settings architecture. Preserve fork responsive settings hooks and overlay behavior around it, but do not restore the old role editor piecemeal.
+
 ### Layout and Modal Integration
 
 Preserve these merge-repair changes around the settings and responsive shell:
@@ -607,7 +621,7 @@ The forked submodules are behaviorally significant:
 - `packages/solid-livekit-components` provides gain, output-device, and `RemoteTrackPublication.setEnabled()` behavior used by mute/deafen integration.
 - `packages/client/assets` provides branded sounds and may be intentionally unavailable to Renovate/public automation.
 
-Current SDK caveat: `User.limits` in the published fork tip multiplies `new_user_hours` by `3600_0000` rather than `3_600_000`, making the client-side new-user period ten times too long. This predates the 0.14.1 parent merge and backend enforcement remains authoritative. Fix it in the SDK fork and push that commit before advancing the parent gitlink; do not work around it with an unpushed submodule commit.
+The Stoat.js fork at `4394bc9e` merges upstream SDK `ee0a9803` while preserving fork voice join/leave/move events, global stale voice-participant clearing on `Ready`, and the optional large-server member hydration cap. It also fixes the `new_user_hours` conversion to use `3_600_000` milliseconds per hour. The web client keeps a 200-member cap for the listed large servers while using upstream's pre-hydration architecture.
 
 Review both `.gitmodules` URLs and gitlink commit pointers. A clean parent-repository merge can still silently regress behavior by advancing a submodule to an incompatible upstream commit.
 
@@ -857,4 +871,4 @@ Manual smoke checks to consider:
 
 ---
 
-_Last updated: after integrating upstream 0.14.1 and its Instance architecture, updating the forked Stoat.js submodule, and preserving the fork voice, sound, fullscreen, and responsive behavior._
+_Last updated: after integrating upstream 0.15.0, Lingui 6, the role-management redesign, guarded Wayland screen-audio scaffolding, and the merged Stoat.js fork while preserving fork voice, PTT, sound, fullscreen, and responsive behavior._

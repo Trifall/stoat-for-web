@@ -3,7 +3,7 @@
 Import the macro package wherever you wish to use Lingui, prefer to use the JSX syntax:
 
 ```typescript
-import { Trans } from "@lingui-solid/solid/macro";
+import { Trans } from "@lingui/solid/macro";
 
 <Trans>Hi, I am a string!</Trans>
 
@@ -13,7 +13,7 @@ import { Trans } from "@lingui-solid/solid/macro";
 But if necessary, you can use the hook where strings are needed:
 
 ```typescript
-import { useLingui } from "@lingui-solid/solid/macro";
+import { useLingui } from "@lingui/solid/macro";
 
 const { t } = useLingui();
 
@@ -29,7 +29,7 @@ If your use case doesn't fit here, ask a maintainer for guidance.
 Use the Plural component:
 
 ```typescript
-import { Plural } from "@lingui-solid/solid/macro";
+import { Plural } from "@lingui/solid/macro";
 
 <Plural
   value={5}
@@ -42,12 +42,8 @@ Learn more in the [Lingui documentation](https://lingui.dev/guides/plurals).
 
 ## Updating catalogs
 
-To update the catalogs, one must run:
+To update and compile the catalogs, run:
 
 ```bash
-pnpm --filter client lingui:extract && \
-pnpm --filter client lingui:compile
+mise lingui
 ```
-
-**NB. don't run this yourself!** \
-A maintainer will do this regularly & after merge down to `main`!

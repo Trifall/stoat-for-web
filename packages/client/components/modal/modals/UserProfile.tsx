@@ -53,6 +53,7 @@ export function UserProfileModal(
         <Profile.Roles member={props.member} />
         <Profile.Status user={props.user} />
         <Profile.Badges user={props.user} />
+        {props.user.bot && <Profile.Owner bot={props.user.bot} />}
         <Profile.Joined user={props.user} member={props.member} />
         <Profile.Mutuals user={props.user} member={props.member} />
         <Profile.Bio content={query.data?.content} full />

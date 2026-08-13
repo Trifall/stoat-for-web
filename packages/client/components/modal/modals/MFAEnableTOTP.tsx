@@ -2,7 +2,7 @@ import { createFormControl, createFormGroup } from "solid-forms";
 import { createEffect, onCleanup } from "solid-js";
 import { QRCodeSVG } from "solid-qr-code";
 
-import { Trans, useLingui } from "@lingui-solid/solid/macro";
+import { Trans, useLingui } from "@lingui/solid/macro";
 import { styled } from "styled-system/jsx";
 
 import { Column, Dialog, DialogProps, Form2, Text } from "@revolt/ui";

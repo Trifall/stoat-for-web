@@ -1,4 +1,8 @@
-import { BiRegularCheck, BiRegularX } from "solid-icons/bi";
+import { useLingui } from "@lingui/solid/macro";
+
+import { For } from "solid-js";
+
+import { Symbol } from "../utils/Symbol";
 
 import { styled } from "styled-system/jsx";
 
@@ -20,46 +24,66 @@ interface Props {
  * Override Switch
  */
 function OverrideSwitch(props: Props) {
+  const { t } = useLingui();
+
+  const options: { state: State; label: string; icon: string }[] = [
+    { state: "allow", label: t`Allow`, icon: "check" },
+    { state: "neutral", label: t`Inherit`, icon: "remove" },
+    { state: "deny", label: t`Deny`, icon: "close" },
+  ];
+
   return (
     <SwitchContainer
       role="radiogroup"
-      aria-orientiation="horizontal"
+      aria-orientation="horizontal"
       aria-disabled={props.disabled}
     >
-      <Override
-        type="allow"
-        selected={props.value}
-        onClick={() => !props.disabled && props.onChange("allow")}
-        role="radio"
-      >
-        <Ripple />
-        <BiRegularCheck size={24} />
-      </Override>
-      <Override
-        type="neutral"
-        selected={props.value}
-        onClick={() => !props.disabled && props.onChange("neutral")}
-        role="radio"
-      >
-        <Ripple />
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          height="24"
-          width="24"
-          viewBox="0 96 960 960"
-        >
-          <path d="M120 936v-60h60v60h-60Zm0-148v-83h60v83h-60Zm0-171v-83h60v83h-60Zm0-170v-83h60v83h-60Zm0-171v-60h60v60h-60Zm148 660v-60h83v60h-83Zm0-660v-60h83v60h-83Zm171 660v-60h83v60h-83Zm0-660v-60h83v60h-83Zm170 660v-60h83v60h-83Zm0-660v-60h83v60h-83Zm171 660v-60h60v60h-60Zm0-148v-83h60v83h-60Zm0-171v-83h60v83h-60Zm0-170v-83h60v83h-60Zm0-171v-60h60v60h-60Z" />
-        </svg>
-      </Override>
-      <Override
-        type="deny"
-        selected={props.value}
-        onClick={() => !props.disabled && props.onChange("deny")}
-        role="radio"
-      >
-        <Ripple />
-        <BiRegularX size={24} />
-      </Override>
+      <For each={options}>
+        {(option) => (
+          <Override
+            type={option.state}
+            selected={props.value}
+            onClick={() => !props.disabled && props.onChange(option.state)}
+            role="radio"
+            tabIndex={props.value === option.state ? 0 : -1}
+            aria-label={option.label}
+            aria-checked={props.value === option.state}
+            aria-disabled={props.disabled}
+            onKeyDown={(event) => {
+              if (props.disabled) return;
+
+              if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                props.onChange(option.state);
+              } else if (
+                ["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(
+                  event.key,
+                )
+              ) {
+                event.preventDefault();
+                const index = options.findIndex(
+                  ({ state }) => state === option.state,
+                );
+                const delta =
+                  event.key === "ArrowRight" || event.key === "ArrowDown"
+                    ? 1
+                    : -1;
+                const next =
+                  options[(index + delta + options.length) % options.length];
+                props.onChange(next.state);
+                (
+                  event.currentTarget.parentElement?.children[
+                    (index + delta + options.length) % options.length
+                  ] as HTMLElement | undefined
+                )?.focus();
+              }
+            }}
+          >
+            <Ripple />
+            <Symbol size={20}>{option.icon}</Symbol>
+          </Override>
+        )}
+      </For>
     </SwitchContainer>
   );
 }
@@ -67,10 +91,7 @@ function OverrideSwitch(props: Props) {
 const SwitchContainer = styled("div", {
   base: {
     flexShrink: 0,
-    width: "fit-content",
-    // height: 'fit-content',
-
-    display: "flex",
+    display: "inline-flex",
     margin: "4px 0",
     overflow: "hidden",
     borderRadius: "var(--borderRadius-md)",
@@ -90,18 +111,22 @@ const Override = styled("div", {
     // for <Ripple />:
     position: "relative",
 
-    padding: "4px",
+    width: "36px",
+    height: "36px",
+    flex: "0 0 36px",
     display: "flex",
     cursor: "pointer",
     alignItems: "center",
+    justifyContent: "center",
     transition: "var(--transitions-fast) all",
+    background: "var(--md-sys-color-surface-container-high)",
 
     "&:hover": {
       // filter: "brightness(0.8)",
     },
 
-    "& svg": {
-      stroke: "5px solid red",
+    "& > span": {
+      lineHeight: 1,
     },
   },
   variants: {
@@ -121,26 +146,24 @@ const Override = styled("div", {
       type: "allow",
       selected: "allow",
       css: {
-        // TODO
-        color: "green",
-        background: "green",
+        color: "var(--md-sys-color-primary-container)",
+        background: "var(--md-sys-color-on-primary-container)",
       },
     },
     {
       type: "neutral",
       selected: "neutral",
       css: {
-        fill: "var(--md-sys-color-inverse-on-surface)",
-        background: "var(--md-sys-color-inverse-surface)",
+        fill: "var(--md-sys-color-secondary)",
+        background: "var(--md-sys-color-on-secondary)",
       },
     },
     {
       type: "deny",
       selected: "deny",
       css: {
-        // TODO
-        color: "red",
-        background: "red",
+        color: "var(--md-sys-color-error-container)",
+        background: "var(--md-sys-color-on-error-container)",
       },
     },
   ],
