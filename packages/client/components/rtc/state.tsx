@@ -33,6 +33,7 @@ import { NoiseGateProcessor } from "./NoiseGateProcessor";
 import { isStoatSinkDevice } from "./virtualMic";
 
 import { type SoundController, useClient, useSound } from "@revolt/client";
+import { Device, useDevice } from "@revolt/common";
 import { useInstance } from "@revolt/instance";
 import { ModalController, useModals } from "@revolt/modal";
 import { useState } from "@revolt/state";
@@ -129,6 +130,7 @@ class Voice {
   showBar: Accessor<boolean>;
   #setShowBar: Setter<boolean>;
 
+  private device: Device;
   private openModal;
   private getClient;
   private config;
@@ -141,9 +143,11 @@ class Voice {
     voiceSettings: VoiceSettings,
     modals: ModalController,
     sound: SoundController,
+    device: Device,
   ) {
     this.#settings = voiceSettings;
     this.sound = sound;
+    this.device = device;
 
     const [channel, setChannel] = createSignal<Channel>();
     this.channel = channel;
@@ -559,6 +563,18 @@ class Voice {
     }
   }
 
+  #setWakeLocked(locked: boolean) {
+    const update = locked
+      ? this.device.setWakeLocked()
+      : this.device.releaseWakeLock();
+    void update.catch((error) =>
+      console.warn(
+        `[Voice] Failed to ${locked ? "acquire" : "release"} wake lock:`,
+        error,
+      ),
+    );
+  }
+
   async connect(channel: Channel, auth?: { url: string; token: string }) {
     debugLog("PTT-WEB", "Voice.connect() called for channel:", channel.id);
 
@@ -581,6 +597,8 @@ class Voice {
 
     this.disconnect(false);
     const connectionGeneration = this.#connectionGeneration;
+
+    this.#setWakeLocked(true);
 
     const room = new Room({
       audioCaptureDefaults: {
@@ -737,6 +755,7 @@ class Voice {
       if (!this.#settings.autoReconnect) {
         debugLog("PTT-WEB", "Auto-reconnect disabled");
         this.#setState("DISCONNECTED");
+        this.#setWakeLocked(false);
         if (this.#settings.soundDisconnect) {
           this.sound.playSound("disconnect");
         }
@@ -817,6 +836,7 @@ class Voice {
     if (!channel) {
       debugLog("PTT-WEB", "No channel to reconnect to");
       this.#setState("DISCONNECTED");
+      this.#setWakeLocked(false);
       if (this.#settings.soundDisconnect) {
         this.sound.playSound("disconnect");
       }
@@ -883,6 +903,7 @@ class Voice {
         // Max attempts reached, give up
         debugLog("PTT-WEB", "Max reconnection attempts reached");
         this.#setState("DISCONNECTED");
+        this.#setWakeLocked(false);
         if (this.#settings.soundDisconnect) {
           this.sound.playSound("disconnect");
         }
@@ -952,6 +973,8 @@ class Voice {
   }
 
   disconnect(manual: boolean = true) {
+    this.#setWakeLocked(false);
+
     try {
       this.#connectionGeneration++;
 
@@ -1323,7 +1346,9 @@ class Voice {
             screenShareEncoding: {
               ...ScreenSharePresets.h1080fps15.encoding,
               maxBitrate: this.#settings.screenShareBitrateKbps * 1000,
-              maxFramerate: this.#settings.screenShareFrameRate,
+              maxFramerate:
+                initialResolution.frameRate ??
+                this.#settings.screenShareFrameRate,
             },
           },
         );
@@ -1356,16 +1381,15 @@ class Voice {
             const resolution = this.#screenShareResolution(quality);
 
             if (localTrack.videoTrack) {
+              const capabilities =
+                localTrack.videoTrack.mediaStreamTrack.getCapabilities();
+              const width = resolution.width || capabilities.width?.max;
+              const height = resolution.height || capabilities.height?.max;
+
               await localTrack.videoTrack.mediaStreamTrack.applyConstraints({
                 frameRate: { max: resolution.frameRate },
-                width:
-                  resolution.width === 0
-                    ? undefined
-                    : { max: resolution.width },
-                height:
-                  resolution.height === 0
-                    ? undefined
-                    : { max: resolution.height },
+                width: width ? { ideal: width, max: width } : undefined,
+                height: height ? { ideal: height, max: height } : undefined,
               });
               localTrack.videoTrack.mediaStreamTrack.contentHint =
                 quality.contentHint;
@@ -1538,7 +1562,8 @@ export function VoiceContext(props: { children: JSX.Element }) {
   const state = useState();
   const modals = useModals();
   const sound = useSound();
-  const voice = new Voice(state.voice, modals, sound);
+  const device = useDevice();
+  const voice = new Voice(state.voice, modals, sound, device);
   onMount(() => {
     debugLog(
       "PTT-WEB",

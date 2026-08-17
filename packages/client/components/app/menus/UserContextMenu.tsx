@@ -320,11 +320,12 @@ export function UserContextMenu(props: {
           }
           actionSymbol={
             <IconSlot>
-              {state.voice.getUserMuted(props.user.id) ? (
+              <Show
+                when={state.voice.getUserMuted(props.user.id)}
+                fallback={<Symbol size={16}>check_box_outline_blank</Symbol>}
+              >
                 <Symbol size={16}>check_box</Symbol>
-              ) : (
-                <Symbol size={16}>check_box_outline_blank</Symbol>
-              )}
+              </Show>
             </IconSlot>
           }
         >
@@ -373,11 +374,12 @@ export function UserContextMenu(props: {
           }
           actionSymbol={
             <IconSlot>
-              {state.voice.getScreenShareMuted(props.user.id) ? (
+              <Show
+                when={state.voice.getScreenShareMuted(props.user.id)}
+                fallback={<Symbol size={16}>check_box_outline_blank</Symbol>}
+              >
                 <Symbol size={16}>check_box</Symbol>
-              ) : (
-                <Symbol size={16}>check_box_outline_blank</Symbol>
-              )}
+              </Show>
             </IconSlot>
           }
         >

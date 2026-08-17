@@ -32,6 +32,9 @@ interface Props {
    */
   addFile(): void;
 
+  /** Whether the file picker action is available. */
+  canAddFiles?: boolean;
+
   /**
    * Remove file by ID
    * @param fileId ID
@@ -117,10 +120,12 @@ export function FileCarousel(props: Props) {
               );
             }}
           </For>
-          <EmptyEntry onClick={props.addFile}>
-            <Ripple />
-            <MdAdd {...iconSize(48)} />
-          </EmptyEntry>
+          <Show when={props.canAddFiles ?? true}>
+            <EmptyEntry onClick={props.addFile}>
+              <Ripple />
+              <MdAdd {...iconSize(48)} />
+            </EmptyEntry>
+          </Show>
         </div>
       </Container>
     </Show>

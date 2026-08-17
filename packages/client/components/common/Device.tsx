@@ -52,6 +52,9 @@ export class Device {
   private pMedia;
   private tMedia;
   private setLayout;
+  private wakeLock: WakeLockSentinel | undefined;
+  private wakeLockRequested = false;
+  private wakeLockPromise: Promise<void> = Promise.resolve();
 
   constructor() {
     this.isMobile = isMobileBrowser();
@@ -74,6 +77,8 @@ export class Device {
     if (this.isPWA && navigator.virtualKeyboard) {
       navigator.virtualKeyboard.overlaysContent = true;
     }
+
+    document.addEventListener("visibilitychange", this.onVisibilityChange);
   }
 
   onLayout = () => {
@@ -88,6 +93,57 @@ export class Device {
 
   destroy = () => {
     this.pMedia.onchange = this.tMedia.onchange = null;
+    document.removeEventListener("visibilitychange", this.onVisibilityChange);
+    void this.releaseWakeLock();
+  };
+
+  get isWakeLocked(): boolean {
+    return !!this.wakeLock && !this.wakeLock.released;
+  }
+
+  private onVisibilityChange = () => {
+    if (document.visibilityState === "visible" && this.wakeLockRequested) {
+      void this.updateWakeLock();
+    }
+  };
+
+  private updateWakeLock = () => {
+    const update = async () => {
+      if (!this.wakeLockRequested) {
+        const wakeLock = this.wakeLock;
+        this.wakeLock = undefined;
+        if (wakeLock && !wakeLock.released) await wakeLock.release();
+        return;
+      }
+
+      if (
+        this.isWakeLocked ||
+        document.visibilityState !== "visible" ||
+        !("wakeLock" in navigator)
+      ) {
+        return;
+      }
+
+      const wakeLock = await navigator.wakeLock.request("screen");
+      if (this.wakeLockRequested) {
+        this.wakeLock = wakeLock;
+      } else {
+        await wakeLock.release();
+      }
+    };
+
+    this.wakeLockPromise = this.wakeLockPromise.then(update, update);
+    return this.wakeLockPromise;
+  };
+
+  setWakeLocked = () => {
+    this.wakeLockRequested = true;
+    return this.updateWakeLock();
+  };
+
+  releaseWakeLock = () => {
+    this.wakeLockRequested = false;
+    return this.updateWakeLock();
   };
 }
 
