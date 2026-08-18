@@ -1,21 +1,17 @@
 msgid ""
 msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-09-29 18:29-0500\n"
-"PO-Revision-Date: \n"
-"Last-Translator: \n"
-"Language-Team: \n"
+"PO-Revision-Date: 2026-08-14 15:38+0000\n"
+"Last-Translator: Cynycal2003 <soumyajitdas340@gmail.com>\n"
+"Language-Team: Bengali <https://translate.stoat.chat/projects/revolt/revolt-for-web/bn/>\n"
 "Language: bn\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: @lingui/cli\n"
-"Language: bn\n"
-"Project-Id-Version: \n"
-"Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: \n"
-"Last-Translator: \n"
-"Language-Team: \n"
-"Plural-Forms: \n"
+"Plural-Forms: nplurals=2; plural=n > 1;\n"
+"X-Generator: Weblate 5.9.1\n"
 
 #. js-lingui-explicit-id
 #: components/i18n/dayjs.tsx
@@ -35,7 +31,7 @@ msgstr ""
 #. js-lingui-explicit-id
 #: components/i18n/dayjs.tsx
 msgid "[Last] dddd [at] LT"
-msgstr ""
+msgstr "[গত] dddd এ LT"
 
 #. js-lingui-explicit-id
 #: components/i18n/dayjs.tsx
@@ -50,6 +46,9 @@ msgstr ""
 #: components/ui/components/features/messaging/elements/BlockedMessage.tsx
 msgid "{0, plural, one {# blocked message} other {# blocked messages}}"
 msgstr ""
+
+#~ msgid "{0, plural, one {# Member} other {# Members}}"
+#~ msgstr ""
 
 #. placeholder {0}: items().length
 #: components/ui/components/utils/files/FileDropAnywhereCollector.tsx
@@ -75,7 +74,7 @@ msgstr "{0} চ্যানেলের চিহ্ন বদলেছেন"
 #. placeholder {0}: instance.globalLimits.server_emoji - props.server.emojis.length
 #: components/app/interface/settings/server/emojis/EmojiList.tsx
 msgid "{0} emoji slots remaining"
-msgstr ""
+msgstr "{0}টি ইমোজির ঘর খালি আছে"
 
 #. placeholder {0}: rejectedFiles.length
 #: src/interface/channels/text/Composition.tsx
@@ -155,11 +154,9 @@ msgstr "{0} -এর সমস্ত রোলগুলো"
 #~ msgid "{h} hours"
 #~ msgstr "{h} ঘণ্টা"
 
-#: src/interface/channels/text/Composition.tsx
 #~ msgid "{m} minutes"
 #~ msgstr "{m} মিনিট"
 
-#: src/interface/channels/text/Composition.tsx
 #~ msgid "{sec} seconds"
 #~ msgstr "{sec} সেকেন্ড"
 
@@ -240,18 +237,12 @@ msgstr ""
 msgid "<0>Be careful!</0><1/>This is not the same as the link that was displayed:"
 msgstr ""
 
-#: components/modal/modals/BanMember.tsx
 #~ msgid "1 day"
 #~ msgstr ""
 
-#: src/interface/channels/text/Composition.tsx
-#: components/modal/modals/BanMember.tsx
-#: components/app/interface/settings/channel/Overview.tsx
 #~ msgid "1 hour"
 #~ msgstr ""
 
-#: src/interface/channels/text/Composition.tsx
-#: components/app/interface/settings/channel/Overview.tsx
 #~ msgid "1 minute"
 #~ msgstr ""
 
@@ -259,56 +250,44 @@ msgstr ""
 msgid "1 person reacted"
 msgstr "1 জন রিয়্যাক্ট করেছেন"
 
-#: src/interface/channels/text/Composition.tsx
 #~ msgid "1 second"
 #~ msgstr ""
 
-#: components/app/interface/settings/channel/Overview.tsx
 #~ msgid "10 minutes"
 #~ msgstr ""
 
-#: components/app/interface/settings/channel/Overview.tsx
 #~ msgid "10 seconds"
 #~ msgstr ""
 
 #: components/app/interface/settings/user/Language.tsx
 msgid "12 hours"
-msgstr ""
+msgstr "12 ঘণ্টা"
 
-#: components/app/interface/settings/channel/Overview.tsx
 #~ msgid "2 hours"
 #~ msgstr ""
 
 #: components/app/interface/settings/user/Language.tsx
 msgid "24 hours"
-msgstr ""
+msgstr "24 ঘণ্টা"
 
-#: components/modal/modals/BanMember.tsx
 #~ msgid "3 days"
 #~ msgstr ""
 
-#: components/app/interface/settings/channel/Overview.tsx
 #~ msgid "30 minutes"
 #~ msgstr ""
 
-#: components/app/interface/settings/channel/Overview.tsx
 #~ msgid "30 seconds"
 #~ msgstr ""
 
-#: components/app/interface/settings/channel/Overview.tsx
 #~ msgid "5 minutes"
 #~ msgstr ""
 
-#: components/app/interface/settings/channel/Overview.tsx
 #~ msgid "5 seconds"
 #~ msgstr ""
 
-#: components/modal/modals/BanMember.tsx
-#: components/app/interface/settings/channel/Overview.tsx
 #~ msgid "6 hours"
 #~ msgstr ""
 
-#: components/modal/modals/BanMember.tsx
 #~ msgid "7 days"
 #~ msgstr ""
 
@@ -391,8 +370,6 @@ msgstr ""
 msgid "Advanced"
 msgstr ""
 
-#: components/app/interface/settings/server/roles/ServerRoleOverview.tsx
-#: components/app/interface/settings/channel/permissions/ChannelPermissionsOverview.tsx
 #~ msgid "Affects all roles and users"
 #~ msgstr ""
 
@@ -1016,6 +993,9 @@ msgstr "তৈরি করুন"
 msgid "Create a channel before inviting others!"
 msgstr ""
 
+#~ msgid "Create a group"
+#~ msgstr "একটি গ্রুপ তৈরি করুন"
+
 #: src/interface/Home.tsx
 msgid "Create a group or server"
 msgstr ""
@@ -1033,7 +1013,6 @@ msgstr ""
 msgid "Create a new group"
 msgstr ""
 
-#: components/app/interface/settings/server/roles/ServerRoleOverview.tsx
 #~ msgid "Create a new role"
 #~ msgstr "একটি নতুন রোল তৈরি করুন"
 
@@ -1171,10 +1150,6 @@ msgstr "ডিফল্ট"
 msgid "ptt.settings.defaultHold"
 msgstr ""
 
-#: components/app/interface/settings/ServerSettings.tsx
-#: components/app/interface/settings/ChannelSettings.tsx
-#: components/app/interface/settings/server/roles/ServerRoleOverview.tsx
-#: components/app/interface/settings/channel/permissions/ChannelPermissionsOverview.tsx
 #~ msgid "Default Permissions"
 #~ msgstr ""
 
@@ -1322,6 +1297,9 @@ msgstr ""
 #: components/modal/modals/LinkWarning.tsx
 msgid "Don't ask me again for "
 msgstr ""
+
+#~ msgid "Don't ask me again for <0>{0}</0>"
+#~ msgstr ""
 
 #: components/modal/modals/BanMember.tsx
 msgid "Don't delete messages"
@@ -1684,6 +1662,9 @@ msgstr ""
 msgid "Go to the Stoat Lounge"
 msgstr ""
 
+#~ msgid "Go to the testers server"
+#~ msgstr "পরীক্ষক সার্ভারে যান"
+
 #: components/modal/modals/Onboarding.tsx
 msgid "Good"
 msgstr ""
@@ -1794,10 +1775,6 @@ msgstr ""
 msgid "In the meantime, install Stoat from Google Play for a faster, smoother experience designed for Android."
 msgstr ""
 
-#: components/app/interface/settings/user/notifications/Sounds.tsx
-#~ msgid "Incoming Call"
-#~ msgstr ""
-
 #: components/ui/components/design/Switch.tsx
 msgid "Inherit"
 msgstr ""
@@ -1871,6 +1848,9 @@ msgstr ""
 #: components/modal/modals/JoinServer.tsx
 msgid "Join a server"
 msgstr ""
+
+#~ msgid "Join call"
+#~ msgstr ""
 
 #: components/app/interface/settings/user/notifications/Sounds.tsx
 msgid "Join Call (Self)"
@@ -2862,6 +2842,9 @@ msgstr ""
 msgid "Review policy changes"
 msgstr ""
 
+#~ msgid "Roadmap"
+#~ msgstr ""
+
 #: components/app/interface/settings/server/roles/ServerRoleEditor.tsx
 msgid "Role Colour"
 msgstr ""
@@ -2949,6 +2932,9 @@ msgstr ""
 #: components/modal/modals/CreateGroup.tsx
 msgid "Search for users..."
 msgstr ""
+
+#~ msgid "See what we're currently working on."
+#~ msgstr ""
 
 #: components/app/interface/settings/user/voice/VoiceInputOptions.tsx
 msgid "Select audio input"
@@ -3166,6 +3152,9 @@ msgstr ""
 msgid "Something went wrong! {error}"
 msgstr ""
 
+#~ msgid "Something went wrong! Try again later."
+#~ msgstr ""
+
 #: components/modal/modals/TryPWA.tsx
 msgid "Sorry, your device doesn't support auto-install. Check your browser's menu for the 'Add to Home Screen' option."
 msgstr ""
@@ -3209,6 +3198,9 @@ msgstr ""
 #: components/ui/components/features/profiles/ProfileStatus.tsx
 msgid "Status"
 msgstr ""
+
+#~ msgid "Stoat Desktop"
+#~ msgstr ""
 
 #: components/ui/components/features/profiles/ProfileBadges.tsx
 msgid "Stoat Developer"
@@ -3664,6 +3656,9 @@ msgstr "বর্তমানের সমস্ত সক্রিয় বা
 msgid "View members"
 msgstr ""
 
+#~ msgid "View older updates"
+#~ msgstr "পুরানো আপডেটগুলি দেখুন"
+
 #: src/interface/channels/ChannelHeader.tsx
 msgid "View pinned messages"
 msgstr ""
@@ -3730,6 +3725,9 @@ msgstr ""
 msgid "Webhooks"
 msgstr "ওয়েবহুকগুলি"
 
+#~ msgid "Welcome to"
+#~ msgstr "স্বাগতম"
+
 #: components/auth/src/flows/FlowLogin.tsx
 msgid "Welcome!"
 msgstr "আপনাকে স্বাগত জানাই!"
@@ -3749,6 +3747,10 @@ msgstr ""
 #. placeholder {0}: names.join(", ")
 #: components/ui/components/features/voice/callCard/VoiceCallCardPreview.tsx
 msgid "With {0}"
+msgstr ""
+
+#: components/ui/components/features/voice/callCard/VoiceCallCardPreview.tsx
+msgid "With {count} others"
 msgstr ""
 
 #: components/modal/modals/CreateGroupOrServer.tsx
@@ -3786,6 +3788,9 @@ msgstr ""
 #: src/interface/Home.tsx
 msgid "You can also click the gear icon in the bottom left."
 msgstr ""
+
+#~ msgid "You can also right-click the user icon in the top left, or left click it if you're already home."
+#~ msgstr "আপনি বাম দিকে থাকা ইউজার আইকনে-ক্লিক করতে পারেন, অথবা আপনি যদি বাড়িতেই থাকেন তবে আপনি বাম ক্লিকও করতে পারেন।"
 
 #: components/modal/modals/DeleteChannel.tsx
 msgid "You can re-open it later, but it will disappear on both sides."

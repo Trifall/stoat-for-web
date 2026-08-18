@@ -3740,6 +3740,10 @@ msgstr "Whether other users can edit these settings"
 msgid "With {0}"
 msgstr "With {0}"
 
+#: components/ui/components/features/voice/callCard/VoiceCallCardPreview.tsx
+msgid "With {count} others"
+msgstr "With {count} others"
+
 #: components/modal/modals/CreateGroupOrServer.tsx
 msgid "Would you like to create a new group or server?"
 msgstr "Would you like to create a new group or server?"

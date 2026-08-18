@@ -3752,6 +3752,10 @@ msgstr ""
 msgid "With {0}"
 msgstr ""
 
+#: components/ui/components/features/voice/callCard/VoiceCallCardPreview.tsx
+msgid "With {count} others"
+msgstr ""
+
 #: components/modal/modals/CreateGroupOrServer.tsx
 msgid "Would you like to create a new group or server?"
 msgstr ""
