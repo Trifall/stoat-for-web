@@ -47,9 +47,6 @@ msgstr "(mudanças estão sendo salvas…)"
 msgid "{0, plural, one {# blocked message} other {# blocked messages}}"
 msgstr "{0, plural, one {# mensagem bloqueada} other {# mensagens bloqueadas}}"
 
-#~ msgid "{0, plural, one {# Member} other {# Members}}"
-#~ msgstr ""
-
 #. placeholder {0}: items().length
 #: components/ui/components/utils/files/FileDropAnywhereCollector.tsx
 msgid "{0, plural, one {Drop a file} other {Drop # files}}"
@@ -444,9 +441,6 @@ msgstr "Tem certeza de que quer deletar isso?"
 #: components/modal/modals/LinkWarning.tsx
 msgid "Are you sure you want to go to "
 msgstr "Tem certeza de que quer ir para "
-
-#~ msgid "Are you sure you want to go to <0>{0}</0>?"
-#~ msgstr ""
 
 #: components/modal/modals/PinMessage.tsx
 msgid "Are you sure you want to pin this message?"
@@ -1295,9 +1289,6 @@ msgstr "Não pergunte novamente"
 msgid "Don't ask me again for "
 msgstr "Não me peça de novo para "
 
-#~ msgid "Don't ask me again for <0>{0}</0>"
-#~ msgstr ""
-
 #: components/modal/modals/BanMember.tsx
 msgid "Don't delete messages"
 msgstr "Não excluir mensagens"
@@ -1845,9 +1836,6 @@ msgstr "Juntar-se"
 #: components/modal/modals/JoinServer.tsx
 msgid "Join a server"
 msgstr "Juntar-se a um servidor"
-
-#~ msgid "Join call"
-#~ msgstr ""
 
 #: components/app/interface/settings/user/notifications/Sounds.tsx
 msgid "Join Call (Self)"
@@ -2839,9 +2827,6 @@ msgstr "Vingança ou pornografia infantil"
 msgid "Review policy changes"
 msgstr "Revisar as alterações na política"
 
-#~ msgid "Roadmap"
-#~ msgstr ""
-
 #: components/app/interface/settings/server/roles/ServerRoleEditor.tsx
 msgid "Role Colour"
 msgstr "Cor do cargo"
@@ -2929,9 +2914,6 @@ msgstr "Buscar grupos..."
 #: components/modal/modals/CreateGroup.tsx
 msgid "Search for users..."
 msgstr "Buscar por usuários..."
-
-#~ msgid "See what we're currently working on."
-#~ msgstr ""
 
 #: components/app/interface/settings/user/voice/VoiceInputOptions.tsx
 msgid "Select audio input"
@@ -3149,9 +3131,6 @@ msgstr "Há algo de errado com sua solicitação, {0}."
 msgid "Something went wrong! {error}"
 msgstr "Algo deu errado! {error}"
 
-#~ msgid "Something went wrong! Try again later."
-#~ msgstr ""
-
 #: components/modal/modals/TryPWA.tsx
 msgid "Sorry, your device doesn't support auto-install. Check your browser's menu for the 'Add to Home Screen' option."
 msgstr ""
@@ -3195,9 +3174,6 @@ msgstr "Iniciar com o Computador"
 #: components/ui/components/features/profiles/ProfileStatus.tsx
 msgid "Status"
 msgstr "Status"
-
-#~ msgid "Stoat Desktop"
-#~ msgstr ""
 
 #: components/ui/components/features/profiles/ProfileBadges.tsx
 msgid "Stoat Developer"
@@ -3618,12 +3594,6 @@ msgstr "Os usuários deverão confirmar sua idade antes de abrir este canal."
 msgid "Users will no longer be asked to confirm their age before joining this channel.<0/> Please ensure the content is appropriate for all ages."
 msgstr "Os usuários não precisarão mais confirmar a idade antes de entrar neste canal. Certifique-se de que o conteúdo seja apropriado para todas as idades."
 
-#~ msgid "Using default microphone"
-#~ msgstr ""
-
-#~ msgid "Using default speaker"
-#~ msgstr ""
-
 #: src/interface/navigation/channels/ServerSidebar.tsx
 msgid "Verified"
 msgstr "Verificado"
@@ -3743,8 +3713,18 @@ msgstr "Permitir que outros usuários editem estas configurações"
 
 #. placeholder {0}: names.join(", ")
 #: components/ui/components/features/voice/callCard/VoiceCallCardPreview.tsx
+#~ msgid "with {0}"
+#~ msgstr ""
+
+#. placeholder {0}: names.join(", ")
+#: components/ui/components/features/voice/callCard/VoiceCallCardPreview.tsx
 msgid "With {0}"
 msgstr "Com {0}"
+
+#. placeholder {0}: names.length
+#: components/ui/components/features/voice/callCard/VoiceCallCardPreview.tsx
+#~ msgid "with {0} others"
+#~ msgstr ""
 
 #: components/ui/components/features/voice/callCard/VoiceCallCardPreview.tsx
 msgid "With {count} others"

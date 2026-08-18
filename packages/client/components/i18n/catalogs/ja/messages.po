@@ -47,9 +47,6 @@ msgstr "(変更を保存しています...)"
 msgid "{0, plural, one {# blocked message} other {# blocked messages}}"
 msgstr "{0} 件のブロックしたメッセージ"
 
-#~ msgid "{0, plural, one {# Member} other {# Members}}"
-#~ msgstr ""
-
 #. placeholder {0}: items().length
 #: components/ui/components/utils/files/FileDropAnywhereCollector.tsx
 msgid "{0, plural, one {Drop a file} other {Drop # files}}"
@@ -151,15 +148,6 @@ msgstr "{0}-{1} ({2}件中)"
 msgid "{0}'s roles"
 msgstr "{0}のロール"
 
-#~ msgid "{h} hours"
-#~ msgstr ""
-
-#~ msgid "{m} minutes"
-#~ msgstr ""
-
-#~ msgid "{sec} seconds"
-#~ msgstr ""
-
 #: components/ui/components/features/messaging/elements/Reactions.tsx
 msgid "{unknown} reacted"
 msgstr "{unknown} がリアクションしました"
@@ -237,59 +225,17 @@ msgstr "<0/> がグループの名前を <1>{0}</1> に変更しました"
 msgid "<0>Be careful!</0><1/>This is not the same as the link that was displayed:"
 msgstr "<0>警告！</0><1/>表示されていたリンクとは異なります:"
 
-#~ msgid "1 day"
-#~ msgstr ""
-
-#~ msgid "1 hour"
-#~ msgstr ""
-
-#~ msgid "1 minute"
-#~ msgstr ""
-
 #: components/ui/components/features/messaging/elements/Reactions.tsx
 msgid "1 person reacted"
 msgstr "1 人が反応しました"
-
-#~ msgid "1 second"
-#~ msgstr ""
-
-#~ msgid "10 minutes"
-#~ msgstr ""
-
-#~ msgid "10 seconds"
-#~ msgstr ""
 
 #: components/app/interface/settings/user/Language.tsx
 msgid "12 hours"
 msgstr "12時間"
 
-#~ msgid "2 hours"
-#~ msgstr ""
-
 #: components/app/interface/settings/user/Language.tsx
 msgid "24 hours"
 msgstr "24時間"
-
-#~ msgid "3 days"
-#~ msgstr ""
-
-#~ msgid "30 minutes"
-#~ msgstr ""
-
-#~ msgid "30 seconds"
-#~ msgstr ""
-
-#~ msgid "5 minutes"
-#~ msgstr ""
-
-#~ msgid "5 seconds"
-#~ msgstr ""
-
-#~ msgid "6 hours"
-#~ msgstr ""
-
-#~ msgid "7 days"
-#~ msgstr ""
 
 #: components/app/interface/settings/channel/permissions/ChannelPermissionsEditor.tsx
 msgid "Able to access channels on this server"
@@ -445,9 +391,6 @@ msgstr "このメッセージを削除してもよろしいですか？"
 msgid "Are you sure you want to go to "
 msgstr ""
 
-#~ msgid "Are you sure you want to go to <0>{0}</0>?"
-#~ msgstr ""
-
 #: components/modal/modals/PinMessage.tsx
 msgid "Are you sure you want to pin this message?"
 msgstr "このメッセージをピン留めしますか?"
@@ -574,9 +517,6 @@ msgstr "ブラウザ"
 #: components/app/interface/settings/user/voice/VoiceProcessingOptions.tsx
 msgid "Browser Echo Cancellation"
 msgstr "エコー除去"
-
-#~ msgid "Browser Noise Supression"
-#~ msgstr ""
 
 #: components/app/interface/settings/user/Feedback.tsx
 msgid "Bug Tracker"
@@ -725,9 +665,6 @@ msgstr "ユーザーネームを変更"
 #: components/app/interface/settings/user/profile/EditProfile.tsx
 msgid "Change your profile per-server"
 msgstr "サーバーごとにプロフィールを変更"
-
-#~ msgid "Changelog"
-#~ msgstr ""
 
 #: components/app/interface/settings/channel/Overview.tsx
 msgid "Channel Description"
@@ -1153,9 +1090,6 @@ msgstr ""
 #~ msgid "Default Permissions"
 #~ msgstr "デフォルトの権限"
 
-#~ msgid "Defean"
-#~ msgstr ""
-
 #: components/ui/components/design/LoadingScreen.tsx
 msgid "Degraded Performance"
 msgstr ""
@@ -1268,7 +1202,7 @@ msgstr "切断済み"
 
 #: components/app/interface/settings/user/Native.tsx
 msgid "Discord RPC"
-msgstr ""
+msgstr "Discord RPC"
 
 #: src/interface/Home.tsx
 msgid "Discover Stoat"
@@ -1297,9 +1231,6 @@ msgstr ""
 #: components/modal/modals/LinkWarning.tsx
 msgid "Don't ask me again for "
 msgstr ""
-
-#~ msgid "Don't ask me again for <0>{0}</0>"
-#~ msgstr ""
 
 #: components/modal/modals/BanMember.tsx
 msgid "Don't delete messages"
@@ -1764,9 +1695,6 @@ msgstr "離席中"
 msgid "Illegal hacking or cracking"
 msgstr "違法なハッキング"
 
-#~ msgid "Image by @fakurian"
-#~ msgstr ""
-
 #: components/modal/modals/ReportContent.tsx
 msgid "Impersonation"
 msgstr "なりすまし"
@@ -1848,9 +1776,6 @@ msgstr "参加"
 #: components/modal/modals/JoinServer.tsx
 msgid "Join a server"
 msgstr "サーバーに参加"
-
-#~ msgid "Join call"
-#~ msgstr ""
 
 #: components/app/interface/settings/user/notifications/Sounds.tsx
 msgid "Join Call (Self)"
@@ -2626,9 +2551,6 @@ msgstr "メッセージに対して、絵文字でリアクションできます
 msgid "Read Message History"
 msgstr "メッセージ履歴を閲覧"
 
-#~ msgid "Read More"
-#~ msgstr ""
-
 #: components/app/interface/settings/channel/permissions/ChannelPermissionsEditor.tsx
 msgid "Read past messages sent in channel"
 msgstr "チャンネルで過去に送信されたメッセージを読むことができます"
@@ -2842,9 +2764,6 @@ msgstr "リベンジポルノ、または児童ポルノ"
 msgid "Review policy changes"
 msgstr "規約の変更を確認"
 
-#~ msgid "Roadmap"
-#~ msgstr ""
-
 #: components/app/interface/settings/server/roles/ServerRoleEditor.tsx
 msgid "Role Colour"
 msgstr ""
@@ -2932,9 +2851,6 @@ msgstr "グループを検索…"
 #: components/modal/modals/CreateGroup.tsx
 msgid "Search for users..."
 msgstr "ユーザーを検索…"
-
-#~ msgid "See what we're currently working on."
-#~ msgstr ""
 
 #: components/app/interface/settings/user/voice/VoiceInputOptions.tsx
 msgid "Select audio input"
@@ -3152,9 +3068,6 @@ msgstr ""
 msgid "Something went wrong! {error}"
 msgstr ""
 
-#~ msgid "Something went wrong! Try again later."
-#~ msgstr ""
-
 #: components/modal/modals/TryPWA.tsx
 msgid "Sorry, your device doesn't support auto-install. Check your browser's menu for the 'Add to Home Screen' option."
 msgstr ""
@@ -3198,9 +3111,6 @@ msgstr ""
 #: components/ui/components/features/profiles/ProfileStatus.tsx
 msgid "Status"
 msgstr ""
-
-#~ msgid "Stoat Desktop"
-#~ msgstr ""
 
 #: components/ui/components/features/profiles/ProfileBadges.tsx
 msgid "Stoat Developer"
@@ -3621,12 +3531,6 @@ msgstr ""
 msgid "Users will no longer be asked to confirm their age before joining this channel.<0/> Please ensure the content is appropriate for all ages."
 msgstr ""
 
-#~ msgid "Using default microphone"
-#~ msgstr ""
-
-#~ msgid "Using default speaker"
-#~ msgstr ""
-
 #: src/interface/navigation/channels/ServerSidebar.tsx
 msgid "Verified"
 msgstr ""
@@ -3746,8 +3650,18 @@ msgstr ""
 
 #. placeholder {0}: names.join(", ")
 #: components/ui/components/features/voice/callCard/VoiceCallCardPreview.tsx
+#~ msgid "with {0}"
+#~ msgstr ""
+
+#. placeholder {0}: names.join(", ")
+#: components/ui/components/features/voice/callCard/VoiceCallCardPreview.tsx
 msgid "With {0}"
 msgstr ""
+
+#. placeholder {0}: names.length
+#: components/ui/components/features/voice/callCard/VoiceCallCardPreview.tsx
+#~ msgid "with {0} others"
+#~ msgstr ""
 
 #: components/ui/components/features/voice/callCard/VoiceCallCardPreview.tsx
 msgid "With {count} others"

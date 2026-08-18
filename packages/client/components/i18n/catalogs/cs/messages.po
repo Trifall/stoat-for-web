@@ -47,9 +47,6 @@ msgstr "(ukládání změn...)"
 msgid "{0, plural, one {# blocked message} other {# blocked messages}}"
 msgstr "{0, plural, one {# blokovaná zpráva} few {# blokované zprávy} other {# blokovaných zpráv}}"
 
-#~ msgid "{0, plural, one {# Member} other {# Members}}"
-#~ msgstr ""
-
 #. placeholder {0}: items().length
 #: components/ui/components/utils/files/FileDropAnywhereCollector.tsx
 msgid "{0, plural, one {Drop a file} other {Drop # files}}"
@@ -151,15 +148,6 @@ msgstr "{0}-{1} z {2}"
 msgid "{0}'s roles"
 msgstr "{0} rolí"
 
-#~ msgid "{h} hours"
-#~ msgstr ""
-
-#~ msgid "{m} minutes"
-#~ msgstr ""
-
-#~ msgid "{sec} seconds"
-#~ msgstr ""
-
 #: components/ui/components/features/messaging/elements/Reactions.tsx
 msgid "{unknown} reacted"
 msgstr "{unknown} reagoval/a"
@@ -237,59 +225,17 @@ msgstr "<0/> změnil jméno skupiny na <1>{0}</1>"
 msgid "<0>Be careful!</0><1/>This is not the same as the link that was displayed:"
 msgstr "<0>Dejte si pozor!</0><1/>Tohle není stejný jako ten odkaz, který je zobrazen:"
 
-#~ msgid "1 day"
-#~ msgstr ""
-
-#~ msgid "1 hour"
-#~ msgstr ""
-
-#~ msgid "1 minute"
-#~ msgstr ""
-
 #: components/ui/components/features/messaging/elements/Reactions.tsx
 msgid "1 person reacted"
 msgstr "1 osoba zareagovala"
-
-#~ msgid "1 second"
-#~ msgstr ""
-
-#~ msgid "10 minutes"
-#~ msgstr ""
-
-#~ msgid "10 seconds"
-#~ msgstr ""
 
 #: components/app/interface/settings/user/Language.tsx
 msgid "12 hours"
 msgstr "12 hodin"
 
-#~ msgid "2 hours"
-#~ msgstr ""
-
 #: components/app/interface/settings/user/Language.tsx
 msgid "24 hours"
 msgstr "24 hodin"
-
-#~ msgid "3 days"
-#~ msgstr ""
-
-#~ msgid "30 minutes"
-#~ msgstr ""
-
-#~ msgid "30 seconds"
-#~ msgstr ""
-
-#~ msgid "5 minutes"
-#~ msgstr ""
-
-#~ msgid "5 seconds"
-#~ msgstr ""
-
-#~ msgid "6 hours"
-#~ msgstr ""
-
-#~ msgid "7 days"
-#~ msgstr ""
 
 #: components/app/interface/settings/channel/permissions/ChannelPermissionsEditor.tsx
 msgid "Able to access channels on this server"
@@ -445,9 +391,6 @@ msgstr "Vážně tohle chcete odstranit?"
 msgid "Are you sure you want to go to "
 msgstr "Jste si jistí že chcete jít na "
 
-#~ msgid "Are you sure you want to go to <0>{0}</0>?"
-#~ msgstr ""
-
 #: components/modal/modals/PinMessage.tsx
 msgid "Are you sure you want to pin this message?"
 msgstr "Jste si jistý, že chcete připnout tuto zprávu?"
@@ -456,11 +399,11 @@ msgstr "Jste si jistý, že chcete připnout tuto zprávu?"
 #. placeholder {1}: props.group.name
 #: components/modal/modals/RemoveMember.tsx
 msgid "Are you sure you want to remove {0} from {1}?"
-msgstr "Jste si jistý, že chcete odebrat {0} z {1}?"
+msgstr "Jste si jistí, že chcete odebrat {0} z {1}?"
 
 #: components/modal/modals/PinMessage.tsx
 msgid "Are you sure you want to unpin this message?"
-msgstr "Jste si jistý, že chcete odepnout tuto zprávu?"
+msgstr "Jste si jistí, že chcete odepnout tuto zprávu?"
 
 #: components/app/interface/settings/channel/permissions/ChannelPermissionsEditor.tsx
 msgid "Assign lower-ranked roles to lower-ranking members"
@@ -533,7 +476,7 @@ msgstr "Zabanovat člena"
 
 #: components/app/interface/settings/channel/permissions/ChannelPermissionsEditor.tsx
 msgid "Ban Members"
-msgstr "Banovat členy"
+msgstr "Zabanovat členy"
 
 #: components/app/menus/UserContextMenu.tsx
 msgid "Ban user"
@@ -557,7 +500,7 @@ msgstr "Zablokovat uživatele"
 
 #: src/interface/Friends.tsx
 msgid "Blocked"
-msgstr "Zablokovaní"
+msgstr "Zablokován"
 
 #: components/ui/components/features/messaging/elements/MessageReply.tsx
 msgid "Blocked User"
@@ -574,9 +517,6 @@ msgstr "Prohlížeč"
 #: components/app/interface/settings/user/voice/VoiceProcessingOptions.tsx
 msgid "Browser Echo Cancellation"
 msgstr "Reudkce ozvěny v prohlížeči"
-
-#~ msgid "Browser Noise Supression"
-#~ msgstr ""
 
 #: components/app/interface/settings/user/Feedback.tsx
 msgid "Bug Tracker"
@@ -725,9 +665,6 @@ msgstr "Změnit uživatelské jméno"
 #: components/app/interface/settings/user/profile/EditProfile.tsx
 msgid "Change your profile per-server"
 msgstr "Změnit profil na serverech"
-
-#~ msgid "Changelog"
-#~ msgstr ""
 
 #: components/app/interface/settings/channel/Overview.tsx
 msgid "Channel Description"
@@ -1153,9 +1090,6 @@ msgstr ""
 #~ msgid "Default Permissions"
 #~ msgstr "Výchozí Oprávnění"
 
-#~ msgid "Defean"
-#~ msgstr ""
-
 #: components/ui/components/design/LoadingScreen.tsx
 msgid "Degraded Performance"
 msgstr ""
@@ -1297,9 +1231,6 @@ msgstr ""
 #: components/modal/modals/LinkWarning.tsx
 msgid "Don't ask me again for "
 msgstr ""
-
-#~ msgid "Don't ask me again for <0>{0}</0>"
-#~ msgstr ""
 
 #: components/modal/modals/BanMember.tsx
 msgid "Don't delete messages"
@@ -1764,9 +1695,6 @@ msgstr "Nečinný"
 msgid "Illegal hacking or cracking"
 msgstr ""
 
-#~ msgid "Image by @fakurian"
-#~ msgstr ""
-
 #: components/modal/modals/ReportContent.tsx
 msgid "Impersonation"
 msgstr "Vydává se za ostatní lidi"
@@ -1848,9 +1776,6 @@ msgstr "Připojit se"
 #: components/modal/modals/JoinServer.tsx
 msgid "Join a server"
 msgstr "Připojit se na server"
-
-#~ msgid "Join call"
-#~ msgstr ""
 
 #: components/app/interface/settings/user/notifications/Sounds.tsx
 msgid "Join Call (Self)"
@@ -2626,9 +2551,6 @@ msgstr ""
 msgid "Read Message History"
 msgstr "Číst historii zpráv"
 
-#~ msgid "Read More"
-#~ msgstr ""
-
 #: components/app/interface/settings/channel/permissions/ChannelPermissionsEditor.tsx
 msgid "Read past messages sent in channel"
 msgstr ""
@@ -2842,9 +2764,6 @@ msgstr "Pomsta nebo nezletilé pornografie"
 msgid "Review policy changes"
 msgstr ""
 
-#~ msgid "Roadmap"
-#~ msgstr ""
-
 #: components/app/interface/settings/server/roles/ServerRoleEditor.tsx
 msgid "Role Colour"
 msgstr "Barva role"
@@ -2932,9 +2851,6 @@ msgstr "Hledat skupiny..."
 #: components/modal/modals/CreateGroup.tsx
 msgid "Search for users..."
 msgstr "Hledat uživatelé..."
-
-#~ msgid "See what we're currently working on."
-#~ msgstr ""
 
 #: components/app/interface/settings/user/voice/VoiceInputOptions.tsx
 msgid "Select audio input"
@@ -3152,9 +3068,6 @@ msgstr ""
 msgid "Something went wrong! {error}"
 msgstr ""
 
-#~ msgid "Something went wrong! Try again later."
-#~ msgstr ""
-
 #: components/modal/modals/TryPWA.tsx
 msgid "Sorry, your device doesn't support auto-install. Check your browser's menu for the 'Add to Home Screen' option."
 msgstr ""
@@ -3198,9 +3111,6 @@ msgstr ""
 #: components/ui/components/features/profiles/ProfileStatus.tsx
 msgid "Status"
 msgstr ""
-
-#~ msgid "Stoat Desktop"
-#~ msgstr ""
 
 #: components/ui/components/features/profiles/ProfileBadges.tsx
 msgid "Stoat Developer"
@@ -3621,12 +3531,6 @@ msgstr ""
 msgid "Users will no longer be asked to confirm their age before joining this channel.<0/> Please ensure the content is appropriate for all ages."
 msgstr ""
 
-#~ msgid "Using default microphone"
-#~ msgstr ""
-
-#~ msgid "Using default speaker"
-#~ msgstr ""
-
 #: src/interface/navigation/channels/ServerSidebar.tsx
 msgid "Verified"
 msgstr "Ověřen"
@@ -3746,8 +3650,18 @@ msgstr "Pokud ostaní mohou upravit toto nastavení"
 
 #. placeholder {0}: names.join(", ")
 #: components/ui/components/features/voice/callCard/VoiceCallCardPreview.tsx
+#~ msgid "with {0}"
+#~ msgstr ""
+
+#. placeholder {0}: names.join(", ")
+#: components/ui/components/features/voice/callCard/VoiceCallCardPreview.tsx
 msgid "With {0}"
 msgstr "s {0}"
+
+#. placeholder {0}: names.length
+#: components/ui/components/features/voice/callCard/VoiceCallCardPreview.tsx
+#~ msgid "with {0} others"
+#~ msgstr ""
 
 #: components/ui/components/features/voice/callCard/VoiceCallCardPreview.tsx
 msgid "With {count} others"

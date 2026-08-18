@@ -47,9 +47,6 @@ msgstr "(les modifications sont en cours d'enregistrement…)"
 msgid "{0, plural, one {# blocked message} other {# blocked messages}}"
 msgstr "{0, plural, one {# message bloqué} other {# messages bloqués}}"
 
-#~ msgid "{0, plural, one {# Member} other {# Members}}"
-#~ msgstr ""
-
 #. placeholder {0}: items().length
 #: components/ui/components/utils/files/FileDropAnywhereCollector.tsx
 msgid "{0, plural, one {Drop a file} other {Drop # files}}"
@@ -445,9 +442,6 @@ msgstr "Êtes-vous sûr de vouloir supprimer ceci ?"
 msgid "Are you sure you want to go to "
 msgstr "Êtes-vous sûr de vouloir aller à "
 
-#~ msgid "Are you sure you want to go to <0>{0}</0>?"
-#~ msgstr ""
-
 #: components/modal/modals/PinMessage.tsx
 msgid "Are you sure you want to pin this message?"
 msgstr "Êtes-vous sûr de vouloir épingler ce message ?"
@@ -574,9 +568,6 @@ msgstr "Navigateur"
 #: components/app/interface/settings/user/voice/VoiceProcessingOptions.tsx
 msgid "Browser Echo Cancellation"
 msgstr "Annulation de l'écho du navigateur"
-
-#~ msgid "Browser Noise Supression"
-#~ msgstr ""
 
 #: components/app/interface/settings/user/Feedback.tsx
 msgid "Bug Tracker"
@@ -725,9 +716,6 @@ msgstr "Change le nom d'utilisateur"
 #: components/app/interface/settings/user/profile/EditProfile.tsx
 msgid "Change your profile per-server"
 msgstr "Modifier votre profil par serveur"
-
-#~ msgid "Changelog"
-#~ msgstr ""
 
 #: components/app/interface/settings/channel/Overview.tsx
 msgid "Channel Description"
@@ -1153,9 +1141,6 @@ msgstr ""
 #~ msgid "Default Permissions"
 #~ msgstr "Permissions par défaut"
 
-#~ msgid "Defean"
-#~ msgstr ""
-
 #: components/ui/components/design/LoadingScreen.tsx
 msgid "Degraded Performance"
 msgstr "Performances dégradées"
@@ -1297,9 +1282,6 @@ msgstr "Ne plus me demander"
 #: components/modal/modals/LinkWarning.tsx
 msgid "Don't ask me again for "
 msgstr "Ne plus me demander pour "
-
-#~ msgid "Don't ask me again for <0>{0}</0>"
-#~ msgstr ""
 
 #: components/modal/modals/BanMember.tsx
 msgid "Don't delete messages"
@@ -1764,9 +1746,6 @@ msgstr "Inactif"
 msgid "Illegal hacking or cracking"
 msgstr "Hacking illégal ou piratage"
 
-#~ msgid "Image by @fakurian"
-#~ msgstr ""
-
 #: components/modal/modals/ReportContent.tsx
 msgid "Impersonation"
 msgstr "Usurpation d'identité"
@@ -1848,9 +1827,6 @@ msgstr "Rejoindre"
 #: components/modal/modals/JoinServer.tsx
 msgid "Join a server"
 msgstr "Rejoindre un serveur"
-
-#~ msgid "Join call"
-#~ msgstr ""
 
 #: components/app/interface/settings/user/notifications/Sounds.tsx
 msgid "Join Call (Self)"
@@ -2626,9 +2602,6 @@ msgstr "Réagir aux messages avec des émojis"
 msgid "Read Message History"
 msgstr "Lire l'historique des messages"
 
-#~ msgid "Read More"
-#~ msgstr ""
-
 #: components/app/interface/settings/channel/permissions/ChannelPermissionsEditor.tsx
 msgid "Read past messages sent in channel"
 msgstr "Lire les messages précédents envoyés dans le salon"
@@ -2842,9 +2815,6 @@ msgstr "Vengeance ou pornographie impliquant des mineurs"
 msgid "Review policy changes"
 msgstr "Modifications apportées à la politique d'évaluation"
 
-#~ msgid "Roadmap"
-#~ msgstr ""
-
 #: components/app/interface/settings/server/roles/ServerRoleEditor.tsx
 msgid "Role Colour"
 msgstr "Couleur du rôle"
@@ -2932,9 +2902,6 @@ msgstr "Rechercher des groupes..."
 #: components/modal/modals/CreateGroup.tsx
 msgid "Search for users..."
 msgstr "Rechercher des utilisateurs..."
-
-#~ msgid "See what we're currently working on."
-#~ msgstr ""
 
 #: components/app/interface/settings/user/voice/VoiceInputOptions.tsx
 msgid "Select audio input"
@@ -3152,9 +3119,6 @@ msgstr "Il y a un problème avec votre demande, {0}."
 msgid "Something went wrong! {error}"
 msgstr "Une erreur s'est produite ! {error}"
 
-#~ msgid "Something went wrong! Try again later."
-#~ msgstr ""
-
 #: components/modal/modals/TryPWA.tsx
 msgid "Sorry, your device doesn't support auto-install. Check your browser's menu for the 'Add to Home Screen' option."
 msgstr ""
@@ -3198,9 +3162,6 @@ msgstr "Commencer avec l'ordinateur"
 #: components/ui/components/features/profiles/ProfileStatus.tsx
 msgid "Status"
 msgstr "Statut"
-
-#~ msgid "Stoat Desktop"
-#~ msgstr ""
 
 #: components/ui/components/features/profiles/ProfileBadges.tsx
 msgid "Stoat Developer"
@@ -3621,12 +3582,6 @@ msgstr "Les utilisateurs devront confirmer leur âge avant d'ouvrir ce salon."
 msgid "Users will no longer be asked to confirm their age before joining this channel.<0/> Please ensure the content is appropriate for all ages."
 msgstr "Les utilisateurs ne seront plus invités à confirmer leur âge avant de rejoindre ce salon.<0/> Veuillez vous assurer que le contenu est adapté à tous les âges."
 
-#~ msgid "Using default microphone"
-#~ msgstr ""
-
-#~ msgid "Using default speaker"
-#~ msgstr ""
-
 #: src/interface/navigation/channels/ServerSidebar.tsx
 msgid "Verified"
 msgstr "Vérifié"
@@ -3746,8 +3701,18 @@ msgstr "Si d'autres utilisateurs peuvent modifier ces paramètres"
 
 #. placeholder {0}: names.join(", ")
 #: components/ui/components/features/voice/callCard/VoiceCallCardPreview.tsx
+#~ msgid "with {0}"
+#~ msgstr ""
+
+#. placeholder {0}: names.join(", ")
+#: components/ui/components/features/voice/callCard/VoiceCallCardPreview.tsx
 msgid "With {0}"
 msgstr "Avec {0}"
+
+#. placeholder {0}: names.length
+#: components/ui/components/features/voice/callCard/VoiceCallCardPreview.tsx
+#~ msgid "with {0} others"
+#~ msgstr ""
 
 #: components/ui/components/features/voice/callCard/VoiceCallCardPreview.tsx
 msgid "With {count} others"
