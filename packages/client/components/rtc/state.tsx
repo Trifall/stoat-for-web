@@ -1410,7 +1410,7 @@ class Voice {
               screenPickerAudio || false,
             );
           } else if (this.#settings.screenShareQualityAsk) {
-            if (Object.keys(qualities).length > 1) {
+            if (Object.keys(qualities).length > 1 || screenAudioTrack) {
               localTrack.pauseUpstream();
               screenAudioTrack?.pauseUpstream();
               this.openModal({

@@ -493,6 +493,8 @@ Upstream 0.15.0 adds `packages/client/components/rtc/virtualMic.ts`, which condi
 
 This web-side integration is dormant unless the paired desktop app exposes the bridge and creates the PipeWire source. Native activation, packaging, and the privacy semantics of which system audio is routed remain desktop responsibilities. Do not make the web check treat an asynchronous Promise as a truthy platform result, and do not route the virtual source through the fork's ordinary PTT/noise-gate microphone pipeline.
 
+When `screenShareQualityAsk` is enabled, keep the screen-share settings prompt available if either multiple qualities or a screen-audio publication is available. Accounts limited to the single low-quality preset still need the prompt to enable or disable Wayland screen audio when the native system picker bypasses the custom desktop picker.
+
 ## Voice Configuration Persistence
 
 All persistent stores are handled by `State` in:
