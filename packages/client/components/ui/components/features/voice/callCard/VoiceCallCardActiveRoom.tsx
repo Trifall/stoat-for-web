@@ -1,6 +1,6 @@
 import { useLingui } from "@lingui/solid/macro";
 import { createResizeObserver } from "@solid-primitives/resize-observer";
-import { createEffect, For, onMount, Show } from "solid-js";
+import { createEffect, createSignal, For, onMount, Show } from "solid-js";
 import { TrackLoop } from "solid-livekit-components";
 import { styled } from "styled-system/jsx";
 
@@ -82,7 +82,9 @@ function VoiceCallMaximize() {
 }
 
 const TILE_MIN_WIDTH = "250px",
-  TILE_MIN_FOCUS_HEIGHT = "100px";
+  TILE_MIN_FOCUS_HEIGHT = "100px",
+  TILE_GAP_PX = 8,
+  STACK_BIAS = 1.04;
 
 /**
  * Show a grid of participants
@@ -96,16 +98,32 @@ function Participants() {
 
   let callRef: HTMLDivElement | undefined;
 
+  const [dims, setDims] = createSignal({ width: 0, height: 0 });
+
   const secondaryTracks = () =>
     voice.visibleTracks().filter((t) => !voice.isFocus(t));
   const hasSecondaryTracks = () =>
     secondaryTracks().length + testTrackCount > 0;
 
+  const trackCount = () => voice.visibleTracks().length + testTrackCount;
+
+  const tileHeightBudget = () =>
+    (dims().height - (trackCount() - 1) * TILE_GAP_PX - 2 * TILE_GAP_PX) /
+    trackCount();
+
+  const stackedTileWidth = () =>
+    Math.min(dims().width, tileHeightBudget() * (16 / 9));
+
+  // Stack tiles vertically whenever that makes every tile larger than
+  // laying them out in horizontal rows, for any number of tracks.
+  const shouldStack = () =>
+    !voice.focusId() &&
+    dims().width > 0 &&
+    stackedTileWidth() > (dims().width / trackCount()) * STACK_BIAS;
+
   const tileWidth = () => {
-    const vidWidth = Math.round(
-      100 / (voice.visibleTracks().length + testTrackCount),
-    );
-    return `max(${TILE_MIN_WIDTH}, ${vidWidth}% - var(--gap-md))`;
+    if (shouldStack()) return `min(100%, ${Math.round(stackedTileWidth())}px)`;
+    return `max(${TILE_MIN_WIDTH}, ${Math.round(100 / trackCount())}% - var(--gap-md))`;
   };
 
   // Clear out any focus when the track that was focused is no longer available.
@@ -125,6 +143,7 @@ function Participants() {
       if (el === callRef) {
         el.style.setProperty("--vc-w", `${width}px`);
         el.style.setProperty("--vc-h", `${height}px`);
+        setDims({ width, height });
       }
     });
   });
@@ -158,6 +177,7 @@ function Participants() {
           </ShowBarButtonHolder>
         </Show>
         <Grid
+          stacked={shouldStack()}
           focus={!!voice.focusId()}
           show={voice.showBar() && hasSecondaryTracks()}
           class={voice.focusId() ? scrollableStyles({ direction: "x" }) : ""}
@@ -284,6 +304,12 @@ const Grid = styled("div", {
   },
 
   variants: {
+    stacked: {
+      true: {
+        flexDirection: "column",
+        alignItems: "safe center",
+      },
+    },
     focus: {
       true: {
         flexDirection: "column",

@@ -597,6 +597,8 @@ Fork call visibility is also integrated through:
 
 The floating/PiP call card must be gated on `voice.room()`, keyed by the concrete `Room` instance, and pass that room to `useTracks()`. During disconnect, room and channel state are cleared together, while floating mode is reset by a later reactive effect; relying only on room context in that interval causes `useTracks()` to throw and turns an otherwise successful manual leave into an error modal. Keying the branch also remounts PiP with the correct room when switching calls.
 
+`VoiceCallCardActiveRoom` chooses tile orientation from measured container size (`createResizeObserver` feeding `--vc-w/--vc-h` plus a `dims()` signal), not media queries. For N 16:9 tiles it stacks the grid vertically whenever a full-width stacked tile would be larger than a `container-width / N` row tile (with a 1.04 bias to prevent flapping at the boundary); wide containers keep horizontal rows. This is geometric and scales to any track count. Do not replace it with fixed breakpoints or viewport media queries: the same component renders in-channel panes, maximized views, and fullscreen, and must respond to panel width rather than window width. Focus-mode's secondary strip keeps its own column layout and bypasses stacking.
+
 ## Desktop Bridge Typing
 
 `packages/client/types/types.d.ts` declares `window.pushToTalk`. Keep these typings aligned with the runtime bridge in the paired desktop repository.
