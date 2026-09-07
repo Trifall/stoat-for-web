@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-09-29 18:29-0500\n"
-"PO-Revision-Date: 2026-08-14 02:29+0000\n"
+"PO-Revision-Date: 2026-08-25 00:03+0000\n"
 "Last-Translator: iNKY <sir.drak@posteo.net>\n"
 "Language-Team: Czech <https://translate.stoat.chat/projects/revolt/revolt-for-web/cs/>\n"
 "Language: cs\n"
@@ -54,7 +54,7 @@ msgstr "{0, plural, one {Přetáhnout soubor} other {Přetáhnout # souborů}}"
 
 #. placeholder {0}: users() .slice(0, -1) .map((user) => user!.username) .join(", ")
 #. placeholder {1}: users().slice(-1)[0]!.username
-#: src/interface/channels/text/CompositionInfo.tsx
+#: components/app/interface/channels/text/CompositionInfo.tsx
 msgid "{0} and {1} are typing…"
 msgstr "{0} a {1} píší…"
 
@@ -79,7 +79,7 @@ msgid "{0} files exceed the maximum size limit of {maxSizeFormatted} and were no
 msgstr "Soubory {0} překračují maximální velikostní limit {maxSizeFormatted} a nebyly nahrány."
 
 #. placeholder {0}: users()[0]!.username
-#: src/interface/channels/text/CompositionInfo.tsx
+#: components/app/interface/channels/text/CompositionInfo.tsx
 msgid "{0} is typing…"
 msgstr "{0} píše…"
 
@@ -91,50 +91,50 @@ msgstr "{0} se připojil"
 #. placeholder {0}: (message.systemMessage as UserSystemMessage).user?.username
 #: components/client/NotificationsWorker.tsx
 msgid "{0} left"
-msgstr "{0} zbývá"
+msgstr "{0} se odpojil"
 
 #. placeholder {0}: (message.systemMessage as ChannelOwnershipChangeSystemMessage).from ?.username
 #. placeholder {1}: (message.systemMessage as ChannelOwnershipChangeSystemMessage).to ?.username
 #: components/client/NotificationsWorker.tsx
 msgid "{0} made {1} the new group owner"
-msgstr "{0} se stal {1} novým vlastníkem skupiny"
+msgstr "{0} udělil {1} jako nového vlastníka skupiny"
 
 #. placeholder {0}: (message.systemMessage as MessagePinnedSystemMessage).by?.username
 #: components/client/NotificationsWorker.tsx
 msgid "{0} pinned a message"
-msgstr "{0} připnutých zpráv"
+msgstr "{0} připnul zprávu"
 
 #. placeholder {0}: (message.systemMessage as ChannelRenamedSystemMessage).by?.username
 #: components/client/NotificationsWorker.tsx
 msgid "{0} renamed the channel"
-msgstr "{0} přejmenovaných kanálů"
+msgstr "{0} přejmenoval kanál"
 
 #. placeholder {0}: (message.systemMessage as MessagePinnedSystemMessage).by?.username
 #: components/client/NotificationsWorker.tsx
 msgid "{0} unpinned a message"
-msgstr "{0} odepnutých zpráv"
+msgstr "{0} odepnul zprávu"
 
 #. placeholder {0}: (message.systemMessage as UserModeratedSystemMessage).user?.username
 #. placeholder {1}: (message.systemMessage as UserModeratedSystemMessage).by?.username
 #: components/client/NotificationsWorker.tsx
 msgid "{0} was added by {1}"
-msgstr "{0} byl přidán {1}"
+msgstr "{0} byl přidán od {1}"
 
 #. placeholder {0}: (message.systemMessage as UserSystemMessage).user?.username
 #: components/client/NotificationsWorker.tsx
 msgid "{0} was banned"
-msgstr "{0} byl zabanován/a"
+msgstr "{0} byl zabanován"
 
 #. placeholder {0}: (message.systemMessage as UserSystemMessage).user?.username
 #: components/client/NotificationsWorker.tsx
 msgid "{0} was kicked"
-msgstr "{0} byl/a vyhozen/a"
+msgstr "{0} byl vyhozen"
 
 #. placeholder {0}: (message.systemMessage as UserModeratedSystemMessage).user?.username
 #. placeholder {1}: (message.systemMessage as UserModeratedSystemMessage).by?.username
 #: components/client/NotificationsWorker.tsx
 msgid "{0} was removed by {1}"
-msgstr "{0} byl odebrán {1}"
+msgstr "{0} byl odebrán od {1}"
 
 #. placeholder {0}: page() * itemsPerPage() + 1
 #. placeholder {1}: Math.min( props.itemCount!, page() * itemsPerPage() + itemsPerPage(), )
@@ -146,11 +146,11 @@ msgstr "{0}-{1} z {2}"
 #. placeholder {0}: props.member.displayName
 #: components/modal/modals/UserProfileRoles.tsx
 msgid "{0}'s roles"
-msgstr "{0} rolí"
+msgstr "{0} role"
 
 #: components/ui/components/features/messaging/elements/Reactions.tsx
 msgid "{unknown} reacted"
-msgstr "{unknown} reagoval/a"
+msgstr "{unknown} reagoval"
 
 #: components/ui/components/features/messaging/elements/Reactions.tsx
 msgid "{usernames} and {unknown} others reacted"
@@ -344,9 +344,17 @@ msgstr ""
 msgid "Allow members to change name and avatar per-message"
 msgstr "Umožnit členům změnit jméno a avatar pro každou zprávu"
 
-#: components/app/interface/settings/user/bots/ViewBot.tsx
+#: components/app/interface/settings/shared/Discoverable.tsx
 msgid "Allow others to add your bot to their servers from Discover"
 msgstr "Umožnit ostatním členům přidat vašeho bota do jejich serveru ze stránky \"Objevovat\""
+
+#: components/app/interface/settings/user/bots/ViewBot.tsx
+msgid "Allow others to invite your bot"
+msgstr ""
+
+#: components/app/interface/settings/shared/Discoverable.tsx
+msgid "Allow others to join your server from Discover"
+msgstr ""
 
 #: components/i18n/errors.tsx
 msgid "Already friends with this user."
@@ -552,6 +560,10 @@ msgstr ""
 msgid "Can't find the perfect GIF? Head to Gifbox and upload your own for everyone to use."
 msgstr "Nemůžete najít dokonalý GIF? Miřte na Gifboxu a nahrávejte své vlastní pro všechny k využití."
 
+#: components/app/interface/settings/shared/Discoverable.tsx
+msgid "Can't get discover request status right now"
+msgstr ""
+
 #: components/auth/src/flows/FlowLogin.tsx
 #: components/modal/modals/AddBot.tsx
 #: components/modal/modals/BanMember.tsx
@@ -581,6 +593,10 @@ msgstr "Nemůžete najít dokonalý GIF? Miřte na Gifboxu a nahrávejte své vl
 msgid "Cancel"
 msgstr "Zrušit"
 
+#: components/app/interface/settings/shared/Discoverable.tsx
+msgid "Cancel discover request"
+msgstr ""
+
 #: components/app/menus/UserContextMenu.tsx
 msgid "Cancel friend request"
 msgstr "Zrušit žádost o přátelství"
@@ -588,6 +604,10 @@ msgstr "Zrušit žádost o přátelství"
 #: components/app/menus/DraftMessageContextMenu.tsx
 msgid "Cancel message"
 msgstr "Zrušit zprávu"
+
+#: components/app/interface/settings/shared/Discoverable.tsx
+msgid "Cancel your discover request and remove it from the review queue"
+msgstr ""
 
 #: components/app/interface/settings/user/Account.tsx
 msgid "Cannot delete account until servers are deleted or transferred"
@@ -672,7 +692,7 @@ msgstr "Popis kanálu"
 
 #: components/app/interface/settings/channel/Overview.tsx
 msgid "Channel Info"
-msgstr "Informace o kanále"
+msgstr "Informace o kanálu"
 
 #: components/app/interface/settings/channel/Overview.tsx
 #: components/modal/modals/CreateChannel.tsx
@@ -694,6 +714,11 @@ msgstr "Kanály"
 #: components/app/interface/settings/user/appearance/AppearanceMenu.tsx
 msgid "Chat Input"
 msgstr "Textové pole chatu"
+
+#. placeholder {0}: props.discoverable instanceof Bot ? "bot" : "server"
+#: components/app/interface/settings/shared/Discoverable.tsx
+msgid "Check back often to see if your {0} has been approved!"
+msgstr ""
 
 #: components/auth/src/flows/FlowCheck.tsx
 msgid "Check your mail!"
@@ -717,7 +742,7 @@ msgstr "Klikněte na možnosti níže pro víc informací o různých změnách!
 
 #: components/ui/components/features/profiles/ProfileBanner.tsx
 msgid "Click to copy username"
-msgstr ""
+msgstr "Klikněte pro kopírování uživatelského jména"
 
 #: src/interface/channels/ChannelHeader.tsx
 msgid "Click to show full description"
@@ -773,6 +798,10 @@ msgstr "Zavřít konverzaci s {0}?"
 msgid "Code"
 msgstr "Kód"
 
+#: components/ui/components/features/voice/callCard/VoiceCallCardActiveRoom.tsx
+msgid "Collapse call window"
+msgstr ""
+
 #: components/ui/components/features/voice/callCard/VoiceCallCardActions.tsx
 msgid "Coming soon! 👀"
 msgstr "Již brzy! 👀"
@@ -813,6 +842,11 @@ msgstr "Připojuje se"
 #. js-lingui-explicit-id
 #: components/app/interface/settings/user/voice/AdvancedSettings.tsx
 msgid "plus.advanced.connection"
+msgstr ""
+
+#. placeholder {0}: props.discoverable instanceof Bot ? "bot" : "server"
+#: components/app/interface/settings/shared/Discoverable.tsx
+msgid "Contact support to remove this {0} from discover"
 msgstr ""
 
 #: components/modal/modals/ReportContent.tsx
@@ -859,6 +893,10 @@ msgstr "Kopírovat odkaz souboru"
 #: components/app/interface/settings/user/bots/ViewBot.tsx
 msgid "Copy ID"
 msgstr "Kopírovat ID"
+
+#: components/app/interface/settings/server/invites/ListServerInvites.tsx
+msgid "Copy invite link"
+msgstr ""
 
 #: components/app/interface/settings/user/bots/ViewBot.tsx
 msgid "Copy Invite URL"
@@ -1104,7 +1142,7 @@ msgstr ""
 msgid "Delete"
 msgstr "Odstranit"
 
-#. placeholder {0}: props.bot.user!.displayName
+#. placeholder {0}: props.bot.user?.displayName ?? props.bot.id
 #. placeholder {0}: props.channel.name
 #. placeholder {0}: props.role.name
 #: components/modal/modals/DeleteBot.tsx
@@ -1168,7 +1206,7 @@ msgstr ""
 #. placeholder {0}: props.invite.username
 #: components/modal/modals/AddBot.tsx
 msgid "Description provided by {0}"
-msgstr ""
+msgstr "Popis poskytnut od {0}"
 
 #: components/app/interface/settings/UserSettings.tsx
 msgid "Desktop"
@@ -1202,6 +1240,11 @@ msgstr "Odpojeno"
 
 #: components/app/interface/settings/user/Native.tsx
 msgid "Discord RPC"
+msgstr "Discord RPC"
+
+#: components/app/interface/settings/ServerSettings.tsx
+#: components/app/interface/settings/shared/Discoverable.tsx
+msgid "Discover"
 msgstr ""
 
 #: src/interface/Home.tsx
@@ -1226,11 +1269,11 @@ msgstr "Nerušit"
 
 #: components/modal/modals/ScreenShareSettings.tsx
 msgid "Don't ask me again"
-msgstr ""
+msgstr "Již se mi neptejte"
 
 #: components/modal/modals/LinkWarning.tsx
 msgid "Don't ask me again for "
-msgstr ""
+msgstr "Již se mi neptejte pro "
 
 #: components/modal/modals/BanMember.tsx
 msgid "Don't delete messages"
@@ -1238,11 +1281,11 @@ msgstr "Nesmazat zprávy"
 
 #: components/modal/modals/LeaveServer.tsx
 msgid "Don't notify others that you've left"
-msgstr ""
+msgstr "Neoznámit ostatní, že jste opustili"
 
 #: src/AndroidNag.tsx
 msgid "Don't show this again"
-msgstr ""
+msgstr "Již mi tohle neukazujte"
 
 #: components/app/interface/settings/UserSettings.tsx
 msgid "Donate"
@@ -1250,7 +1293,7 @@ msgstr "Přispějte nám"
 
 #: src/interface/Home.tsx
 msgid "Donate to Stoat"
-msgstr "Přispjejte Stoatu"
+msgstr "Přispívat Stoatu"
 
 #: components/ui/components/features/profiles/ProfileBadges.tsx
 msgid "Donated to Stoat"
@@ -1295,7 +1338,7 @@ msgstr "Upravit identitu"
 
 #: components/modal/modals/ServerInfo.tsx
 msgid "Edit Identity"
-msgstr "Upravit Identitu"
+msgstr "Upravit identitu"
 
 #: components/app/menus/MessageContextMenu.tsx
 msgid "Edit message"
@@ -1330,11 +1373,11 @@ msgstr "E-mail"
 
 #: components/app/interface/settings/server/emojis/EmojiList.tsx
 msgid "Emoji Name"
-msgstr "Název Emoji"
+msgstr "Název smajlíka"
 
 #: components/app/interface/settings/user/appearance/AppearanceMenu.tsx
 msgid "Emoji Pack (affects your messages only)"
-msgstr "Balíček Emoji (ovlivní jen vaše zprávy)"
+msgstr "Balíček smajlíků (ovlivní jen vaše zprávy)"
 
 #: components/app/interface/settings/ServerSettings.tsx
 msgid "Emojis"
@@ -1354,7 +1397,7 @@ msgstr "Povolit oznámení na ploše"
 
 #: components/app/interface/settings/user/notifications/Notifications.tsx
 msgid "Enable Push Notifications"
-msgstr ""
+msgstr "Povolit plovoucí oznámení"
 
 #. js-lingui-explicit-id
 #: components/app/interface/settings/user/voice/PushToTalkSettings.tsx
@@ -1376,11 +1419,11 @@ msgstr "Ukončit hovor"
 
 #: components/app/interface/settings/user/voice/VoiceProcessingOptions.tsx
 msgid "Enhanced"
-msgstr ""
+msgstr "Zvýšené"
 
 #: components/app/interface/settings/user/voice/VoiceProcessingOptions.tsx
 msgid "Enhanced (RNNoise)"
-msgstr ""
+msgstr "Zvýšené (RNNoise)"
 
 #: components/modal/modals/RenameSession.tsx
 msgid "Enter a new name for this session"
@@ -1407,11 +1450,11 @@ msgstr "Zadejte své současné heslo."
 #: components/modal/modals/EditPassword.tsx
 #: components/modal/modals/EditUsername.tsx
 msgid "Enter your current password..."
-msgstr "Zadejte své aktuální heslo..."
+msgstr "Zadejte své současné heslo..."
 
 #: components/auth/src/flows/Form.tsx
 msgid "Enter your invite code."
-msgstr ""
+msgstr "Zadejte své zvací kód."
 
 #: components/auth/src/flows/Form.tsx
 msgid "Enter your preferred username."
@@ -1422,7 +1465,7 @@ msgstr "Zadejte své upřednostňované uživatelské jméno."
 #: components/app/interface/settings/server/roles/ServerRoleOverview.tsx
 #: components/app/interface/settings/ServerSettings.tsx
 msgid "Everyone"
-msgstr ""
+msgstr "Všichni"
 
 #: components/ui/components/features/voice/callCard/VoiceCallCardActiveRoom.tsx
 msgid "Exit fullscreen"
@@ -1522,7 +1565,7 @@ msgstr "Přátelé"
 
 #: components/ui/components/features/messaging/composition/picker/EmojiPicker.tsx
 msgid "from "
-msgstr ""
+msgstr "od "
 
 #: components/app/interface/settings/user/appearance/AppearanceMenu.tsx
 msgid "Fruit Salad"
@@ -1558,11 +1601,11 @@ msgstr ""
 
 #: components/ui/components/features/messaging/composition/picker/GifPicker.tsx
 msgid "Gifbox is our own GIF service, so you can keep sharing GIFs right here on Stoat."
-msgstr ""
+msgstr "Gifbox je náš vlastní servis GIFů, takže můžete stále sdílet GIFy na Stoatu."
 
 #: components/ui/components/features/messaging/composition/picker/GifPicker.tsx
 msgid "GIFs are now powered by Gifbox"
-msgstr ""
+msgstr "GIFy jsou teď poháněny od Gifboxu"
 
 #: src/interface/Home.tsx
 msgid "Give feedback on Stoat"
@@ -2004,7 +2047,7 @@ msgid "Master Volume"
 msgstr ""
 
 #: components/ui/components/features/voice/callCard/VoiceCallCardActiveRoom.tsx
-msgid "Maximize call view"
+msgid "Maximize call window"
 msgstr ""
 
 #. js-lingui-explicit-id
@@ -2023,7 +2066,7 @@ msgid "Members"
 msgstr "Členové"
 
 #. placeholder {0}: slowmodeWaitTime()
-#: src/interface/channels/text/CompositionInfo.tsx
+#: components/app/interface/channels/text/CompositionInfo.tsx
 msgid "Members can send one message every {0}."
 msgstr ""
 
@@ -2569,6 +2612,16 @@ msgstr "Důvod"
 msgid "Reason for report"
 msgstr "Důvod k nahlášení"
 
+#. placeholder {0}: (dr.status as { Denied: string | null }) .Denied
+#: components/app/interface/settings/shared/Discoverable.tsx
+msgid "Reason: {0}"
+msgstr ""
+
+#. placeholder {0}: (dr.status as { Removed: string | null }) .Removed
+#: components/app/interface/settings/shared/Discoverable.tsx
+msgid "Reason: {0} Contact support for more information."
+msgstr ""
+
 #: components/app/interface/settings/user/notifications/Notifications.tsx
 msgid "Receive notifications while the app is open and in the background."
 msgstr ""
@@ -2744,8 +2797,9 @@ msgstr "Obnovit Token"
 msgid "Responsibly disclosed security issues"
 msgstr "Zodpovědně uzavíral bezpečnostní problémy"
 
+#: components/ui/components/features/voice/callCard/VoiceCallCardActions.tsx
 #: components/ui/components/features/voice/callCard/VoiceCallCardActiveRoom.tsx
-msgid "Restore call view"
+msgid "Restore call window"
 msgstr ""
 
 #: components/app/menus/DraftMessageContextMenu.tsx
@@ -2866,7 +2920,7 @@ msgstr ""
 
 #: components/app/interface/settings/user/voice/VoiceProcessingOptions.tsx
 msgid "Select noise suppression"
-msgstr ""
+msgstr "Vybrat potlačení šumu"
 
 #: components/app/interface/settings/user/voice/ScreenShareOptions.tsx
 msgid "Select screen share quality"
@@ -2994,7 +3048,7 @@ msgstr ""
 msgid "Setup recovery codes"
 msgstr ""
 
-#: src/interface/channels/text/CompositionInfo.tsx
+#: components/app/interface/channels/text/CompositionInfo.tsx
 msgid "Several people are typing…"
 msgstr "Několik lidí píše…"
 
@@ -3039,11 +3093,11 @@ msgstr ""
 msgid "Silent"
 msgstr ""
 
-#: src/interface/channels/text/CompositionInfo.tsx
+#: components/app/interface/channels/text/CompositionInfo.tsx
 msgid "Slowmode Immune"
 msgstr ""
 
-#: src/interface/channels/text/CompositionInfo.tsx
+#: components/app/interface/channels/text/CompositionInfo.tsx
 msgid "Slowmode is enabled."
 msgstr ""
 
@@ -3164,7 +3218,7 @@ msgstr "Poslat návrh na funkci"
 msgid "Submit feedback"
 msgstr "Poslat zpětnou vazbu"
 
-#: components/app/interface/settings/user/bots/ViewBot.tsx
+#: components/app/interface/settings/shared/Discoverable.tsx
 msgid "Submit to Discover"
 msgstr ""
 
@@ -3236,18 +3290,51 @@ msgstr "Textový kanál"
 msgid "That action had no effect."
 msgstr ""
 
+#: components/i18n/errors.tsx
+msgid "The bot has been removed from discover by moderators, the user must contact support."
+msgstr ""
+
+#: components/i18n/errors.tsx
+msgid "The bot is already on discover, the user must contact support to have it removed"
+msgstr ""
+
+#: components/i18n/errors.tsx
+msgid "The Discover request is approved or the item has been removed from discover. In either case, the user must contact support."
+msgstr ""
+
+#: components/i18n/errors.tsx
+msgid "The Discover request was declined. Declined requests cannot be removed, but the user may submit again."
+msgstr ""
+
 #. placeholder {0}: file.name
 #: src/interface/channels/text/Composition.tsx
 msgid "The file \"{0}\" ({fileSize}) exceeds the maximum size limit of {maxSizeFormatted}."
 msgstr ""
 
 #: components/i18n/errors.tsx
+msgid "The item was removed by moderators, and as such future applications are prohibited. Contact support for more information."
+msgstr ""
+
+#: components/i18n/errors.tsx
 msgid "The password is too short."
+msgstr ""
+
+#: components/i18n/errors.tsx
+msgid "The server has been removed from discover by moderators, the user must contact support."
+msgstr ""
+
+#: components/i18n/errors.tsx
+msgid "The server is already on discover, the user must contact support to have it removed."
 msgstr ""
 
 #: components/app/interface/settings/user/Sync.tsx
 msgid "Theme"
 msgstr "Motiv"
+
+#. placeholder {0}: props.discoverable instanceof Bot ? "bot" : "server"
+#: components/app/interface/settings/shared/Discoverable.tsx
+msgid "This {0} is discoverable"
+msgstr ""
 
 #: components/i18n/errors.tsx
 msgid "This account is not activated! Please check your account's inbox and try again."
@@ -3586,7 +3673,7 @@ msgstr "Hlas"
 
 #: components/app/interface/settings/UserSettings.tsx
 msgid "Voice & Video"
-msgstr ""
+msgstr "Hlas a video"
 
 #: components/modal/modals/CreateChannel.tsx
 msgid "Voice Channel"
@@ -3715,6 +3802,10 @@ msgstr "Můžete ji později znovu otevřít, zmizí ale na obou stranách."
 msgid "You can report issues and discuss improvements with us directly here."
 msgstr "Zde můžete nahlásit problémy a diskutovat o vylepšeních přímo s námi."
 
+#: components/app/interface/settings/shared/Discoverable.tsx
+msgid "You can request again below"
+msgstr ""
+
 #. placeholder {0}: err.max
 #: components/i18n/errors.tsx
 msgid "You can't be in more than {0} servers, please leave one and try again."
@@ -3779,6 +3870,10 @@ msgstr "Tohoto uživatele máte zablokovaného."
 msgid "You may be experiencing connection issues."
 msgstr ""
 
+#: components/i18n/errors.tsx
+msgid "You may not submit this item to discover."
+msgstr ""
+
 #: components/ui/components/features/voice/VoiceStatefulUserIcons.tsx
 msgid "You muted this user."
 msgstr "Tohoto uživatele jste ztlumil/a."
@@ -3830,6 +3925,11 @@ msgstr ""
 msgid "You've sent too many friend requests, the maximum is {0}"
 msgstr "Poslali jste maxium žádostí o přátelství, maximum je {0}"
 
+#. placeholder {0}: props.discoverable instanceof Bot ? "bot" : "server"
+#: components/app/interface/settings/shared/Discoverable.tsx
+msgid "Your {0} is under review"
+msgstr ""
+
 #: components/app/interface/settings/user/Account.tsx
 msgid "Your account and all of your data (including your messages and friends list) will be queued for deletion. A confirmation email will be sent - you can cancel this within 7 days by contacting support."
 msgstr "Váš účet a všechny vaše údaje (i vaše zprávy a list přátel) budou zařazeny do fronty na smazání. E-mail pro potvrzení bude odeslán - toto můžete zrušit do 7 dnů kontaktováním podpory."
@@ -3837,6 +3937,14 @@ msgstr "Váš účet a všechny vaše údaje (i vaše zprávy a list přátel) b
 #: components/auth/src/flows/FlowVerify.tsx
 msgid "Your account has been verified!"
 msgstr "Váš účet byl ověřen!"
+
+#: components/app/interface/settings/shared/Discoverable.tsx
+msgid "Your discover request has been denied"
+msgstr ""
+
+#: components/app/interface/settings/shared/Discoverable.tsx
+msgid "Your discover request has been removed"
+msgstr ""
 
 #: components/i18n/errors.tsx
 msgid "Your discriminator change has been ratelimited, please try again later."
@@ -3849,6 +3957,10 @@ msgstr "Vaše zpráva je příliš dlouhá, prosím zkraťte zprávu a zkuste to
 #: components/modal/modals/MFARecovery.tsx
 msgid "Your recovery codes"
 msgstr "Vaše obnovovací kódy"
+
+#: components/i18n/errors.tsx
+msgid "Your request failed. Please contact support."
+msgstr ""
 
 #: components/i18n/errors.tsx
 msgid "Your role ranking is too low to take this action."

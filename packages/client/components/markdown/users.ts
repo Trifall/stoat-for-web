@@ -88,10 +88,9 @@ export function useUsers(
   ids: string[] | Accessor<string[]>,
   filterNull?: boolean,
 ): Accessor<(UserInformation | undefined)[]> {
-  const clientAccessor = useClient();
-
   // TODO: use a context here for when we do multi view :)
   const params = useSmartParams();
+  const clientAccessor = useClient();
 
   createEffect(() => {
     const client = clientAccessor()!;
@@ -102,19 +101,20 @@ export function useUsers(
   return createMemo(() => {
     const client = clientAccessor()!;
     const list = (typeof ids === "function" ? ids() : ids).map((id) => {
-      const user = client.users.get(id)!;
-
-      if (user) {
-        return userInformation(
-          user,
-          params().serverId
-            ? client.serverMembers.getByKey({
-                server: params().serverId!,
-                user: user.id,
-              })
-            : undefined,
-        );
+      const user = client.users.get(id);
+      if (!user) {
+        return userInformation();
       }
+
+      return userInformation(
+        user,
+        params().serverId
+          ? client.serverMembers.getByKey({
+              server: params().serverId!,
+              user: user.id,
+            })
+          : undefined,
+      );
     });
 
     return filterNull ? list.filter((x) => x) : list;

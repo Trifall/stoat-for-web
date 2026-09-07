@@ -17,6 +17,7 @@ import { Channel } from "stoat.js";
 import { styled } from "styled-system/jsx";
 
 import { useVoice } from "@revolt/rtc";
+import { VoiceLayout } from "@revolt/rtc/state";
 import { useState } from "@revolt/state";
 import { SlideState } from "@revolt/ui/components/navigation/SlideDrawer";
 
@@ -30,6 +31,7 @@ type FloatType = "tl" | "tr" | "bl" | "br";
 type Info = {
   channel: Channel;
   pos: DOMRect;
+  parentRect: DOMRect;
   drawer?: SlideState;
 };
 
@@ -106,18 +108,31 @@ export function VoiceCallCardContext(props: { children: JSX.Element }) {
     resetEvents();
 
     //Set mode based on state
-    if (voice.fullscreen()) {
+    if (voice.layout() === "fullscreen") {
       sty.transform = ``;
       sty.width = `100%`;
+      sty.height = "";
+      setMode();
+    } else if (
+      voice.layout() === "expanded" &&
+      inf?.parentRect &&
+      (!inf.drawer || inf.drawer === SlideState.SHOWN)
+    ) {
+      sty.transform = `translate(${inf.parentRect.x}px, ${inf.parentRect.y}px)`;
+      sty.width = `${inf.parentRect.width}px`;
+      sty.height = `${inf.parentRect.height}px`;
       setMode();
     } else if (inf?.pos && (!inf.drawer || inf.drawer === SlideState.SHOWN)) {
       sty.setProperty("--vc-y", `${inf.pos.y}px`);
       sty.transform = `translate(${inf.pos.x}px, ${inf.pos.y}px)`;
       sty.width = `${inf.pos.width}px`;
+      sty.height = voice.layout() === "collapsed" ? "56px" : "";
       setMode();
     } else if (!inCall()) {
       const y = inf?.pos.y ?? ref.getBoundingClientRect().y;
       sty.transform = `translate(${innerWidth + 50}px, ${y}px)`;
+      sty.width = "";
+      sty.height = "";
       setMode();
     } else if (!mode()) setFloat("tr");
   });
@@ -130,6 +145,7 @@ export function VoiceCallCardContext(props: { children: JSX.Element }) {
       y = float[0] === "t" ? PAD_Y : `calc(100vh - var(--flt-h) - ${PAD_Y})`;
     sty.transform = `translate(${x}, ${y})`;
     sty.width = "";
+    sty.height = "";
     setMode("floating");
   }
 
@@ -139,7 +155,7 @@ export function VoiceCallCardContext(props: { children: JSX.Element }) {
     const floating = document.getElementById("floating");
     const handleFullscreenChange = () => {
       if (!document.fullscreenElement) {
-        voice.toggleFullscreen(false);
+        voice.resetLayout();
       }
     };
 
@@ -150,7 +166,7 @@ export function VoiceCallCardContext(props: { children: JSX.Element }) {
   });
 
   createEffect(() => {
-    if (voice.fullscreen() && inCall()) {
+    if (voice.layout() === "fullscreen" && inCall()) {
       if (
         !document
           .getElementById("floating")
@@ -174,7 +190,7 @@ export function VoiceCallCardContext(props: { children: JSX.Element }) {
           ref={ref}
           mode={mode()}
           onPointerDown={mouseDown}
-          fullscreen={voice.fullscreen()}
+          fullscreen={voice.layout() === "fullscreen"}
         >
           <Switch>
             <Match keyed when={mode() && voice.room()}>
@@ -185,8 +201,7 @@ export function VoiceCallCardContext(props: { children: JSX.Element }) {
                 channel={channel()!}
                 inCall={inCall()}
                 showCard={voice.showCard(channel()!)}
-                fullscreen={voice.fullscreen()}
-                maximized={inCall() && voice.maximized() && !voice.fullscreen()}
+                layout={voice.layout()}
               />
             </Match>
           </Switch>
@@ -220,7 +235,6 @@ const Float = styled("div", {
         top: 0,
         // Width is set by floating logic in effect above
       },
-      false: {},
     },
   },
   compoundVariants: [
@@ -250,6 +264,7 @@ export function VoiceChannelCallCardMount(props: { channel: Channel }) {
         ? {
             channel: props.channel,
             pos: ref!.getBoundingClientRect(),
+            parentRect: ref!.parentElement!.getBoundingClientRect(),
             drawer: state.appDrawer()?.state,
           }
         : undefined,
@@ -278,17 +293,12 @@ function VoiceCallCard(props: {
   channel: Channel;
   inCall: boolean;
   showCard: boolean;
-  fullscreen: boolean;
-  maximized: boolean;
+  layout: VoiceLayout;
 }) {
   return (
     <Show when={props.showCard}>
-      <Base fullscreen={props.fullscreen}>
-        <Card
-          active={props.inCall}
-          fullscreen={props.fullscreen}
-          maximized={props.maximized}
-        >
+      <Base layout={props.layout as never}>
+        <Card active={props.inCall} layout={props.layout}>
           <Show
             when={props.inCall}
             fallback={<VoiceCallCardPreview channel={props.channel} />}
@@ -308,18 +318,26 @@ const Base = styled("div", {
     padding: "var(--gap-md)",
 
     width: "100%",
+    height: "100%",
     position: "absolute",
 
     zIndex: 2,
     userSelect: "none",
+    pointerEvents: "none",
 
     display: "flex",
     alignItems: "center",
     flexDirection: "column",
+    transition: "all var(--transitions-medium)",
   },
   variants: {
-    fullscreen: {
-      true: {
+    layout: {
+      fullscreen: {
+        top: 0,
+        height: "100%",
+        padding: 0,
+      },
+      expanded: {
         top: 0,
         height: "100%",
         padding: 0,
@@ -343,6 +361,7 @@ const Card = styled("div", {
     active: {
       true: {
         width: "100%",
+        height: "100%",
       },
       false: {
         width: "360px",
@@ -350,34 +369,16 @@ const Card = styled("div", {
         cursor: "pointer",
       },
     },
-    maximized: {
-      true: {
-        height:
-          "calc(100vh - var(--vc-y) - var(--gap-md) - var(--gap-md) - var(--gap-md))",
-      },
-      false: {},
-    },
-    fullscreen: {
-      true: {
-        height: "100%",
+    layout: {
+      fullscreen: {
         borderRadius: 0,
       },
-      false: {},
-    },
-  },
-  compoundVariants: [
-    {
-      active: [true],
-      fullscreen: [false],
-      maximized: [false],
-      css: {
-        height: "40vh",
+      expanded: {
+        borderRadius: "var(--borderRadius-xl)",
+      },
+      collapsed: {
+        background: "none",
       },
     },
-  ],
-  defaultVariants: {
-    active: false,
-    fullscreen: false,
-    maximized: false,
   },
 });

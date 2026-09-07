@@ -32,7 +32,6 @@ import { ChannelPageProps } from "../ChannelPage";
 import { VoiceChannelCallCardMount } from "@revolt/ui/components/features/voice/callCard/VoiceCallCard";
 import { Channel } from "stoat.js";
 import { MessageComposition } from "./Composition";
-import { CompositionInfo } from "./CompositionInfo";
 import { MemberSidebar } from "./MemberSidebar";
 import { TextSearchSidebar } from "./TextSearchSidebar";
 
@@ -232,8 +231,6 @@ export function TextChannel(props: ChannelPageProps) {
             jumpToBottomRef={(ref) => (jumpToBottomRef = ref)}
             atEnd={[atEnd, setEnd]}
           />
-
-          <CompositionInfo channel={props.channel} />
 
           <MessageComposition
             channel={props.channel}

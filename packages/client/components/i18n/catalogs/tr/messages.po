@@ -57,7 +57,7 @@ msgstr "{0, plural, one {Bir Dosya Bırak} other {Dosya # Bırak}}"
 
 #. placeholder {0}: users() .slice(0, -1) .map((user) => user!.username) .join(", ")
 #. placeholder {1}: users().slice(-1)[0]!.username
-#: src/interface/channels/text/CompositionInfo.tsx
+#: components/app/interface/channels/text/CompositionInfo.tsx
 msgid "{0} and {1} are typing…"
 msgstr "{0} ve {1} yazıyor…"
 
@@ -82,7 +82,7 @@ msgid "{0} files exceed the maximum size limit of {maxSizeFormatted} and were no
 msgstr "{0} dosya, {maxSizeFormatted} olan maksimum boyut sınırını aştığı için yüklenemedi."
 
 #. placeholder {0}: users()[0]!.username
-#: src/interface/channels/text/CompositionInfo.tsx
+#: components/app/interface/channels/text/CompositionInfo.tsx
 msgid "{0} is typing…"
 msgstr "{0} yazıyor…"
 
@@ -399,9 +399,17 @@ msgstr ""
 msgid "Allow members to change name and avatar per-message"
 msgstr "Üyelerin her mesaj için ad ve avatar değiştirmesine izin ver"
 
-#: components/app/interface/settings/user/bots/ViewBot.tsx
+#: components/app/interface/settings/shared/Discoverable.tsx
 msgid "Allow others to add your bot to their servers from Discover"
 msgstr "Başkalarının botunu Keşfet sekmesinden kendi sunucularına eklemesine izin ver"
+
+#: components/app/interface/settings/user/bots/ViewBot.tsx
+msgid "Allow others to invite your bot"
+msgstr ""
+
+#: components/app/interface/settings/shared/Discoverable.tsx
+msgid "Allow others to join your server from Discover"
+msgstr ""
 
 #: components/i18n/errors.tsx
 msgid "Already friends with this user."
@@ -613,6 +621,10 @@ msgstr ""
 msgid "Can't find the perfect GIF? Head to Gifbox and upload your own for everyone to use."
 msgstr "Mükemmel bir GİF bulamıyor musunuz? GifBox'a gidin ve kendinizinkini yükleyin ki herkes kullanabilsin."
 
+#: components/app/interface/settings/shared/Discoverable.tsx
+msgid "Can't get discover request status right now"
+msgstr ""
+
 #: components/auth/src/flows/FlowLogin.tsx
 #: components/modal/modals/AddBot.tsx
 #: components/modal/modals/BanMember.tsx
@@ -642,6 +654,10 @@ msgstr "Mükemmel bir GİF bulamıyor musunuz? GifBox'a gidin ve kendinizinkini 
 msgid "Cancel"
 msgstr "İptal et"
 
+#: components/app/interface/settings/shared/Discoverable.tsx
+msgid "Cancel discover request"
+msgstr ""
+
 #: components/app/menus/UserContextMenu.tsx
 msgid "Cancel friend request"
 msgstr "Arkadaş isteğini iptal et"
@@ -649,6 +665,10 @@ msgstr "Arkadaş isteğini iptal et"
 #: components/app/menus/DraftMessageContextMenu.tsx
 msgid "Cancel message"
 msgstr "Mesajı iptal et"
+
+#: components/app/interface/settings/shared/Discoverable.tsx
+msgid "Cancel your discover request and remove it from the review queue"
+msgstr ""
 
 #: components/app/interface/settings/user/Account.tsx
 msgid "Cannot delete account until servers are deleted or transferred"
@@ -759,6 +779,11 @@ msgstr "Kanallar"
 msgid "Chat Input"
 msgstr "Sohbet Girdisi"
 
+#. placeholder {0}: props.discoverable instanceof Bot ? "bot" : "server"
+#: components/app/interface/settings/shared/Discoverable.tsx
+msgid "Check back often to see if your {0} has been approved!"
+msgstr ""
+
 #: components/auth/src/flows/FlowCheck.tsx
 msgid "Check your mail!"
 msgstr "Posta kutunu kontrol et!"
@@ -837,6 +862,10 @@ msgstr "{0} ile olan konuşmayı kapat?"
 msgid "Code"
 msgstr "Kod"
 
+#: components/ui/components/features/voice/callCard/VoiceCallCardActiveRoom.tsx
+msgid "Collapse call window"
+msgstr ""
+
 #: components/ui/components/features/voice/callCard/VoiceCallCardActions.tsx
 msgid "Coming soon! 👀"
 msgstr "Çok yakında geliyor! 👀"
@@ -877,6 +906,11 @@ msgstr "Bağlanıyor"
 #. js-lingui-explicit-id
 #: components/app/interface/settings/user/voice/AdvancedSettings.tsx
 msgid "plus.advanced.connection"
+msgstr ""
+
+#. placeholder {0}: props.discoverable instanceof Bot ? "bot" : "server"
+#: components/app/interface/settings/shared/Discoverable.tsx
+msgid "Contact support to remove this {0} from discover"
 msgstr ""
 
 #: components/modal/modals/ReportContent.tsx
@@ -923,6 +957,10 @@ msgstr "Dosya linkini kopyala"
 #: components/app/interface/settings/user/bots/ViewBot.tsx
 msgid "Copy ID"
 msgstr "ID'yi Kopyala"
+
+#: components/app/interface/settings/server/invites/ListServerInvites.tsx
+msgid "Copy invite link"
+msgstr ""
 
 #: components/app/interface/settings/user/bots/ViewBot.tsx
 msgid "Copy Invite URL"
@@ -1172,7 +1210,7 @@ msgstr "Performans Düşüşü"
 msgid "Delete"
 msgstr "Sil"
 
-#. placeholder {0}: props.bot.user!.displayName
+#. placeholder {0}: props.bot.user?.displayName ?? props.bot.id
 #. placeholder {0}: props.channel.name
 #. placeholder {0}: props.role.name
 #: components/modal/modals/DeleteBot.tsx
@@ -1271,6 +1309,11 @@ msgstr "Bağlantı kesildi"
 #: components/app/interface/settings/user/Native.tsx
 msgid "Discord RPC"
 msgstr "Discord RPC"
+
+#: components/app/interface/settings/ServerSettings.tsx
+#: components/app/interface/settings/shared/Discoverable.tsx
+msgid "Discover"
+msgstr ""
 
 #: src/interface/Home.tsx
 msgid "Discover Stoat"
@@ -2082,7 +2125,11 @@ msgid "Master Volume"
 msgstr ""
 
 #: components/ui/components/features/voice/callCard/VoiceCallCardActiveRoom.tsx
-msgid "Maximize call view"
+#~ msgid "Maximize call view"
+#~ msgstr ""
+
+#: components/ui/components/features/voice/callCard/VoiceCallCardActiveRoom.tsx
+msgid "Maximize call window"
 msgstr ""
 
 #. js-lingui-explicit-id
@@ -2101,7 +2148,7 @@ msgid "Members"
 msgstr "Üyeler"
 
 #. placeholder {0}: slowmodeWaitTime()
-#: src/interface/channels/text/CompositionInfo.tsx
+#: components/app/interface/channels/text/CompositionInfo.tsx
 msgid "Members can send one message every {0}."
 msgstr "Üyeler her {0}'da bir mesaj gönderebilir."
 
@@ -2650,6 +2697,16 @@ msgstr "Sebep"
 msgid "Reason for report"
 msgstr "Şikayet etme nedeni"
 
+#. placeholder {0}: (dr.status as { Denied: string | null }) .Denied
+#: components/app/interface/settings/shared/Discoverable.tsx
+msgid "Reason: {0}"
+msgstr ""
+
+#. placeholder {0}: (dr.status as { Removed: string | null }) .Removed
+#: components/app/interface/settings/shared/Discoverable.tsx
+msgid "Reason: {0} Contact support for more information."
+msgstr ""
+
 #: components/app/interface/settings/user/notifications/Notifications.tsx
 msgid "Receive notifications while the app is open and in the background."
 msgstr "Uygulama arka planda açıkken bildirim al."
@@ -2826,7 +2883,12 @@ msgid "Responsibly disclosed security issues"
 msgstr "Güvenlik sorunlarını düzgün bir biçimde açığa çıkardı"
 
 #: components/ui/components/features/voice/callCard/VoiceCallCardActiveRoom.tsx
-msgid "Restore call view"
+#~ msgid "Restore call view"
+#~ msgstr ""
+
+#: components/ui/components/features/voice/callCard/VoiceCallCardActions.tsx
+#: components/ui/components/features/voice/callCard/VoiceCallCardActiveRoom.tsx
+msgid "Restore call window"
 msgstr ""
 
 #: components/app/menus/DraftMessageContextMenu.tsx
@@ -3081,7 +3143,7 @@ msgstr "Tek kullanımlık şifre doğrulaması ayarla"
 msgid "Setup recovery codes"
 msgstr "Kurtarma kodu ayarla"
 
-#: src/interface/channels/text/CompositionInfo.tsx
+#: components/app/interface/channels/text/CompositionInfo.tsx
 msgid "Several people are typing…"
 msgstr "Birkaç kişi yazıyor…"
 
@@ -3127,11 +3189,11 @@ msgstr ""
 msgid "Silent"
 msgstr "Sessiz"
 
-#: src/interface/channels/text/CompositionInfo.tsx
+#: components/app/interface/channels/text/CompositionInfo.tsx
 msgid "Slowmode Immune"
 msgstr "Yavaş mod bağışıklığı"
 
-#: src/interface/channels/text/CompositionInfo.tsx
+#: components/app/interface/channels/text/CompositionInfo.tsx
 msgid "Slowmode is enabled."
 msgstr "Yavaş mod aktif."
 
@@ -3258,7 +3320,7 @@ msgstr "Özellik tavsiyesi gönder"
 msgid "Submit feedback"
 msgstr "Geri bildirim gönder"
 
-#: components/app/interface/settings/user/bots/ViewBot.tsx
+#: components/app/interface/settings/shared/Discoverable.tsx
 msgid "Submit to Discover"
 msgstr "Keşfete Sun"
 
@@ -3330,18 +3392,51 @@ msgstr "Metin Kanalı"
 msgid "That action had no effect."
 msgstr "Bu eylem hiçbir şey yapmadı."
 
+#: components/i18n/errors.tsx
+msgid "The bot has been removed from discover by moderators, the user must contact support."
+msgstr ""
+
+#: components/i18n/errors.tsx
+msgid "The bot is already on discover, the user must contact support to have it removed"
+msgstr ""
+
+#: components/i18n/errors.tsx
+msgid "The Discover request is approved or the item has been removed from discover. In either case, the user must contact support."
+msgstr ""
+
+#: components/i18n/errors.tsx
+msgid "The Discover request was declined. Declined requests cannot be removed, but the user may submit again."
+msgstr ""
+
 #. placeholder {0}: file.name
 #: src/interface/channels/text/Composition.tsx
 msgid "The file \"{0}\" ({fileSize}) exceeds the maximum size limit of {maxSizeFormatted}."
 msgstr "\"{0}\" adlı dosya ({fileSize}) maksimum dosya limiti olan {maxSizeFormatted} boyutunu aşıyor."
 
 #: components/i18n/errors.tsx
+msgid "The item was removed by moderators, and as such future applications are prohibited. Contact support for more information."
+msgstr ""
+
+#: components/i18n/errors.tsx
 msgid "The password is too short."
 msgstr "Şifre çok kısa."
+
+#: components/i18n/errors.tsx
+msgid "The server has been removed from discover by moderators, the user must contact support."
+msgstr ""
+
+#: components/i18n/errors.tsx
+msgid "The server is already on discover, the user must contact support to have it removed."
+msgstr ""
 
 #: components/app/interface/settings/user/Sync.tsx
 msgid "Theme"
 msgstr "Tema"
+
+#. placeholder {0}: props.discoverable instanceof Bot ? "bot" : "server"
+#: components/app/interface/settings/shared/Discoverable.tsx
+msgid "This {0} is discoverable"
+msgstr ""
 
 #: components/i18n/errors.tsx
 msgid "This account is not activated! Please check your account's inbox and try again."
@@ -3815,6 +3910,10 @@ msgstr "Daha sonra tekrar açabilirsin, ancak her iki taraftan da kaybolacaktır
 msgid "You can report issues and discuss improvements with us directly here."
 msgstr "Sorunları bildirebilir ve gelişmeleri bizimle doğrudan buradan paylaşabilirsin."
 
+#: components/app/interface/settings/shared/Discoverable.tsx
+msgid "You can request again below"
+msgstr ""
+
 #. placeholder {0}: err.max
 #: components/i18n/errors.tsx
 msgid "You can't be in more than {0} servers, please leave one and try again."
@@ -3879,6 +3978,10 @@ msgstr "Bu kullanıcı engellemişsiniz."
 msgid "You may be experiencing connection issues."
 msgstr "Bağlantı sorunları yaşıyor olabilirsiniz."
 
+#: components/i18n/errors.tsx
+msgid "You may not submit this item to discover."
+msgstr ""
+
 #: components/ui/components/features/voice/VoiceStatefulUserIcons.tsx
 msgid "You muted this user."
 msgstr "Bu kullanıcıyı susturdunuz."
@@ -3930,6 +4033,11 @@ msgstr "Kişisel bot oluşturma sayına ulaştın."
 msgid "You've sent too many friend requests, the maximum is {0}"
 msgstr "Çok fazla arkadaş isteği gönderdin, en fazla {0} tane gönderebilirsin"
 
+#. placeholder {0}: props.discoverable instanceof Bot ? "bot" : "server"
+#: components/app/interface/settings/shared/Discoverable.tsx
+msgid "Your {0} is under review"
+msgstr ""
+
 #: components/app/interface/settings/user/Account.tsx
 msgid "Your account and all of your data (including your messages and friends list) will be queued for deletion. A confirmation email will be sent - you can cancel this within 7 days by contacting support."
 msgstr "Bütün verileriniz (mesaj ve arkadaş listesi dahil) ve hesabınız silinmeye ayarlandı. Onay için e-posta gönderilecek - bunu 7 gün içerisinde destek ekibimizle iletişime geçerek iptal edebilirsiniz."
@@ -3937,6 +4045,14 @@ msgstr "Bütün verileriniz (mesaj ve arkadaş listesi dahil) ve hesabınız sil
 #: components/auth/src/flows/FlowVerify.tsx
 msgid "Your account has been verified!"
 msgstr "Hesabınız doğrulandı!"
+
+#: components/app/interface/settings/shared/Discoverable.tsx
+msgid "Your discover request has been denied"
+msgstr ""
+
+#: components/app/interface/settings/shared/Discoverable.tsx
+msgid "Your discover request has been removed"
+msgstr ""
 
 #: components/i18n/errors.tsx
 msgid "Your discriminator change has been ratelimited, please try again later."
@@ -3949,6 +4065,10 @@ msgstr "Mesajın çok uzun, lütfen bazı karakterleri silip tekrar dene."
 #: components/modal/modals/MFARecovery.tsx
 msgid "Your recovery codes"
 msgstr "Kurtarma kodların"
+
+#: components/i18n/errors.tsx
+msgid "Your request failed. Please contact support."
+msgstr ""
 
 #: components/i18n/errors.tsx
 msgid "Your role ranking is too low to take this action."

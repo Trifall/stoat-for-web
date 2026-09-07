@@ -24,8 +24,13 @@ import {
   MediaDeviceFailure,
   Room,
   RoomEvent,
+  ScreenShareCaptureOptions,
+  ScreenSharePresets,
   Track,
   TrackInvalidError,
+  VideoEncoding,
+  VideoPresets,
+  VideoResolution,
 } from "livekit-client";
 import { Channel } from "stoat.js";
 
@@ -43,8 +48,6 @@ import {
   Voice as VoiceSettings,
 } from "@revolt/state/stores/Voice";
 import { VoiceCallCardContext } from "@revolt/ui/components/features/voice/callCard/VoiceCallCard";
-import { ScreenSharePresets, VideoResolution } from "livekit-client";
-
 import { InRoom } from "./components/InRoom";
 import { RoomAudioManager } from "./components/RoomAudioManager";
 import { VoiceProcessor } from "./VoiceProcessor";
@@ -66,11 +69,14 @@ type MicrophonePublication = NonNullable<
   Awaited<ReturnType<Room["localParticipant"]["setMicrophoneEnabled"]>>
 >;
 
-type ScreenShareQuality = {
+export type VoiceLayout = "fullscreen" | "expanded" | "collapsed" | undefined;
+
+type ScreenShareQuality = Required<
+  Pick<ScreenShareCaptureOptions, "contentHint" | "resolution">
+> & {
   name: ScreenShareQualityName;
-  resolution: VideoResolution;
   fullName: string;
-  contentHint: string;
+  encoding: VideoEncoding;
 };
 
 class Voice {
@@ -115,11 +121,8 @@ class Voice {
   #disposeTracks?: () => void;
   #disposed = false;
 
-  fullscreen: Accessor<boolean>;
-  #setFullscreen: Setter<boolean>;
-
-  maximized: Accessor<boolean>;
-  #setMaximized: Setter<boolean>;
+  layout: Accessor<VoiceLayout>;
+  #setLayout: Setter<VoiceLayout>;
 
   hideNonVideoParticipants: Accessor<boolean>;
   #setHideNonVideoParticipants: Setter<boolean>;
@@ -179,13 +182,9 @@ class Voice {
     this.screenshare = screenshare;
     this.#setScreenshare = setScreenshare;
 
-    const [fullscreen, setFullscreen] = createSignal(false);
-    this.fullscreen = fullscreen;
-    this.#setFullscreen = setFullscreen;
-
-    const [maximized, setMaximized] = createSignal(false);
-    this.maximized = maximized;
-    this.#setMaximized = setMaximized;
+    const [layout, setLayout] = createSignal<VoiceLayout>();
+    this.layout = layout;
+    this.#setLayout = setLayout;
 
     const [hideNonVideoParticipants, setHideNonVideoParticipants] =
       createSignal(false);
@@ -608,12 +607,13 @@ class Voice {
         deviceId: this.#settings.preferredAudioOutputDevice,
       },
       videoCaptureDefaults: {
-        resolution: {
-          width: 1280,
-          height: 720,
-          frameRate: 30,
-        },
+        // TODO: Support higher resolutions based on limits
+        resolution: VideoPresets.h720.resolution,
         deviceId: this.#settings.preferredVideoDevice,
+      },
+      publishDefaults: {
+        videoEncoding: VideoPresets.h720.encoding,
+        screenShareEncoding: ScreenSharePresets.h720fps30.encoding,
       },
     });
     this.#mediaDevicesChangeHandler = () => {
@@ -1031,8 +1031,7 @@ class Voice {
         this.#setMicrophone(this.#settings.micOn);
         this.#setVideo(false);
         this.#setScreenshare(false);
-        this.#setFullscreen(false);
-        this.#setMaximized(false);
+        this.#setLayout();
         this.#setHideNonVideoParticipants(false);
         this.#setFocus();
         this.#setShowBar(true);
@@ -1241,6 +1240,7 @@ class Voice {
         resolution: ScreenSharePresets.h720fps30.resolution,
         fullName: `720p ${Math.min(30, this.#settings.screenShareFrameRate)}FPS`,
         contentHint: "motion",
+        encoding: ScreenSharePresets.h720fps30.encoding,
       },
     };
 
@@ -1256,6 +1256,7 @@ class Voice {
         resolution: ScreenSharePresets.h1080fps30.resolution,
         fullName: `1080p ${Math.min(30, this.#settings.screenShareFrameRate)}FPS`,
         contentHint: "motion",
+        encoding: ScreenSharePresets.h1080fps30.encoding,
       };
       const originalResolution = ScreenSharePresets.original.resolution;
       originalResolution.frameRate = 5;
@@ -1274,6 +1275,7 @@ class Voice {
         resolution: originalResolution,
         fullName: `Source ${Math.min(5, this.#settings.screenShareFrameRate)}FPS`,
         contentHint: "text",
+        encoding: ScreenSharePresets.original.encoding,
       };
     }
 
@@ -1349,7 +1351,7 @@ class Voice {
           },
           {
             screenShareEncoding: {
-              ...ScreenSharePresets.h1080fps15.encoding,
+              ...initialQuality.encoding,
               maxBitrate: this.#settings.screenShareBitrateKbps * 1000,
               maxFramerate:
                 initialResolution.frameRate ??
@@ -1386,18 +1388,18 @@ class Voice {
             const resolution = this.#screenShareResolution(quality);
 
             if (localTrack.videoTrack) {
-              const capabilities =
-                localTrack.videoTrack.mediaStreamTrack.getCapabilities();
-              const width = resolution.width || capabilities.width?.max;
-              const height = resolution.height || capabilities.height?.max;
-
-              await localTrack.videoTrack.mediaStreamTrack.applyConstraints({
-                frameRate: { max: resolution.frameRate },
-                width: width ? { ideal: width, max: width } : undefined,
-                height: height ? { ideal: height, max: height } : undefined,
-              });
-              localTrack.videoTrack.mediaStreamTrack.contentHint =
-                quality.contentHint;
+              await localTrack.videoTrack.applyScreenShareConstraints(
+                {
+                  resolution,
+                  contentHint: quality.contentHint,
+                },
+                {
+                  ...quality.encoding,
+                  maxBitrate: this.#settings.screenShareBitrateKbps * 1000,
+                  maxFramerate:
+                    resolution.frameRate ?? this.#settings.screenShareFrameRate,
+                },
+              );
               if (!audio && screenAudioTrack?.track) {
                 room.localParticipant.unpublishTrack(screenAudioTrack.track);
               }
@@ -1469,12 +1471,12 @@ class Voice {
     }
   }
 
-  toggleFullscreen(fullscreen: boolean = !this.fullscreen()) {
-    this.#setFullscreen(fullscreen);
+  resetLayout() {
+    this.#setLayout();
   }
 
-  toggleMaximized(maximized: boolean = !this.maximized()) {
-    this.#setMaximized(maximized);
+  toggleLayout(type: VoiceLayout) {
+    this.#setLayout((l) => (l === type ? undefined : type));
   }
 
   toggleHideNonVideoParticipants(
