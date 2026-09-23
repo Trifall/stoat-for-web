@@ -5,7 +5,6 @@ import { cva } from "styled-system/css";
 
 import { MessageContextMenu, useMessage } from "@revolt/app";
 import { useClient } from "@revolt/client";
-import { STOAT_HOST } from "@revolt/common/lib/env";
 import { DefaultHost, useInstance } from "@revolt/instance";
 import { useModals } from "@revolt/modal";
 import { paramsFromPathname } from "@revolt/routing";
@@ -109,15 +108,32 @@ export function RenderAnchor(
 
       const currentHost = instance.host || DefaultHost;
       params.host ||=
-        url.origin === location.origin || url.origin === instance.origin
+        url.origin === location.origin ||
+        url.origin === instance.origin ||
+        url.hostname === currentHost
           ? currentHost
-          : STOAT_HOST;
+          : url.hostname;
+      params.host ||= DefaultHost;
       const remote = params.host !== currentHost;
 
       if (params.exactChannel) {
         const channel = () => client().channels.get(params.channelId!);
-        const internalUrl = () =>
-          new URL(
+        const internalUrl = () => {
+          // HOTFIX: See above
+          // Override remote links until multi-tenant implemented.
+          if (remote) {
+            return new URL(
+              `https://${params.host}` +
+                (channel()?.serverId ? `/server/${channel()!.serverId}` : "") +
+                `/channel/${params.channelId}` +
+                (params.exactMessage && params.messageId
+                  ? `/${params.messageId}`
+                  : ""),
+              location.origin,
+            ).href;
+          }
+          // END HOTFIX
+          return new URL(
             `/i/${params.host}` +
               (channel()?.serverId ? `/server/${channel()!.serverId}` : "") +
               `/channel/${params.channelId}` +
@@ -126,7 +142,7 @@ export function RenderAnchor(
                 : ""),
             location.origin,
           ).href;
-
+        };
         return (
           <Show
             when={remote || channel()}
@@ -141,6 +157,9 @@ export function RenderAnchor(
               class={internalLink()}
               disabled={props.disabled}
               href={internalUrl()}
+              // HOTFIX: See above
+              target={remote ? "_blank" : void 0}
+              // END HOTFIX
             >
               <Symbol>tag</Symbol>
               {remote ? <Trans>Remote Channel</Trans> : channel()!.name}

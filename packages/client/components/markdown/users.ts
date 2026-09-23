@@ -87,12 +87,14 @@ export function userInformation(user?: User, member?: ServerMember) {
 export function useUsers(
   ids: string[] | Accessor<string[]>,
   filterNull?: boolean,
+  onlyCached?: boolean,
 ): Accessor<(UserInformation | undefined)[]> {
   // TODO: use a context here for when we do multi view :)
   const params = useSmartParams();
   const clientAccessor = useClient();
 
   createEffect(() => {
+    if (onlyCached) return;
     const client = clientAccessor()!;
     fetchMissingUsers(client, typeof ids === "function" ? ids() : ids);
   });

@@ -25,13 +25,16 @@ import { CustomStatusModal } from "./modals/CustomStatus";
 import { DeleteBotModal } from "./modals/DeleteBot";
 import { DeleteCategoryModal } from "./modals/DeleteCategory";
 import { DeleteChannelModal } from "./modals/DeleteChannel";
+import { DeleteEmojiModal } from "./modals/DeleteEmoji";
 import { DeleteMessageModal } from "./modals/DeleteMessage";
 import { DeleteRoleModal } from "./modals/DeleteRole";
 import { DeleteServerModal } from "./modals/DeleteServer";
 import { EditBotUsernameModal } from "./modals/EditBotUsername";
 import { EditCategoryModal } from "./modals/EditCategory";
 import { EditEmailModal } from "./modals/EditEmail";
+import { EditEmojiModal } from "./modals/EditEmoji";
 import { EditPasswordModal } from "./modals/EditPassword";
+import { EditServerFolderModal } from "./modals/EditServerFolder";
 import { EditUsernameModal } from "./modals/EditUsername";
 import { EmojiPreviewModal } from "./modals/EmojiPreview";
 import { Error2Modal } from "./modals/Error2";
@@ -48,6 +51,7 @@ import { OnboardingModal } from "./modals/Onboarding";
 import { PinMessageModal } from "./modals/PinMessage";
 import { PolicyChangeModal } from "./modals/PolicyChange";
 import { RemoveMemberModal } from "./modals/RemoveMember";
+import { RemoveTimeoutModal } from "./modals/RemoveTimeout";
 import { RenameSessionModal } from "./modals/RenameSession";
 import { ReportContentModal } from "./modals/ReportContent";
 import { ResetBotTokenModal } from "./modals/ResetBotToken";
@@ -58,6 +62,7 @@ import { ServerInfoModal } from "./modals/ServerInfo";
 import { SettingsModal } from "./modals/Settings";
 import { SignOutSessionsModal } from "./modals/SignOutSessions";
 import { SignedOutModal } from "./modals/SignedOut";
+import { TimeoutMemberModal } from "./modals/TimeoutMember";
 import { TryPWAModal } from "./modals/TryPWA";
 import { UserProfileModal } from "./modals/UserProfile";
 import { UserProfileMutualFriendsModal } from "./modals/UserProfileMutualFriends";
@@ -189,6 +194,8 @@ export function RenderModal(props: ActiveModal & { onClose: () => void }) {
       return <ResetBotTokenModal {...modalProps} />;
     case "edit_category":
       return <EditCategoryModal {...modalProps} />;
+    case "edit_server_folder":
+      return <EditServerFolderModal {...modalProps} />;
     case "try_pwa":
       return <TryPWAModal {...modalProps} />;
     case "remove_member":
@@ -201,6 +208,14 @@ export function RenderModal(props: ActiveModal & { onClose: () => void }) {
       return <ScreenShareSettingsModal {...modalProps} />;
     case "screen_share_picker":
       return <ScreenSharePickerModal {...modalProps} />;
+    case "timeout_member":
+      return <TimeoutMemberModal {...modalProps} />;
+    case "remove_timeout":
+      return <RemoveTimeoutModal {...modalProps} />;
+    case "edit_emoji":
+      return <EditEmojiModal {...modalProps} />;
+    case "delete_emoji":
+      return <DeleteEmojiModal {...modalProps} />;
     default:
       console.error(
         "Failed to create modal for",

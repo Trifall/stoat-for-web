@@ -3,14 +3,14 @@ import {
   Accessor,
   JSX,
   Match,
-  Setter,
   Show,
   Switch,
   createMemo,
+  createSignal,
 } from "solid-js";
 
 import { useLingui } from "@lingui/solid/macro";
-import type { API, Channel, Server, ServerFlags } from "stoat.js";
+import type { Channel, Server, ServerFlags } from "stoat.js";
 import { styled } from "styled-system/jsx";
 
 import { useDevice } from "@revolt/common";
@@ -33,6 +33,7 @@ import {
   symbolSize,
   typography,
 } from "@revolt/ui";
+import { UnreadCallout } from "@revolt/ui/components/features/navigation/UnreadCallout";
 import { VoiceChannelPreview } from "@revolt/ui/components/features/voice/VoiceChannelPreview";
 import { createDragHandle } from "@revolt/ui/components/utils/Draggable";
 import { Symbol } from "@revolt/ui/components/utils/Symbol";
@@ -42,6 +43,11 @@ import MdSettings from "@material-symbols/svg-400/outlined/settings-fill.svg?com
 
 import { HeaderIcon } from "../../common/CommonHeader";
 import { SidebarBase } from "./common";
+import {
+  OrderedCategory,
+  applyChannelOrdering,
+  orderedCategories,
+} from "./ordering";
 import { SidebarVoicePanel } from "./SidebarVoicePanel";
 
 interface Props {
@@ -74,7 +80,7 @@ interface Props {
 /**
  * Ordered category data returned from server
  */
-type CategoryData = Omit<API.Category, "channels"> & { channels: Channel[] };
+type CategoryData = OrderedCategory & { channels: Channel[] };
 
 type OrderingEvent =
   | {
@@ -84,7 +90,8 @@ type OrderingEvent =
   | {
       type: "category";
       id: string;
-      channelIds: string[];
+      reorderedIds: string[];
+      visibleIds: string[];
       moved: boolean;
     };
 
@@ -104,10 +111,26 @@ export const ServerSidebar = (props: Props) => {
       "ManagePermissions",
     );
 
+  const categories = createMemo<CategoryData[]>(() => {
+    const channels = new Map(
+      props.server.channels.map((channel) => [channel.id, channel]),
+    );
+
+    return orderedCategories(
+      props.server.categories,
+      props.server.channels.map((channel) => channel.id),
+    ).map((category) => ({
+      ...category,
+      channels: category.channelIds
+        .map((id) => channels.get(id)!)
+        .filter((channel) => channel),
+    }));
+  });
+
   // TODO: this does not filter visible channels at the moment because the state for categories is not stored anywhere
   /** Gets a list of channels that are currently not hidden inside a closed category */
   const visibleChannels = () =>
-    props.server.orderedChannels.flatMap((category) => category.channels);
+    categories().flatMap((category) => category.channels);
 
   // TODO: when navigating channels, we want to add aria-keyshortcuts={localized-shortcut} to the next/previous channels
   // https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-keyshortcuts
@@ -147,6 +170,8 @@ export const ServerSidebar = (props: Props) => {
 
   const noOrdering = () => !props.server.havePermission("ManageChannel");
 
+  const [list, setList] = createSignal<HTMLDivElement>();
+
   let heldEvent: OrderingEvent & { type: "category" } = null!;
   function handleOrdering(event: OrderingEvent) {
     if (event.type === "category" && event.moved && !heldEvent) {
@@ -154,35 +179,40 @@ export const ServerSidebar = (props: Props) => {
       return;
     }
 
-    const normalisedCategories = props.server.orderedChannels.map(
-      (category) => ({
-        ...category,
-        channels: category.channels.map((channel) => channel.id),
-      }),
-    );
-
     if (event.type === "categories") {
+      const ids = event.ids.filter((id) => id !== "default");
+
       props.server.edit({
-        categories: event.ids
-          .map((id) => normalisedCategories.find((cat) => cat.id === id)!)
-          .filter((cat) => cat),
+        categories: ["default", ...ids]
+          .map((id) => categories().find((category) => category.id === id)!)
+          .filter((category) => category)
+          .map(({ id, title, channelIds }) => ({
+            id,
+            title,
+            channels: channelIds,
+          })),
       });
     } else {
       props.server.edit({
-        categories: normalisedCategories.map((category) => {
-          if (heldEvent && category.id === heldEvent.id) {
-            return {
-              ...category,
-              channels: heldEvent.channelIds,
-            };
-          } else if (category.id === event.id) {
-            return {
-              ...category,
-              channels: event.channelIds,
-            };
-          } else {
-            return category;
-          }
+        categories: categories().map(({ id, title, channelIds }) => {
+          const reordered =
+            heldEvent?.id === id
+              ? heldEvent
+              : event.id === id
+                ? event
+                : undefined;
+
+          return {
+            id,
+            title,
+            channels: reordered
+              ? applyChannelOrdering(
+                  channelIds,
+                  reordered.visibleIds,
+                  reordered.reorderedIds,
+                )
+              : channelIds,
+          };
         }),
       });
 
@@ -224,38 +254,68 @@ export const ServerSidebar = (props: Props) => {
           </Header>
         </Match>
       </Switch>
-      <div
-        use:invisibleScrollable
-        style={{ "flex-grow": 1, "margin-bottom": "var(--gap-md)" }}
-        use:floating={props.menuGenerator(props.server)}
-      >
-        <Draggable
-          dragHandles
-          type="category"
-          //TODO - No channel ordering on mobile due to usability issue
-          //Consider adding a way to enable reordering with dragHandles in server settings
-          disabled={isMobile || noOrdering()}
-          items={props.server.orderedChannels}
-          onChange={(ids) => handleOrdering({ type: "categories", ids })}
+      <ChannelList>
+        <UnreadCallout list={list} />
+        <div
+          ref={setList}
+          use:invisibleScrollable
+          style={{ height: "100%" }}
+          use:floating={props.menuGenerator(props.server)}
         >
-          {(entry) => (
-            <Category
-              server={props.server}
-              category={entry.item}
-              channelId={props.channelId}
-              menuGenerator={props.menuGenerator}
-              dragDisabled={entry.dragDisabled}
-              setDragDisabled={entry.setDragDisabled}
-              noOrdering={noOrdering}
-              handleOrdering={handleOrdering}
-            />
-          )}
-        </Draggable>
-      </div>
+          <Show
+            when={categories().find((category) => category.id === "default")}
+          >
+            {(category) => (
+              <Category
+                server={props.server}
+                category={category()}
+                channelId={props.channelId}
+                menuGenerator={props.menuGenerator}
+                dragDisabled={() => true}
+                setDragDisabled={() => void 0}
+                noOrdering={noOrdering}
+                handleOrdering={handleOrdering}
+              />
+            )}
+          </Show>
+          <Draggable
+            dragHandles
+            dropIndicator
+            type="category"
+            //TODO - No channel ordering on mobile due to usability issue
+            //Consider adding a way to enable reordering with dragHandles in server settings
+            disabled={isMobile || noOrdering()}
+            items={categories().filter((category) => category.id !== "default")}
+            onChange={(ids) => handleOrdering({ type: "categories", ids })}
+          >
+            {(entry) => (
+              <Category
+                server={props.server}
+                category={entry.item}
+                channelId={props.channelId}
+                menuGenerator={props.menuGenerator}
+                dragDisabled={entry.dragDisabled}
+                setDragDisabled={entry.setDragDisabled}
+                noOrdering={noOrdering}
+                handleOrdering={handleOrdering}
+              />
+            )}
+          </Draggable>
+        </div>
+      </ChannelList>
       <SidebarVoicePanel />
     </SidebarBase>
   );
 };
+
+const ChannelList = styled("div", {
+  base: {
+    position: "relative",
+    flexGrow: 1,
+    minHeight: 0,
+    marginBottom: "var(--gap-md)",
+  },
+});
 
 /**
  * Server Information
@@ -338,7 +398,7 @@ function Category(
     handleOrdering: (event: OrderingEvent) => void;
   } & Pick<Props, "menuGenerator"> & {
       dragDisabled: Accessor<boolean>;
-      setDragDisabled: Setter<boolean>;
+      setDragDisabled: (value: boolean) => void;
     },
 ) {
   const state = useState();
@@ -372,21 +432,23 @@ function Category(
         </div>
       </Show>
       <Draggable
+        dropIndicator
         type="channels"
         items={channels()}
-        onChange={(channelIds) => {
+        onChange={(reorderedIds) => {
           const current = channels();
           props.handleOrdering({
             type: "category",
             id: props.category.id,
-            channelIds,
-            moved: channelIds.length !== current.length,
+            reorderedIds,
+            visibleIds: current.map((channel) => channel.id),
+            moved: reorderedIds.length !== current.length,
           });
         }}
         //TODO - No channel ordering on mobile due to usability issue
         //Consider adding a way to enable reordering with dragHandles in server settings
         disabled={isMobile || props.noOrdering() || !isOpen()}
-        minimumDropAreaHeight="32px"
+        minimumDropAreaHeight="42px"
       >
         {(entry) => (
           <Entry
@@ -403,7 +465,7 @@ function Category(
 const CategorySection = styled("div", {
   base: {
     display: "flex",
-    gap: "var(--gap-md)",
+    gap: "var(--gap-sm)",
     flexDirection: "column",
     paddingBlock: "var(--gap-sm)",
     borderRadius: "var(--borderRadius-sm)",
@@ -426,7 +488,7 @@ const CategoryBase = styled("div", {
 
     padding: "0 var(--gap-sm)",
     paddingLeft: "calc(var(--gap-lg) + 5px)",
-    paddingTop: "10px",
+    paddingBlock: "var(--gap-sm)",
 
     cursor: "pointer",
     userSelect: "none",
@@ -512,6 +574,8 @@ function Entry(
         }}
         use:floating={props.menuGenerator(props.channel)}
         size="normal"
+        data-unread={props.channel.unread ? "" : undefined}
+        data-mentions={props.channel.mentions?.size || undefined}
         alert={alertState()}
         attention={attentionState()}
         icon={
