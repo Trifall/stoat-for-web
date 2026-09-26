@@ -252,9 +252,10 @@ class Voice {
     });
   }
 
-  #resetVoiceProcessors() {
-    this.#noiseGateProcessor?.destroy();
+  async #resetVoiceProcessors() {
+    const processor = this.#noiseGateProcessor;
     this.#noiseGateProcessor = undefined;
+    await processor?.destroy();
   }
 
   #microphoneCaptureOptions() {
@@ -435,14 +436,23 @@ class Voice {
       const audioTrack = track?.audioTrack;
       if (!audioTrack || audioTrack.getProcessor()) return;
 
-      this.#resetVoiceProcessors();
+      const isCurrentMicrophoneTrack = () =>
+        audioTrack.mediaStreamTrack.readyState === "live" &&
+        this.room()?.localParticipant.getTrackPublication(
+          Track.Source.Microphone,
+        )?.audioTrack === audioTrack;
+
+      if (!isCurrentMicrophoneTrack()) return;
+
+      await this.#resetVoiceProcessors();
+      if (!isCurrentMicrophoneTrack()) return;
 
       const settings = audioTrack.mediaStreamTrack.getSettings();
       if (settings.channelCount && settings.channelCount > 1) {
         console.warn(
           "[Voice] Mic track is stereo (channelCount:",
           settings.channelCount,
-          ") - remote participants may hear audio in one ear only.",
+          ") - downmixing to mono for processing.",
         );
       }
 
@@ -452,7 +462,31 @@ class Voice {
           "[Voice] Applying processor to audio track:",
           audioTrack.sid,
         );
-        await audioTrack.setProcessor(processor as never);
+        try {
+          await audioTrack.setProcessor(processor as never);
+        } catch (error) {
+          try {
+            if (audioTrack.getProcessor() === processor) {
+              await audioTrack.stopProcessor();
+            } else {
+              await processor.destroy();
+            }
+          } catch (cleanupError) {
+            console.warn(
+              "[Voice] Failed to clean up an unattached microphone processor:",
+              cleanupError,
+            );
+          }
+          if (this.#noiseGateProcessor === processor) {
+            this.#noiseGateProcessor = undefined;
+          }
+          if (!isCurrentMicrophoneTrack()) return;
+          throw error;
+        }
+
+        if (!isCurrentMicrophoneTrack()) {
+          await audioTrack.stopProcessor();
+        }
       }
     };
 
@@ -750,7 +784,7 @@ class Voice {
       ) {
         void this.#configureMicrophoneTrack(
           publication as MicrophonePublication,
-        );
+        ).catch((error) => this.#handleMicrophoneError(error));
       }
     });
 
@@ -1005,8 +1039,9 @@ class Voice {
       if (!room) return;
 
       // Clean up noise gate processor
-      this.#noiseGateProcessor?.destroy();
-      this.#noiseGateProcessor = undefined;
+      void this.#resetVoiceProcessors().catch((error) =>
+        console.warn("[Voice] Failed to reset voice processors:", error),
+      );
 
       if (manual) {
         this.sound.playSound("selfLeaveVoice");

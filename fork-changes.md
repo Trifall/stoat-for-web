@@ -433,6 +433,9 @@ Processor file:
 The processor:
 
 - Implements a LiveKit-compatible track processor shape.
+- Loads the RNNoise worklet only for enhanced suppression and caches successful loads per LiveKit `AudioContext`.
+- Falls back to the normal input-gain path when the worklet cannot load and does not retry it for the same `AudioContext`, so a transient reconnect/CDN failure does not reject microphone setup or retry on every unmute.
+- Forces the voice processor graph to mono so stereo Windows mics are downmixed before RNNoise, which only reads the first channel.
 - Uses Web Audio to compute RMS level in dB.
 - Gates audio by controlling a `GainNode`.
 - Exposes `onLevel?: (db: number) => void` for the settings meter.
