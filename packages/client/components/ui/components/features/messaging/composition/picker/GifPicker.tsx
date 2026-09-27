@@ -16,7 +16,7 @@ import { useQuery } from "@tanstack/solid-query";
 import { styled } from "styled-system/jsx";
 
 import { useClient } from "@revolt/client";
-import { useDevice } from "@revolt/common";
+import { debounce, useDevice } from "@revolt/common";
 import { useInstance } from "@revolt/instance";
 import { useState } from "@revolt/state";
 import {
@@ -29,7 +29,6 @@ import {
 } from "@revolt/ui/components/design";
 import { Symbol } from "@revolt/ui/components/utils/Symbol";
 
-import { debounce } from "@revolt/common";
 import { CompositionMediaPickerContext } from "./CompositionMediaPicker";
 
 /**

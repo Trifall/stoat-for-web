@@ -344,8 +344,8 @@ msgid "Able to speak in voice call"
 msgstr "Kann im Sprachkanal sprechen"
 
 #: components/auth/src/AuthPage.tsx
-msgid "About"
-msgstr "Über"
+#~ msgid "About"
+#~ msgstr "Über"
 
 #: components/modal/modals/SignOutSessions.tsx
 msgid "Accept"
@@ -458,6 +458,10 @@ msgstr ""
 msgid "Already friends with this user."
 msgstr "Du bist bereits mit dieser:diesem Nutzer:in befreundet."
 
+#: components/auth/src/AuthPage.tsx
+msgid "Already have an account?"
+msgstr ""
+
 #: components/app/interface/settings/user/voice/ScreenShareOptions.tsx
 msgid "Always Ask for Screen Share Quality"
 msgstr "Immer nach Qualität der Bildschirmübertragung fragen"
@@ -465,6 +469,11 @@ msgstr "Immer nach Qualität der Bildschirmübertragung fragen"
 #: components/app/interface/settings/user/Language.tsx
 msgid "American (MM/DD/YYYY)"
 msgstr "Amerikanisch (MM/TT/JJJJ)"
+
+#. placeholder {0}: e()
+#: components/modal/modals/CropProcess.tsx
+msgid "An error occurred while processing the image: {0}"
+msgstr ""
 
 #: components/modal/modals/Error2.tsx
 msgid "An error occurred."
@@ -549,7 +558,6 @@ msgstr "Avatar"
 #: components/app/interface/settings/user/_AccountCard.tsx
 #: components/auth/src/flows/FlowCheck.tsx
 #: components/auth/src/flows/FlowCreate.tsx
-#: components/auth/src/flows/FlowLogin.tsx
 #: components/modal/modals/MFAFlow.tsx
 #: src/interface/channels/AgeGate.tsx
 msgid "Back"
@@ -592,6 +600,7 @@ msgstr "Nutzer bannen"
 msgid "Ban User"
 msgstr "Nutzer bannen"
 
+#: components/app/interface/settings/server/Overview.tsx
 #: components/app/interface/settings/user/profile/UserProfileEditor.tsx
 msgid "Banner"
 msgstr "Banner"
@@ -666,6 +675,7 @@ msgstr ""
 #: components/modal/modals/AddBot.tsx
 #: components/modal/modals/BanMember.tsx
 #: components/modal/modals/BanNonMember.tsx
+#: components/modal/modals/CropProcess.tsx
 #: components/modal/modals/DeleteBot.tsx
 #: components/modal/modals/DeleteCategory.tsx
 #: components/modal/modals/DeleteChannel.tsx
@@ -794,6 +804,10 @@ msgid "Channel Description"
 msgstr "Kanalbeschreibung"
 
 #: components/app/interface/settings/channel/Overview.tsx
+msgid "Channel Icon"
+msgstr ""
+
+#: components/app/interface/settings/channel/Overview.tsx
 msgid "Channel Info"
 msgstr "Kanalinfo"
 
@@ -824,8 +838,16 @@ msgid "Check back often to see if your {0} has been approved!"
 msgstr ""
 
 #: components/auth/src/flows/FlowCheck.tsx
-msgid "Check your mail!"
-msgstr "Überprüfe deine Mails!"
+msgid "Check your email"
+msgstr ""
+
+#: components/auth/src/flows/FlowCheck.tsx
+#~ msgid "Check your mail!"
+#~ msgstr "Überprüfe deine Mails!"
+
+#: components/auth/src/flows/FlowConfirmReset.tsx
+msgid "Choose a new password for your Stoat account."
+msgstr ""
 
 #: components/auth/src/flows/FlowLogin.tsx
 msgid "Choose a username"
@@ -1057,6 +1079,10 @@ msgstr "Was du suchst konnte nicht gefunden werden."
 msgid "Couldn't fetch Stoat configuration from {hStr}."
 msgstr "Stoat Konfiguration konnte von {hStr} nicht geladen werden."
 
+#: components/ui/components/design/ImageCropper.tsx
+msgid "Couldn't load this image."
+msgstr ""
+
 #: components/app/interface/settings/server/emojis/EmojiList.tsx
 #: components/modal/modals/CreateBot.tsx
 #: components/modal/modals/CreateCategory.tsx
@@ -1099,9 +1125,14 @@ msgstr "Erstelle eine neue Gruppe"
 msgid "Create a webhook"
 msgstr "Erstelle einen Webhook"
 
+#: components/auth/src/AuthPage.tsx
 #: components/auth/src/flows/FlowCreate.tsx
-msgid "Create an account"
-msgstr "Einen Account erstellen"
+msgid "Create account"
+msgstr ""
+
+#: components/auth/src/flows/FlowCreate.tsx
+#~ msgid "Create an account"
+#~ msgstr "Einen Account erstellen"
 
 #: components/app/interface/settings/channel/permissions/ChannelPermissionsEditor.tsx
 msgid "Create and edit server roles"
@@ -1165,6 +1196,47 @@ msgstr "Webhook erstellen"
 #: components/app/interface/settings/user/Sessions.tsx
 msgid "Created <0/>"
 msgstr "Erstellt <0/>"
+
+#: components/modal/modals/CropProcess.tsx
+msgid "Crop"
+msgstr ""
+
+#: components/app/interface/settings/user/profile/UserProfileEditor.tsx
+msgid "Crop Avatar"
+msgstr ""
+
+#: components/app/interface/settings/user/profile/UserProfileEditor.tsx
+msgid "Crop Banner"
+msgstr ""
+
+#: components/app/interface/settings/channel/Overview.tsx
+msgid "Crop Channel Icon"
+msgstr ""
+
+#: components/app/interface/settings/server/emojis/EmojiList.tsx
+msgid "Crop Emoji"
+msgstr ""
+
+#: components/modal/modals/CropProcess.tsx
+msgid "Crop image"
+msgstr ""
+
+#: components/app/interface/settings/server/roles/ServerRoleEditor.tsx
+msgid "Crop Role Icon"
+msgstr ""
+
+#: components/app/interface/settings/server/Overview.tsx
+msgid "Crop Server Banner"
+msgstr ""
+
+#: components/app/interface/settings/server/Overview.tsx
+msgid "Crop Server Icon"
+msgstr ""
+
+#. placeholder {0}: humanFileSize(e().maxSize)
+#: components/modal/modals/CropProcess.tsx
+msgid "Cropped image is too large — try a smaller crop area (max. {0})"
+msgstr ""
 
 #: components/modal/modals/EditEmail.tsx
 #: components/modal/modals/EditPassword.tsx
@@ -1424,6 +1496,10 @@ msgstr "Hat an Stoat gespendet"
 msgid "Done"
 msgstr "Erledigt"
 
+#: components/auth/src/AppUpsell.tsx
+msgid "Download for desktop"
+msgstr ""
+
 #: components/modal/modals/ReportContent.tsx
 msgid "Drugs or illegal goods"
 msgstr "Drogen oder illegale Waren"
@@ -1504,6 +1580,10 @@ msgstr "Wirksam zum <0/> (<1/>)"
 #: components/modal/modals/EditEmail.tsx
 msgid "Email"
 msgstr "E-Mail"
+
+#: components/app/interface/settings/server/emojis/EmojiList.tsx
+msgid "Emoji"
+msgstr ""
 
 #: components/app/interface/settings/server/emojis/EmojiList.tsx
 #: components/modal/modals/EditEmoji.tsx
@@ -1587,6 +1667,10 @@ msgstr "Gebe dein aktuelles Passwort ein."
 msgid "Enter your current password..."
 msgstr "Gebe dein aktuelles Passwort ein..."
 
+#: components/auth/src/flows/FlowResend.tsx
+msgid "Enter your email and we'll send you a fresh link."
+msgstr ""
+
 #: components/auth/src/flows/Form.tsx
 msgid "Enter your invite code."
 msgstr "Gib deinen Einladungscode ein."
@@ -1653,8 +1737,8 @@ msgid "Find a community based on your hobbies or interests."
 msgstr "Finde eine Community basierend auf deinen Hobbys und Interessen."
 
 #: components/auth/src/flows/FlowHome.tsx
-msgid "Find your com<0/>munity,<1/>connect with the world."
-msgstr "Finde deine Community, verbinde dich mit der Welt."
+#~ msgid "Find your com<0/>munity,<1/>connect with the world."
+#~ msgstr "Finde deine Community, verbinde dich mit der Welt."
 
 #: components/ui/components/features/profiles/ProfileStatus.tsx
 #: src/interface/channels/text/MemberSidebar.tsx
@@ -1695,6 +1779,10 @@ msgstr "Für 3 Stunden"
 #: components/app/menus/shared/NotificationContextMenu.tsx
 msgid "For 8 hours"
 msgstr "Für 8 Stunden"
+
+#: components/auth/src/flows/FlowLogin.tsx
+msgid "Forgot password?"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: components/app/interface/settings/user/voice/AdvancedSettings.tsx
@@ -1738,9 +1826,18 @@ msgstr "Erhalte neue Wiederherstellungscodes"
 msgid "Get active recovery codes"
 msgstr "Aktive Wiederherstellungscodes"
 
+#: components/auth/src/AppUpsell.tsx
 #: src/AndroidNag.tsx
 msgid "Get it on Google Play"
 msgstr "Jetzt bei"
+
+#: components/auth/src/AppUpsell.tsx
+msgid "Get Stoat for Android and keep up with your friends wherever you are."
+msgstr ""
+
+#: components/auth/src/AppUpsell.tsx
+msgid "Get the desktop app for Windows, macOS and Linux and keep your conversations one click away."
+msgstr ""
 
 #: components/ui/components/features/messaging/composition/picker/GifPicker.tsx
 msgid "Gifbox is our own GIF service, so you can keep sharing GIFs right here on Stoat."
@@ -1821,8 +1918,12 @@ msgid "Hear other people and see their video"
 msgstr "Andere Nutzer hören und ihre Videoübertragung sehen"
 
 #: components/auth/src/flows/FlowCreate.tsx
-msgid "Hello!"
-msgstr "Hallo!"
+#~ msgid "Hello!"
+#~ msgstr "Hallo!"
+
+#: components/auth/src/AuthPage.tsx
+msgid "Help"
+msgstr ""
 
 #: components/app/interface/settings/user/Language.tsx
 msgid "Help contribute to an existing or new language"
@@ -1968,6 +2069,10 @@ msgstr "Einem Server beitreten"
 msgid "Join Call (Self)"
 msgstr ""
 
+#: components/auth/src/flows/FlowCreate.tsx
+msgid "Join Stoat"
+msgstr ""
+
 #: components/app/interface/settings/user/Feedback.tsx
 #: src/interface/Home.tsx
 msgid "Join the Stoat Lounge"
@@ -2091,9 +2196,22 @@ msgstr "Zuhören"
 msgid "Load file ({0})"
 msgstr "Datei ({0}) laden"
 
+#: components/auth/src/AuthPage.tsx
+#: components/auth/src/flows/FlowLogin.tsx
+msgid "Log in"
+msgstr ""
+
 #: components/auth/src/flows/FlowHome.tsx
-msgid "Log In"
-msgstr "Anmelden"
+#~ msgid "Log In"
+#~ msgstr "Anmelden"
+
+#: components/auth/src/flows/FlowLogin.tsx
+msgid "Log in again"
+msgstr ""
+
+#: components/auth/src/flows/FlowLogin.tsx
+msgid "Log in to pick up right where you left off."
+msgstr ""
 
 #: components/app/interface/settings/user/Sessions.tsx
 #: components/app/interface/settings/UserSettings.tsx
@@ -2109,8 +2227,12 @@ msgid "Log Out Other Sessions"
 msgstr "Aus anderen Sitzungen abmelden"
 
 #: components/auth/src/flows/FlowLogin.tsx
-msgid "Login"
-msgstr "Anmeldung"
+msgid "Logging you in…"
+msgstr ""
+
+#: components/auth/src/flows/FlowLogin.tsx
+#~ msgid "Login"
+#~ msgstr "Anmeldung"
 
 #: components/app/interface/settings/user/Sessions.tsx
 msgid "Logs you out of all sessions except this device."
@@ -2410,6 +2532,10 @@ msgstr "Neues Passwort"
 msgid "New to Stoat"
 msgstr "Neu bei Stoat"
 
+#: components/auth/src/AuthPage.tsx
+msgid "New to Stoat?"
+msgstr ""
+
 #: components/app/interface/channels/text/Message.tsx
 msgid "New to the server"
 msgstr "Neu auf dem Server"
@@ -2488,7 +2614,6 @@ msgstr "Offizieller Server"
 msgid "Offline"
 msgstr "Offline"
 
-#: components/auth/src/flows/FlowHome.tsx
 #: components/modal/modals/CreateInvite.tsx
 #: components/modal/modals/Error2.tsx
 #: components/modal/modals/SignedOut.tsx
@@ -2687,12 +2812,17 @@ msgid "Preview"
 msgstr ""
 
 #: components/app/interface/settings/UserSettings.tsx
+#: components/auth/src/AuthPage.tsx
 msgid "Privacy"
 msgstr "Privatsphäre"
 
+#: components/auth/src/flows/FlowCreate.tsx
+msgid "Privacy policy"
+msgstr ""
+
 #: components/auth/src/AuthPage.tsx
-msgid "Privacy Policy"
-msgstr "Datenschutzerklärung"
+#~ msgid "Privacy Policy"
+#~ msgstr "Datenschutzerklärung"
 
 #: components/markdown/plugins/anchors.tsx
 msgid "Private Channel"
@@ -2804,8 +2934,8 @@ msgid "Reduced"
 msgstr "Reduziert"
 
 #: components/auth/src/flows/FlowCreate.tsx
-msgid "Register"
-msgstr "Registrieren"
+#~ msgid "Register"
+#~ msgstr "Registrieren"
 
 #: components/modal/modals/AddBot.tsx
 msgid "Registered since <0/>"
@@ -2946,7 +3076,6 @@ msgid "Reset {0}'s token?"
 msgstr "{0}s Token zurücksetzen?"
 
 #: components/auth/src/flows/FlowConfirmReset.tsx
-#: components/auth/src/flows/FlowLogin.tsx
 #: components/auth/src/flows/FlowReset.tsx
 msgid "Reset password"
 msgstr "Passwort zurücksetzen"
@@ -3045,6 +3174,10 @@ msgstr "Speichere…"
 #: components/modal/modals/ReportContent.tsx
 msgid "Scams or fraud"
 msgstr "Betrug"
+
+#: components/auth/src/AppUpsell.tsx
+msgid "Scan with your phone, or"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: components/app/interface/settings/user/voice/AdvancedSettings.tsx
@@ -3211,6 +3344,10 @@ msgstr ""
 msgid "Set role colour to {colour}"
 msgstr ""
 
+#: components/auth/src/flows/FlowCreate.tsx
+msgid "Set up your account and make yourself at home."
+msgstr ""
+
 #: components/modal/modals/CustomStatus.tsx
 msgid "Set your status"
 msgstr "Setze deinen Status"
@@ -3257,12 +3394,12 @@ msgid "Show send message button"
 msgstr "\"Nachrichten senden\" Knopf anzeigen"
 
 #: components/auth/src/flows/FlowLogin.tsx
-msgid "Sign into Stoat"
-msgstr "Melde dich bei Stoat an"
+#~ msgid "Sign into Stoat"
+#~ msgstr "Melde dich bei Stoat an"
 
 #: components/auth/src/flows/FlowHome.tsx
-msgid "Sign Up"
-msgstr "Registrieren"
+#~ msgid "Sign Up"
+#~ msgstr "Registrieren"
 
 #: components/app/interface/settings/user/voice/VoiceProcessingOptions.tsx
 msgid "Silence your mic when you're not speaking"
@@ -3297,6 +3434,10 @@ msgstr "Etwas cooles über mich..."
 msgid "Something is wrong with your request, {0}."
 msgstr "Etwas mit deiner Anfrage stimmt nicht, {0}."
 
+#: components/auth/src/flows/FlowLogin.tsx
+msgid "Something went wrong"
+msgstr ""
+
 #: components/i18n/errors.tsx
 msgid "Something went wrong! {error}"
 msgstr "Etwas ist schief gelaufen! {error}"
@@ -3324,6 +3465,14 @@ msgstr "Sprechen"
 #: components/app/interface/settings/user/Native.tsx
 msgid "Spellchecker"
 msgstr "Rechtschreibprüfung"
+
+#: components/app/interface/settings/channel/Overview.tsx
+#: components/app/interface/settings/server/emojis/EmojiList.tsx
+#: components/app/interface/settings/server/Overview.tsx
+#: components/app/interface/settings/server/roles/ServerRoleEditor.tsx
+#: components/app/interface/settings/user/profile/UserProfileEditor.tsx
+msgid "Square"
+msgstr ""
 
 #: components/ui/components/features/voice/callCard/VoiceCallCardActions.tsx
 msgid "Start camera"
@@ -3358,8 +3507,8 @@ msgid "Stoat Founder"
 msgstr "Stoat-Gründer"
 
 #: components/auth/src/flows/FlowHome.tsx
-msgid "Stoat is one of the best ways to stay connected with your friends and community, anywhere, anytime."
-msgstr "Stoat ist einer der besten Wege um mit deinen Freunden und deiner Community in Kontakt zu bleiben, immer, überall."
+#~ msgid "Stoat is one of the best ways to stay connected with your friends and community, anywhere, anytime."
+#~ msgstr "Stoat ist einer der besten Wege um mit deinen Freunden und deiner Community in Kontakt zu bleiben, immer, überall."
 
 #: components/app/interface/settings/server/roles/ServerRoleEditor.tsx
 msgid "Stoat rocks!"
@@ -3371,6 +3520,10 @@ msgstr ""
 
 #: src/AndroidNag.tsx
 msgid "Stoat works best as an app"
+msgstr ""
+
+#: components/auth/src/AppUpsell.tsx
+msgid "Stoat, right on <0>your desktop.</0>"
 msgstr ""
 
 #: components/ui/components/features/voice/callCard/VoiceCallCardActions.tsx
@@ -3437,6 +3590,10 @@ msgstr "System"
 msgid "System message channels"
 msgstr "Kanäle für Systemnachrichten"
 
+#: components/auth/src/AppUpsell.tsx
+msgid "Take your communities <0>with you.</0>"
+msgstr ""
+
 #: components/modal/modals/ReportContent.tsx
 msgid "Tell us what's wrong with this message"
 msgstr "Sag uns was an dieser Nachricht nicht stimmt"
@@ -3454,12 +3611,13 @@ msgid "Temporarily prevent lower-ranking members from interacting"
 msgstr "Mitglieder mit niedrigerem Rang temporär von Interaktionen ausschließen"
 
 #: components/app/interface/settings/UserSettings.tsx
+#: components/auth/src/AuthPage.tsx
 msgid "Terms"
 msgstr "Nutzungsbedingungen"
 
 #: components/auth/src/AuthPage.tsx
-msgid "Terms of Service"
-msgstr "Nutzungsbedingungen"
+#~ msgid "Terms of Service"
+#~ msgstr "Nutzungsbedingungen"
 
 #: components/modal/modals/CreateChannel.tsx
 msgid "Text Channel"
@@ -3658,6 +3816,10 @@ msgstr "Beliebte GIFs"
 #: components/ui/components/design/LoadingScreen.tsx
 msgid "Troubleshooting"
 msgstr "Fehlerbehebung"
+
+#: components/auth/src/flows/FlowLogin.tsx
+msgid "Try again"
+msgstr ""
 
 #: components/app/menus/UserContextMenu.tsx
 msgid "Unblock user"
@@ -3897,6 +4059,18 @@ msgstr "Möchtest du deinen Nutzernamen ändern?"
 msgid "We are working hard on optimising our web app for mobile."
 msgstr ""
 
+#: components/auth/src/flows/FlowLogin.tsx
+msgid "We couldn't finish logging you in. Try again, and if it keeps happening, check Stoat's status."
+msgstr ""
+
+#: components/auth/src/flows/FlowCreate.tsx
+msgid "We only use it to verify your account and help you get back in if you're ever locked out. We'll never sell it or send you spam."
+msgstr ""
+
+#: components/auth/src/flows/FlowReset.tsx
+msgid "We'll email you a secure link to choose a new password."
+msgstr ""
+
 #: components/auth/src/flows/FlowCheck.tsx
 msgid "We've sent you a verification email. Please allow up to 10 minutes for it to arrive."
 msgstr "Wir haben dir eine Bestätigungs-E-Mail geschickt. Bitte warte bis zu 10 Minuten, bis sie ankommt."
@@ -3918,12 +4092,16 @@ msgstr "Webhook-Name"
 msgid "Webhooks"
 msgstr "Webhooks"
 
+#: components/auth/src/flows/FlowLogin.tsx
+msgid "Welcome back"
+msgstr ""
+
 #~ msgid "Welcome to"
 #~ msgstr "Willkommen bei"
 
 #: components/auth/src/flows/FlowLogin.tsx
-msgid "Welcome!"
-msgstr "Willkommen!"
+#~ msgid "Welcome!"
+#~ msgstr "Willkommen!"
 
 #: components/modal/modals/Changelog.tsx
 msgid "What's new"
@@ -4090,8 +4268,8 @@ msgid "You muted this user."
 msgstr "Du hast diesen Nutzer stummgeschaltet."
 
 #: components/auth/src/flows/FlowHome.tsx
-msgid "You were logged out!"
-msgstr "Du wurdest abgemeldet!"
+#~ msgid "You were logged out!"
+#~ msgstr "Du wurdest abgemeldet!"
 
 #: src/interface/navigation/servers/UserMenu.tsx
 msgid "You will not receive any notifications"
@@ -4122,6 +4300,10 @@ msgstr "Du hast bereits eine Freundschaftsanfrage gesendet."
 #: components/modal/modals/Invite.tsx
 msgid "You've been invited to join this server.<0/>Would you like to join?"
 msgstr "Du wurdest zu diesem Server eingeladen. <0/>Möchtest du beitreten?"
+
+#: components/auth/src/flows/FlowLogin.tsx
+msgid "You've been logged out"
+msgstr ""
 
 #: components/modal/modals/SignedOut.tsx
 msgid "You've been signed out of Stoat!"
@@ -4161,6 +4343,10 @@ msgstr ""
 msgid "Your discriminator change has been ratelimited, please try again later."
 msgstr "Deine Änderung des Discriminators wurde durch Rate-Limiting blockiert. Bitte versuche es später erneut."
 
+#: components/auth/src/flows/FlowCreate.tsx
+msgid "Your email stays private"
+msgstr ""
+
 #: components/i18n/errors.tsx
 msgid "Your message is too long, please remove some characters and try again."
 msgstr "Deine Nachricht ist zu lang, entferne einige Zeichen und versuche es erneut."
@@ -4176,6 +4362,10 @@ msgstr ""
 #: components/i18n/errors.tsx
 msgid "Your role ranking is too low to take this action."
 msgstr "Deine Rolle ist zu niedrig um diese Aktion auszuführen."
+
+#: components/auth/src/flows/FlowLogin.tsx
+msgid "Your session ended, possibly because you logged out on another device. Log in again to continue."
+msgstr ""
 
 #: components/i18n/errors.tsx
 msgid "Your user has already been created? Try logging in again or refreshing the app."

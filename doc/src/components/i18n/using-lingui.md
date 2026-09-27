@@ -47,3 +47,5 @@ To update and compile the catalogs, run:
 ```bash
 mise lingui
 ```
+
+This runs `mise lingui:extract` followed by `mise lingui:compile`.

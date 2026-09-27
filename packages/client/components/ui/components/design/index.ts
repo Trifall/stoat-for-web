@@ -36,6 +36,12 @@ export { type DialogProps, Dialog } from "./Dialog";
 export { Fab } from "./Fab";
 export { FloatingSelect } from "./FloatingSelect";
 export { IconButton } from "./IconButton";
+export {
+  type ImageCropperHandle,
+  type ImageCropperProps,
+  CropSizeError,
+  ImageCropper,
+} from "./ImageCropper";
 export { KeybindInput } from "./KeybindInput";
 export { List } from "./List";
 export { CircularProgress } from "./LoadingProgress";

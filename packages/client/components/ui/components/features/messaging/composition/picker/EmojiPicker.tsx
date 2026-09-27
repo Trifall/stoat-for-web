@@ -9,7 +9,9 @@ import {
   useContext,
 } from "solid-js";
 
+import { Trans, useLingui } from "@lingui/solid/macro";
 import { VirtualContainer } from "@minht11/solid-virtual-container";
+import { createResizeObserver } from "@solid-primitives/resize-observer";
 import { Emoji, Server } from "stoat.js";
 import { css, cva } from "styled-system/css";
 import { styled } from "styled-system/jsx";
@@ -17,14 +19,16 @@ import { styled } from "styled-system/jsx";
 import { useClient } from "@revolt/client";
 import { useDevice } from "@revolt/common";
 import { UnicodeEmoji } from "@revolt/markdown/emoji";
-import { UNICODE_EMOJI_PACK_PUA } from "@revolt/markdown/emoji/UnicodeEmoji";
+import {
+  UNICODE_EMOJI_PACK_PUA,
+  UNICODE_ZWNJ,
+  isRegionalIndicator,
+} from "@revolt/markdown/emoji/UnicodeEmoji";
 import { useState } from "@revolt/state";
 import { Avatar, Ripple, TextField } from "@revolt/ui/components/design";
 import { Row } from "@revolt/ui/components/layout";
+import { EMOJI_MAP, EMOJI_MAP_DEDUPE } from "@revolt/ui/emojis";
 
-import emojiMapping from "../../../../../emojiMapping.json";
-
-import { Trans, useLingui } from "@lingui/solid/macro";
 import {
   CompositionMediaPickerContext,
   compositionContent,
@@ -81,12 +85,15 @@ export function EmojiPicker() {
   let emojiScrollTargetElement!: HTMLDivElement;
 
   onMount(() =>
-    setColCount(
-      Math.max(1, Math.floor(emojiScrollTargetElement.offsetWidth / 40)),
+    createResizeObserver(emojiScrollTargetElement, ({ width }) =>
+      setColCount(Math.max(1, Math.floor(width / 40))),
     ),
   );
 
   const items = createMemo(() => {
+    const cols = colCount();
+    if (!cols) return [];
+
     const filterText = filter().toLowerCase();
 
     if (filterText) {
@@ -98,14 +105,19 @@ export function EmojiPicker() {
               .filter((emoji) => emoji.name.toLowerCase().includes(filterText))
               .map((emoji) => ({ t: 2, emoji })),
           ),
-        ...Object.entries(emojiMapping)
-          .filter(([name]) => name.toLowerCase().includes(filterText))
-          .map(([name, text]) => ({ t: 4, name, text })),
+        ...EMOJI_MAP_DEDUPE.filter(
+          (ed) =>
+            ed.shorthands.filter((sh) => sh.toLowerCase().includes(filterText))
+              .length > 0,
+        ).map((ed) => ({
+          t: 4,
+          name: ed.shorthands[0],
+          text: ed.emoji,
+        })),
       ] as Item[];
     }
 
-    const items: Item[] = [],
-      cols = colCount();
+    const items: Item[] = [];
 
     for (const server of ordering.orderedServers(client())) {
       const emojis = server.emojis;
@@ -139,11 +151,11 @@ export function EmojiPicker() {
       items.push({ t: 1 });
     }
 
-    for (const emoji of Object.entries(emojiMapping)) {
+    for (const emoji of EMOJI_MAP) {
       items.push({
         t: 4,
-        name: emoji[0],
-        text: emoji[1] as string,
+        name: emoji.shorthands[0],
+        text: emoji.emoji,
       });
     }
 
@@ -355,12 +367,10 @@ const ServerItem = (props: {
     style={props.style as never}
     tabIndex={props.tabIndex}
     role="listitem"
-    onMouseDown={(e) => {
-      e.preventDefault();
+    onClick={(e) => {
       e.stopPropagation();
-      e.stopImmediatePropagation();
+      props.onClick(e);
     }}
-    onClick={props.onClick}
   >
     <Avatar
       size={32}
@@ -462,7 +472,7 @@ const EmojiItem = (props: {
 
         if (props.item.t === 4) {
           onTextReplacement(
-            `${UNICODE_EMOJI_PACK_PUA[state.settings.getValue("appearance:unicode_emoji")!] ?? ""}${props.item.text}`,
+            `${UNICODE_EMOJI_PACK_PUA[state.settings.getValue("appearance:unicode_emoji")!] ?? ""}${isRegionalIndicator(props.item.text) ? UNICODE_ZWNJ + props.item.text : props.item.text}`,
           );
         }
       }}

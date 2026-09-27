@@ -632,7 +632,9 @@ The forked submodules are behaviorally significant:
 - `packages/solid-livekit-components` provides gain, output-device, and `RemoteTrackPublication.setEnabled()` behavior used by mute/deafen integration.
 - `packages/client/assets` provides branded sounds and may be intentionally unavailable to Renovate/public automation.
 
-The Stoat.js fork at `4394bc9e` merges upstream SDK `ee0a9803` while preserving fork voice join/leave/move events, global stale voice-participant clearing on `Ready`, and the optional large-server member hydration cap. It also fixes the `new_user_hours` conversion to use `3_600_000` milliseconds per hour. The web client keeps a 200-member cap for the listed large servers while using upstream's pre-hydration architecture.
+Upstream 0.16.0's login upsell requests `assets/inapp-promotion/web/desktop-app.webp` at runtime using the deployment base path, hiding the image if it is missing or the fallback is a transparent 1×1. The pinned internal brand-assets submodule does not yet include that screenshot; importing it at build time fails whenever the populated brand-assets directory replaces `assets_fallback`. Keep the runtime lookup until the brand asset is present in the fork's pinned submodule. Do not advance that submodule just to make the build pass.
+
+The Stoat.js fork at `c33033e3` contains upstream SDK `f65da395` while preserving fork voice join/leave/move events, global stale voice-participant clearing on `Ready`, and the optional large-server member hydration cap. It also fixes the `new_user_hours` conversion to use `3_600_000` milliseconds per hour. The web client intentionally uses upstream's count-based large-server detection (`approximateMemberCount > 1000`) and hydrates all online members, rather than the old eight-server list and 200-member cap; the owner chose this behavior during the September 2026 merge. The large-server sidebar omits the online-count heading when the count-based check is true.
 
 Review both `.gitmodules` URLs and gitlink commit pointers. A clean parent-repository merge can still silently regress behavior by advancing a submodule to an incompatible upstream commit.
 
@@ -882,4 +884,4 @@ Manual smoke checks to consider:
 
 ---
 
-_Last updated: after integrating upstream 0.15.0, Lingui 6, the role-management redesign, guarded Wayland screen-audio scaffolding, and the merged Stoat.js fork while preserving fork voice, PTT, sound, fullscreen, and responsive behavior._
+_Last updated: after integrating upstream 0.16.0, count-based large-server detection, and the merged Stoat.js fork while preserving fork voice, PTT, sound, fullscreen, and responsive behavior._
