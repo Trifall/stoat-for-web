@@ -58,7 +58,7 @@ msgstr ""
 #. placeholder {0}: items().length
 #: components/ui/components/utils/files/FileDropAnywhereCollector.tsx
 msgid "{0, plural, one {Drop a file} other {Drop # files}}"
-msgstr "{0, shumës, një {Hidh një skedar} tjetër {Hidh # skedarë}}"
+msgstr "{0, plural, one {Hidh një skedar} other {Hidh # skedarë}}"
 
 #. placeholder {0}: users() .slice(0, -1) .map((user) => user!.username) .join(", ")
 #. placeholder {1}: users().slice(-1)[0]!.username
@@ -274,7 +274,7 @@ msgstr ""
 msgid "<0/> updated the group icon "
 msgstr ""
 
-#. placeholder {0}: (props.systemMessage as ChannelRenamedSystemMessage).name
+#. placeholder {0}: (sm as ChannelRenamedSystemMessage).name
 #: components/ui/components/features/messaging/elements/SystemMessage.tsx
 msgid "<0/> updated the group name to <1>{0}</1>"
 msgstr ""
@@ -1035,6 +1035,10 @@ msgstr ""
 msgid "Conversations"
 msgstr "Bisedat"
 
+#: components/app/menus/MessageContextMenu.tsx
+msgid "Copied file to clipboard"
+msgstr ""
+
 #: components/ui/components/features/profiles/ProfileBanner.tsx
 msgid "Copied!"
 msgstr ""
@@ -1048,8 +1052,12 @@ msgid "Copy channel ID"
 msgstr "Kopjo ID-në e kanalit"
 
 #: components/app/menus/MessageContextMenu.tsx
-msgid "Copy file link"
+msgid "Copy file"
 msgstr ""
+
+#: components/app/menus/MessageContextMenu.tsx
+#~ msgid "Copy file link"
+#~ msgstr ""
 
 #: components/app/interface/settings/user/bots/ViewBot.tsx
 msgid "Copy ID"
@@ -1070,6 +1078,10 @@ msgstr "Kopjo lidhjen"
 
 #: components/modal/modals/CreateInvite.tsx
 msgid "Copy Link"
+msgstr ""
+
+#: components/app/menus/MessageContextMenu.tsx
+msgid "Copy link to file"
 msgstr ""
 
 #: components/app/menus/MessageContextMenu.tsx

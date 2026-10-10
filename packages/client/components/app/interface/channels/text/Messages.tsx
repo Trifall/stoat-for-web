@@ -324,6 +324,12 @@ export function Messages(props: Props) {
     // - Must not already be fetching (or otherwise the fetch must have failed)
     if (atStart() || !canFetch()) return;
 
+    // In-case initial load failed and left us with an empty message list
+    if (messages().length === 0) {
+      caseInitialLoad(props.highlightedMessageId());
+      return;
+    }
+
     // Indicate we are fetching upwards
     setFetching("upwards");
 
@@ -392,6 +398,12 @@ export function Messages(props: Props) {
     // - Must not already be at the end
     // - Must not already be fetching (or otherwise the fetch must have failed)
     if (atEnd() || !canFetch()) return;
+
+    // In-case initial load failed and left us with an empty message list
+    if (messages().length === 0) {
+      caseInitialLoad(props.highlightedMessageId());
+      return;
+    }
 
     // Indicate we are fetching downwards
     setFetching("downwards");
@@ -544,11 +556,22 @@ export function Messages(props: Props) {
      * Scroll to the nearest message (to the id) in history
      */
     const scrollToNearestMessage = () => {
-      const index = messagesWithTail().findIndex(
-        (entry) => entry.t === 0 && entry.message.id === messageId,
-      ); // use localeCompare
+      const entries = messagesWithTail();
 
-      listRef()!.children[index + (atStart() ? 1 : 0)].scrollIntoView({
+      // ULIDs sort by time, so take the first message at or after the id
+      let index = entries.findIndex(
+        (entry) =>
+          entry.t === 0 && entry.message.id.localeCompare(messageId) >= 0,
+      );
+
+      // Everything is older than the id, so fall back to the newest message
+      if (index === -1) {
+        index = entries.findLastIndex((entry) => entry.t === 0);
+      }
+
+      if (index === -1) return;
+
+      listRef()!.children[index + (atStart() ? 1 : 0)]?.scrollIntoView({
         behavior: "smooth",
         block: "center",
       });

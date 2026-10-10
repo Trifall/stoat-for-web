@@ -523,7 +523,7 @@ Important persistence behavior:
 - Direct setters like `state.voice.autoReconnect = false` persist automatically because store setters call `this.set(...)`.
 - `sounds.toggle(...)` and `sounds.setVolume(...)` persist automatically.
 - `clean(...)` methods are important for migrating legacy values and validating persisted data.
-- `voice` and `sounds` are local-only stores. They are not part of server settings synchronization; currently only `ordering`, `notifications`, and `release-notes` are synchronized.
+- `voice` and `sounds` are local-only stores. They are not part of server settings synchronization; only `ordering`, `notifications`, `release-notes`, and `server-folders` are synchronized. Upstream 0.16.1 centralizes these keys in `SyncedStore`/`SYNCED_KEYS` and uses `AbstractSyncedStore` for cleaned equality checks and remote writes. Keep fork voice/sound fields in `UnsyncedStore`; remote writes still pass through `State.set()` for persistence and sync-loop suppression.
 - Normal store writes are delayed by `DISK_WRITE_WAIT_MS = 1200`; auth bypasses the delay. There is no explicit unload flush, so do not assume the last in-memory change was persisted if the page exits immediately.
 
 ## Legacy Sound Fields in `state.voice`
@@ -635,6 +635,8 @@ The forked submodules are behaviorally significant:
 Upstream 0.16.0's login upsell requests `assets/inapp-promotion/web/desktop-app.webp` at runtime using the deployment base path, hiding the image if it is missing or the fallback is a transparent 1×1. The pinned internal brand-assets submodule does not yet include that screenshot; importing it at build time fails whenever the populated brand-assets directory replaces `assets_fallback`. Keep the runtime lookup until the brand asset is present in the fork's pinned submodule. Do not advance that submodule just to make the build pass.
 
 The Stoat.js fork at `c33033e3` contains upstream SDK `f65da395` while preserving fork voice join/leave/move events, global stale voice-participant clearing on `Ready`, and the optional large-server member hydration cap. It also fixes the `new_user_hours` conversion to use `3_600_000` milliseconds per hour. The web client intentionally uses upstream's count-based large-server detection (`approximateMemberCount > 1000`) and hydrates all online members, rather than the old eight-server list and 200-member cap; the owner chose this behavior during the September 2026 merge. The large-server sidebar omits the online-count heading when the count-based check is true.
+
+The October 2026 merge advances the SDK fork to the owner's published `e8f26e3f`, containing upstream `5e88ed6e` and the previous fork history. This retains those fork features while adding animated WebP support and WebSocket lifecycle fixes. `EventClient.dispose()` closes the previous socket without emitting a disconnected state during replacement; explicit `disconnect()` still emits it. Web lifecycle consumers distinguish backend (`revolt`) errors from temporary socket/protocol errors. LiveKit is updated to 2.22.3 with its screen-share constraint patch while retaining the forked Solid LiveKit submodule and the fork voice runtime.
 
 Review both `.gitmodules` URLs and gitlink commit pointers. A clean parent-repository merge can still silently regress behavior by advancing a submodule to an incompatible upstream commit.
 

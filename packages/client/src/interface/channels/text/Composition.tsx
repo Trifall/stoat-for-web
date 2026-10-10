@@ -229,7 +229,6 @@ export function MessageComposition(props: Props) {
    */
   function onFiles(files: File[]) {
     if (!canUploadFiles()) return;
-
     const rejectedFiles: File[] = [];
     const validFiles: File[] = [];
     const maxSize = limits().file_upload_size_limits.attachments;
@@ -412,10 +411,15 @@ export function MessageComposition(props: Props) {
               <CompositionMediaPicker
                 onMessage={sendMessage}
                 onTextReplacement={(text) => setNodeReplacement([text])}
+                channel={props.channel}
               >
                 {(triggerProps) => (
                   <>
-                    <Show when={!canSend()}>
+                    <Show
+                      when={
+                        !canSend() && props.channel.havePermission("SendEmbeds")
+                      }
+                    >
                       <MessageBox.InlineIcon>
                         <IconButton onPress={triggerProps.onClickGif}>
                           <Symbol>gif</Symbol>
